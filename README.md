@@ -225,8 +225,7 @@ node dev/check.mjs ./screenshots
 
 ## 📚 来源与致谢
 
-- 方法内容整理自 **蠹儒** 的讲义《第 3 章 设计思维》《第 4 章 AI 辅助设计思维》（经作者授权）
-- 讲义主要基于 Michael Lewrick 等著 *The Design Thinking Playbook*（Wiley, 2018）
+- 主要基于 Michael Lewrick 等著 *The Design Thinking Playbook*（Wiley, 2018）
 - Hook 模型出自 Nir Eyal《Hooked》；JTBD 由 Clayton Christensen 等人推广
 - 对原讲义的几处勘误：移情图中"看"应对应 Sees；SCAMPER 的 R 应为 Rearrange（重组）
 
@@ -241,4 +240,3 @@ node dev/check.mjs ./screenshots
 | 代码（scripts、templates、dev、schema、presets） | [MIT License](LICENSE) |
 | 文档与内容（SKILL.md、README、references、examples） | [CC BY-NC-SA 4.0](LICENSE) |
 
-版权所有 © 蠹儒 and contributors
