@@ -1,0 +1,544 @@
+{
+ "aeiou": {
+  "title": "AEIOU 观察",
+  "en": "AEIOU Observation",
+  "phase": "empathize",
+  "intro": "进入现场观察时，按五个维度记录看到的事实。只记录观察到的，不急着下结论；推断请标注出来。",
+  "cols": 5,
+  "columns": [
+   {
+    "key": "A",
+    "title": "活动 Activities",
+    "hint": "人们在做什么？为了完成什么任务？",
+    "color": "blue"
+   },
+   {
+    "key": "E",
+    "title": "环境 Environments",
+    "hint": "活动发生在哪里？空间、氛围、功能如何？",
+    "color": "green"
+   },
+   {
+    "key": "I",
+    "title": "互动 Interactions",
+    "hint": "人与人、人与物之间如何互动？",
+    "color": "orange"
+   },
+   {
+    "key": "O",
+    "title": "物体 Objects",
+    "hint": "用到了哪些物品、设备、工具？",
+    "color": "purple"
+   },
+   {
+    "key": "U",
+    "title": "用户 Users",
+    "hint": "有哪些人？角色、价值观、偏好、关系？",
+    "color": "pink"
+   }
+  ],
+  "cards": {
+   "A": [],
+   "E": [],
+   "I": [],
+   "O": [],
+   "U": []
+  }
+ },
+ "insights": {
+  "title": "洞察聚类",
+  "en": "Insight Clustering",
+  "phase": "define",
+  "intro": "把共情阶段的观察、原话贴到“原始发现”，拖动到主题列中聚类，再用投票选出最关键的洞察。",
+  "cols": 4,
+  "voting": {
+   "enabled": true,
+   "perPerson": 3
+  },
+  "columns": [
+   {
+    "key": "raw",
+    "title": "原始发现",
+    "hint": "观察、原话、数据，一张卡一个发现",
+    "color": "gray"
+   },
+   {
+    "key": "t1",
+    "title": "主题 1",
+    "hint": "为这一组发现命名",
+    "color": "blue"
+   },
+   {
+    "key": "t2",
+    "title": "主题 2",
+    "hint": "",
+    "color": "green"
+   },
+   {
+    "key": "t3",
+    "title": "主题 3",
+    "hint": "",
+    "color": "orange"
+   }
+  ],
+  "cards": {
+   "raw": [],
+   "t1": [],
+   "t2": [],
+   "t3": []
+  }
+ },
+ "ninegrid": {
+  "title": "九宫格",
+  "en": "Nine Windows",
+  "phase": "define",
+  "intro": "从时间（过去/现在/未来）与系统层级（超系统/系统/子系统）两个维度拆解问题，帮助看到问题的来龙去脉与上下文。",
+  "cols": 3,
+  "columns": [
+   {
+    "key": "sp",
+    "title": "超系统 · 过去",
+    "hint": "过去，用户所处的大环境是怎样的？",
+    "color": "purple"
+   },
+   {
+    "key": "sn",
+    "title": "超系统 · 现在",
+    "hint": "现在的大环境、社会与行业趋势",
+    "color": "purple"
+   },
+   {
+    "key": "sf",
+    "title": "超系统 · 未来",
+    "hint": "未来大环境可能如何变化？",
+    "color": "purple"
+   },
+   {
+    "key": "p",
+    "title": "系统 · 过去",
+    "hint": "过去用户如何完成这件事？",
+    "color": "blue"
+   },
+   {
+    "key": "n",
+    "title": "系统 · 现在",
+    "hint": "现在的产品/服务/做法",
+    "color": "blue"
+   },
+   {
+    "key": "f",
+    "title": "系统 · 未来",
+    "hint": "未来理想的方式",
+    "color": "blue"
+   },
+   {
+    "key": "bp",
+    "title": "子系统 · 过去",
+    "hint": "过去的组成部件/步骤",
+    "color": "teal"
+   },
+   {
+    "key": "bn",
+    "title": "子系统 · 现在",
+    "hint": "现在的关键部件/步骤",
+    "color": "teal"
+   },
+   {
+    "key": "bf",
+    "title": "子系统 · 未来",
+    "hint": "未来部件/步骤会怎样变化？",
+    "color": "teal"
+   }
+  ],
+  "cards": {
+   "sp": [],
+   "sn": [],
+   "sf": [],
+   "p": [],
+   "n": [],
+   "f": [],
+   "bp": [],
+   "bn": [],
+   "bf": []
+  }
+ },
+ "brainstorm": {
+  "title": "头脑风暴墙",
+  "en": "Brainstorming",
+  "phase": "ideate",
+  "intro": "规则：先追求数量、不批评、鼓励疯狂的点子、在别人的点子上延伸、一次一个人说、尽量画出来。计时结束后投票。",
+  "cols": 3,
+  "timer": {
+   "minutes": 10
+  },
+  "voting": {
+   "enabled": true,
+   "perPerson": 3
+  },
+  "steps": [
+   "热身：用一个轻松的问题打开思路",
+   "明确 HMW 问题",
+   "独立写点子（每张卡一个）",
+   "轮流分享、在别人点子上延伸",
+   "聚类与投票",
+   "挑选进入下一步的点子"
+  ],
+  "columns": [
+   {
+    "key": "wild",
+    "title": "大胆疯狂的",
+    "hint": "不考虑限制",
+    "color": "pink"
+   },
+   {
+    "key": "doable",
+    "title": "马上能做的",
+    "hint": "低成本、可快速验证",
+    "color": "green"
+   },
+   {
+    "key": "build",
+    "title": "在别人点子上延伸",
+    "hint": "“是的，而且……”",
+    "color": "blue"
+   }
+  ],
+  "cards": {
+   "wild": [],
+   "doable": [],
+   "build": []
+  }
+ },
+ "shelf": {
+  "title": "架子原则",
+  "en": "Shelf Principle",
+  "phase": "prototype",
+  "intro": "把现有与新构思的产品、服务和解决方案摆上不同的“货架”，看看组合里哪里空缺、哪里重复、哪些可以协同。",
+  "cols": 3,
+  "columns": [
+   {
+    "key": "product",
+    "title": "产品架",
+    "hint": "实体或数字产品",
+    "color": "blue"
+   },
+   {
+    "key": "service",
+    "title": "服务架",
+    "hint": "服务与支持",
+    "color": "green"
+   },
+   {
+    "key": "solution",
+    "title": "解决方案架",
+    "hint": "组合起来解决完整问题的方案",
+    "color": "orange"
+   },
+   {
+    "key": "gap",
+    "title": "空白",
+    "hint": "货架上缺什么？",
+    "color": "red"
+   },
+   {
+    "key": "synergy",
+    "title": "协同",
+    "hint": "哪些放在一起 1+1>2？",
+    "color": "purple"
+   }
+  ],
+  "cards": {
+   "product": [],
+   "service": [],
+   "solution": [],
+   "gap": [],
+   "synergy": []
+  }
+ },
+ "workshop": {
+  "title": "原型工作坊",
+  "en": "Prototype Workshop",
+  "phase": "prototype",
+  "intro": "用时间盒子施加压力，快速产出原型。演示后收集红色（希望改进）与绿色（喜欢）反馈，再迭代。",
+  "cols": 4,
+  "timer": {
+   "minutes": 30
+  },
+  "steps": [
+   "定义要测试的核心功能",
+   "构思不同变体",
+   "动手制作原型（时间盒子）",
+   "向其他小组演示",
+   "收集红/绿反馈",
+   "根据反馈改进",
+   "准备真实用户测试"
+  ],
+  "columns": [
+   {
+    "key": "feature",
+    "title": "要测试的功能",
+    "hint": "这个原型要验证什么？",
+    "color": "blue"
+   },
+   {
+    "key": "variant",
+    "title": "变体",
+    "hint": "同一功能的不同做法",
+    "color": "purple"
+   },
+   {
+    "key": "green",
+    "title": "绿色反馈 · 喜欢",
+    "hint": "保留并强化",
+    "color": "green"
+   },
+   {
+    "key": "red",
+    "title": "红色反馈 · 希望改进",
+    "hint": "下一轮要改的",
+    "color": "red"
+   }
+  ],
+  "cards": {
+   "feature": [],
+   "variant": [],
+   "green": [],
+   "red": []
+  }
+ },
+ "feedback": {
+  "title": "反馈收集表",
+  "en": "Feedback Capture Grid",
+  "phase": "test",
+  "intro": "测试时边听边记，结束后立刻整理。把反馈视为礼物：倾听、感谢，不辩解。",
+  "cols": 2,
+  "columns": [
+   {
+    "key": "like",
+    "title": "+ 用户喜欢什么",
+    "hint": "值得保留的",
+    "color": "green"
+   },
+   {
+    "key": "wish",
+    "title": "△ 用户有什么期望",
+    "hint": "希望改进的",
+    "color": "orange"
+   },
+   {
+    "key": "question",
+    "title": "? 出现了什么问题",
+    "hint": "困惑、卡住、误用",
+    "color": "red"
+   },
+   {
+    "key": "idea",
+    "title": "💡 新的点子",
+    "hint": "用户或团队冒出的新想法",
+    "color": "blue"
+   }
+  ],
+  "cards": {
+   "like": [],
+   "wish": [],
+   "question": [],
+   "idea": []
+  }
+ },
+ "retro": {
+  "title": "回溯板",
+  "en": "Retrospective Board",
+  "phase": "reflect",
+  "intro": "对事不对人。每个人先独立写，再分享、归类、投票，最后制定具体可执行的行动项。",
+  "cols": 4,
+  "voting": {
+   "enabled": true,
+   "perPerson": 3
+  },
+  "actionsEnabled": true,
+  "timer": {
+   "minutes": 8
+  },
+  "steps": [
+   "准备：召集团队、设定规则",
+   "独立思考、写卡片",
+   "分享与归类",
+   "投票排序",
+   "讨论并制定行动项",
+   "总结与跟进"
+  ],
+  "columns": [
+   {
+    "key": "well",
+    "title": "做得好的",
+    "hint": "值得继续保持",
+    "color": "green"
+   },
+   {
+    "key": "improve",
+    "title": "可以改进的",
+    "hint": "流程、方法、合作",
+    "color": "orange"
+   },
+   {
+    "key": "puzzle",
+    "title": "问题 / 困惑",
+    "hint": "疑问、不解、障碍",
+    "color": "purple"
+   },
+   {
+    "key": "action",
+    "title": "下一步想法",
+    "hint": "可转为行动项",
+    "color": "blue"
+   }
+  ],
+  "cards": {
+   "well": [],
+   "improve": [],
+   "puzzle": [],
+   "action": []
+  }
+ },
+ "crazy8": {
+  "title": "Crazy 8s 快速草图",
+  "en": "Crazy 8s",
+  "phase": "ideate",
+  "intro": "把一张纸折成 8 格，8 分钟内每格画一个不同的方案（每格约 1 分钟）。追求数量和差异，不求画得好看。结束后每人分享并投票。（Crazy 8s 是 Google Ventures 设计冲刺中的常用方法，不在原书中。）",
+  "cols": 4,
+  "timer": {
+   "minutes": 8
+  },
+  "voting": {
+   "enabled": true,
+   "perPerson": 2
+  },
+  "columns": [
+   {
+    "key": "s1",
+    "title": "第 1 格",
+    "hint": "一句话 + 简单示意",
+    "color": "blue"
+   },
+   {
+    "key": "s2",
+    "title": "第 2 格",
+    "hint": "一句话 + 简单示意",
+    "color": "green"
+   },
+   {
+    "key": "s3",
+    "title": "第 3 格",
+    "hint": "一句话 + 简单示意",
+    "color": "orange"
+   },
+   {
+    "key": "s4",
+    "title": "第 4 格",
+    "hint": "一句话 + 简单示意",
+    "color": "purple"
+   },
+   {
+    "key": "s5",
+    "title": "第 5 格",
+    "hint": "一句话 + 简单示意",
+    "color": "pink"
+   },
+   {
+    "key": "s6",
+    "title": "第 6 格",
+    "hint": "一句话 + 简单示意",
+    "color": "teal"
+   },
+   {
+    "key": "s7",
+    "title": "第 7 格",
+    "hint": "一句话 + 简单示意",
+    "color": "yellow"
+   },
+   {
+    "key": "s8",
+    "title": "第 8 格",
+    "hint": "一句话 + 简单示意",
+    "color": "red"
+   }
+  ],
+  "cards": {
+   "s1": [],
+   "s2": [],
+   "s3": [],
+   "s4": [],
+   "s5": [],
+   "s6": [],
+   "s7": [],
+   "s8": []
+  }
+ },
+ "mvp": {
+  "title": "MVP 画布",
+  "en": "MVP Canvas",
+  "phase": "prototype",
+  "intro": "用最小的投入验证最关键的假设。MVP 不是“简陋版产品”，而是“为了学到某件事而做的最小实验”。（MVP 画布为常用补充工具，不在原书中。）",
+  "cols": 4,
+  "columns": [
+   {
+    "key": "vision",
+    "title": "愿景",
+    "hint": "这个 MVP 服务于什么长期目标？",
+    "color": "blue"
+   },
+   {
+    "key": "users",
+    "title": "目标用户",
+    "hint": "先服务哪一小群人？",
+    "color": "pink"
+   },
+   {
+    "key": "hypo",
+    "title": "核心假设",
+    "hint": "最需要验证、风险最高的假设",
+    "color": "red"
+   },
+   {
+    "key": "features",
+    "title": "最小功能",
+    "hint": "验证假设所需的最少功能",
+    "color": "green"
+   },
+   {
+    "key": "form",
+    "title": "形式",
+    "hint": "落地页 / 绿野仙踪 / 礼宾式 / 黑马原型……",
+    "color": "purple"
+   },
+   {
+    "key": "metrics",
+    "title": "衡量指标",
+    "hint": "看哪个数据？怎么收集？",
+    "color": "orange"
+   },
+   {
+    "key": "success",
+    "title": "成功标准",
+    "hint": "达到多少算假设成立？事先写下",
+    "color": "teal"
+   },
+   {
+    "key": "next",
+    "title": "下一步",
+    "hint": "成立怎么做？不成立怎么做？",
+    "color": "gray"
+   }
+  ],
+  "cards": {
+   "vision": [],
+   "users": [],
+   "hypo": [],
+   "features": [],
+   "form": [],
+   "metrics": [],
+   "success": [],
+   "next": []
+  }
+ }
+}

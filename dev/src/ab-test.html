@@ -1,0 +1,85 @@
+<!-- title: A/B 测试 -->
+<style>
+.hyp{display:grid;grid-template-columns:110px 1fr;gap:8px 12px;align-items:baseline}
+.hyp .lb{font-size:13.5px;color:var(--muted)}
+.hyp .ed{border-bottom:1px dashed var(--border);padding:2px 0}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.var{border:1px solid var(--border);border-radius:12px;padding:14px;border-top:4px solid var(--c)}
+.var .nm{font-weight:700;font-size:16px;display:flex;gap:8px;align-items:center}
+.var .tag{background:var(--c);color:#fff;border-radius:6px;padding:0 8px;font-size:13px}
+.nums{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.nums label{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.nums input{width:100%}
+.rate{font-size:28px;font-weight:750;margin-top:10px;font-variant-numeric:tabular-nums}
+.rate small{font-size:13px;color:var(--muted);font-weight:400;margin-left:6px}
+.res{margin-top:16px;border-radius:12px;padding:16px 20px;border-left:4px solid var(--c);background:var(--cs)}
+.res .v{font-size:18px;font-weight:700;color:var(--c)}
+.res .d{font-size:14px;margin-top:4px}
+.kv{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.kv div{background:var(--bg);border-radius:8px;padding:8px 10px;border:1px solid var(--border)}
+.kv b{display:block;font-size:17px;font-variant-numeric:tabular-nums}.kv span{font-size:12px;color:var(--muted)}
+.ci{display:block;max-width:100%;height:auto;margin:8px auto 0}
+.set{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:12px;font-size:13.5px}
+.set select,.set input{min-height:32px}
+.plan{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:720px){.vs,.plan{grid-template-columns:1fr}.kv{grid-template-columns:1fr 1fr}.hyp{grid-template-columns:1fr}}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed}=DT;
+const A=()=>{const t=DT.get('test',{});t.ab=t.ab||{};const ab=t.ab;ab.a=ab.a||{label:'A（对照）',n:0,conv:0};ab.b=ab.b||{label:'B（新版本）',n:0,conv:0};ab.alpha=ab.alpha||0.05;ab.power=ab.power||0.8;return ab};
+function cdf(z){const t=1/(1+.2316419*Math.abs(z)),d=.3989423*Math.exp(-z*z/2);let p=d*t*(.3193815+t*(-.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return z>0?1-p:p}
+function inv(p){// Acklam 近似
+ const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],c=[-.007784894002430293,-.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],d=[.007784695709041462,.3224671290700398,2.445134137142996,3.754408661907416];
+ const q=p<.02425?Math.sqrt(-2*Math.log(p)):p>1-.02425?Math.sqrt(-2*Math.log(1-p)):0;
+ if(p<.02425)return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+ if(p>1-.02425)return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+ const r=p-.5,s=r*r;return(((((a[0]*s+a[1])*s+a[2])*s+a[3])*s+a[4])*s+a[5])*r/(((((b[0]*s+b[1])*s+b[2])*s+b[3])*s+b[4])*s+1)}
+function calc(ab){const n1=+ab.a.n||0,x1=+ab.a.conv||0,n2=+ab.b.n||0,x2=+ab.b.conv||0;
+ if(n1<=0||n2<=0||x1>n1||x2>n2||x1<0||x2<0)return null;
+ const p1=x1/n1,p2=x2/n2,pp=(x1+x2)/(n1+n2),se0=Math.sqrt(pp*(1-pp)*(1/n1+1/n2)),z=se0?(p2-p1)/se0:0,pv=2*(1-cdf(Math.abs(z)));
+ const se=Math.sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2),za=inv(1-ab.alpha/2),diff=p2-p1;
+ const small=Math.min(x1,n1-x1,x2,n2-x2)<5;
+ return {p1,p2,diff,lift:p1?diff/p1:null,z,pv,lo:diff-za*se,hi:diff+za*se,small,sig:pv<ab.alpha}}
+function need(p1,mde,alpha,power){const p2=p1*(1+mde);if(!(p1>0&&p1<1&&p2>0&&p2<1))return null;const za=inv(1-alpha/2),zb=inv(power);return Math.ceil((za+zb)**2*(p1*(1-p1)+p2*(1-p2))/(p2-p1)**2)}
+const pct=(v,d)=>v==null||isNaN(v)?'—':(v*100).toFixed(d==null?1:d)+'%';
+function ciSVG(r,W){W=Math.max(280,Math.min(W||600,900));const span=Math.max(Math.abs(r.lo),Math.abs(r.hi),Math.abs(r.diff),0.01)*1.25,x=v=>W/2+v/span*(W/2-30);
+ return '<svg class="ci" width="'+W+'" height="120" viewBox="0 0 '+W+' 120" role="img" aria-label="B 相对 A 的差异及置信区间"><line x1="'+x(0)+'" y1="46" x2="'+x(0)+'" y2="92" stroke="var(--muted)" stroke-dasharray="4 4"/><text x="'+x(0)+'" y="110" text-anchor="middle" font-size="12" fill="var(--muted)">无差异 0</text>'+
+ '<line x1="'+x(r.lo)+'" y1="52" x2="'+x(r.hi)+'" y2="52" stroke="var(--c)" stroke-width="6" stroke-linecap="round" opacity=".45"/><circle cx="'+x(r.diff)+'" cy="52" r="8" fill="var(--c)"/>'+
+ '<text x="'+x(r.lo)+'" y="36" text-anchor="middle" font-size="12" fill="var(--text)">'+pct(r.lo,2)+'</text><text x="'+x(r.hi)+'" y="36" text-anchor="middle" font-size="12" fill="var(--text)">'+pct(r.hi,2)+'</text>'+
+ '<text x="'+x(r.diff)+'" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="var(--c)">'+(r.diff>=0?'+':'')+pct(r.diff,2)+'</text></svg>'}
+function render(){const app=document.getElementById('app');app.innerHTML='';const ab=A();
+ const hy=h('div',{class:'hyp box soft'});[['name','测试名称','例如：取餐页按钮文案'],['hypothesis','假设','如果……那么……因为……'],['variable','唯一变量','一次只改变一个变量'],['metric','衡量指标','例如：点击率、下单转化率']].forEach(f=>{hy.appendChild(h('div',{class:'lb'},f[1]));const e=ed(h('div'),ab,f[0],f[2]);if(f[0]==='hypothesis')e.dataset.multi='1';hy.appendChild(e)});app.appendChild(hy);
+ const vs=h('div',{class:'vs'});const out=h('div');
+ [['a','var(--blue)'],['b','var(--orange)']].forEach(([k,c])=>{const v=ab[k];const d=h('div',{class:'var',style:'--c:'+c});
+  const nm=h('div',{class:'nm'},'<span class="tag">'+k.toUpperCase()+'</span>');nm.appendChild(ed(h('div'),v,'label','版本名称'));d.appendChild(nm);
+  const ds=ed(h('div',{class:'hint',style:'margin-top:4px'}),v,'desc','这个版本有什么不同？');ds.dataset.multi='1';d.appendChild(ds);
+  const ns=h('div',{class:'nums'});const rt=h('div',{class:'rate'});
+  const sr=()=>{rt.innerHTML=(+v.n>0?pct(v.conv/v.n):'—')+'<small>转化率</small>'};
+  [['n','样本量（访问/曝光）'],['conv','转化数（达成指标）']].forEach(f=>{const lb=h('label',{},f[1]);const i=h('input',{type:'number',min:'0',step:'1',inputmode:'numeric'});i.value=v[f[0]]||'';i.oninput=()=>{v[f[0]]=i.value===''?0:Math.max(0,Math.floor(+i.value));save();sr();result(out)};lb.appendChild(i);ns.appendChild(lb)});
+  d.appendChild(ns);sr();d.appendChild(rt);vs.appendChild(d)});
+ app.appendChild(vs);
+ const st=h('div',{class:'set'});const al=h('select',{'aria-label':'显著性水平'});[[0.1,'90%'],[0.05,'95%'],[0.01,'99%']].forEach(o=>{const x=h('option',{value:o[0]},'置信水平 '+o[1]);if(ab.alpha==o[0])x.selected=true;al.appendChild(x)});al.onchange=()=>{ab.alpha=+al.value;save();result(out);plan()};
+ st.appendChild(al);st.appendChild(h('span',{class:'hint'},'双侧两比例 z 检验；样本很少时结论仅供参考。'));app.appendChild(st);
+ app.appendChild(out);result(out);
+ app.appendChild(h('div',{class:'sec'},'需要多少样本？'));app.appendChild(h('p',{class:'secsub'},'测试开始前估算：基线转化率 + 希望检测到的最小相对提升 → 每组所需样本量。'));
+ const pw=h('div',{class:'box plan'});const pr=h('div',{class:'set',style:'margin:0'});const po=h('div',{style:'align-self:center'});
+ const inp=(k,lb,def,step)=>{const l=h('label',{style:'display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted)'},lb);const i=h('input',{type:'number',step:step,min:'0'});i.value=ab[k]!=null?ab[k]:def;ab[k]=+i.value;i.oninput=()=>{ab[k]=+i.value;save();plan()};l.appendChild(i);pr.appendChild(l)};
+ inp('baseline','基线转化率（%）',10,'0.1');inp('mde','最小相对提升（%）',20,'1');
+ const pwr=h('select',{'aria-label':'统计功效'});[[0.8,'功效 80%'],[0.9,'功效 90%']].forEach(o=>{const x=h('option',{value:o[0]},o[1]);if(ab.power==o[0])x.selected=true;pwr.appendChild(x)});pwr.onchange=()=>{ab.power=+pwr.value;save();plan()};pr.appendChild(pwr);
+ pw.appendChild(pr);pw.appendChild(po);app.appendChild(pw);
+ function plan(){const n=need(ab.baseline/100,ab.mde/100,ab.alpha,ab.power);po.innerHTML=n?'<div class="hint">每组约需</div><div style="font-size:26px;font-weight:750">'+n.toLocaleString()+' <small style="font-size:14px;font-weight:400">人</small></div><div class="hint">两组合计约 '+(2*n).toLocaleString()+' 人'+(ab.a.n&&ab.b.n?'；当前 A '+ab.a.n+' / B '+ab.b.n+(Math.min(ab.a.n,ab.b.n)>=n?' ✓ 已达到':' · 尚未达到'):'')+'</div>':'<div class="hint">请填写有效的基线与提升幅度</div>'}
+ plan();
+ const nt=h('div',{class:'verify'});nt.innerHTML='<b>测试纪律</b><ul><li>一次只改变一个变量，否则无法判断是什么带来了差异。</li><li>开始前定好样本量和停止条件，不要“看到显著就停”。</li><li>A/B 告诉你“哪个更好”，不告诉你“为什么”——结合定性访谈一起看。</li><li>样本与转化数来自真实测试时，点击页面顶部的数据来源标签，切换为“基于真实调研”。</li></ul>';app.appendChild(nt)}
+function result(out){const ab=A(),r=calc(ab);out.innerHTML='';
+ if(!r){out.appendChild(h('div',{class:'empty',style:'margin-top:14px'},'填入两个版本的样本量与转化数后，这里会显示结论（转化数不能大于样本量）'));return}
+ const c=r.sig?(r.diff>0?'var(--green)':'var(--red)'):'var(--muted)',cs=r.sig?(r.diff>0?'var(--green-s)':'var(--red-s)'):'var(--soft)';
+ const v=r.sig?(r.diff>0?'B 显著优于 A':'B 显著差于 A'):'差异不显著';
+ const d=r.sig?'在 '+Math.round((1-ab.alpha)*100)+'% 置信水平下，差异不太可能由随机波动造成。':'目前的数据还不能区分两个版本，可继续收集样本，或接受“两者差不多”。';
+ const x=h('div',{class:'res',style:'--c:'+c+';--cs:'+cs});
+ x.innerHTML='<div class="v">'+v+'</div><div class="d">'+d+(r.small?' <b>注意：</b>转化数或未转化数少于 5，近似检验不可靠。':'')+'</div><div class="kv"><div><span>A 转化率</span><b>'+pct(r.p1,2)+'</b></div><div><span>B 转化率</span><b>'+pct(r.p2,2)+'</b></div><div><span>相对提升</span><b>'+(r.lift==null?'—':(r.lift>=0?'+':'')+pct(r.lift))+'</b></div><div><span>p 值</span><b>'+(r.pv<0.001?'<0.001':r.pv.toFixed(3))+'</b></div></div>'+ciSVG(r,out.clientWidth-48)+'<div class="hint">圆点为 B − A 的差值，横条为 '+Math.round((1-ab.alpha)*100)+'% 置信区间；横条跨过 0 即不显著。</div>';
+ out.appendChild(x)}
+function md(){const ab=A(),r=calc(ab);return ['# A/B 测试：'+(ab.name||''),'','- 假设：'+(ab.hypothesis||''),'- 唯一变量：'+(ab.variable||''),'- 指标：'+(ab.metric||''),'','| 版本 | 样本 | 转化 | 转化率 |','|---|---|---|---|','| '+ab.a.label+' | '+ab.a.n+' | '+ab.a.conv+' | '+(r?pct(r.p1,2):'—')+' |','| '+ab.b.label+' | '+ab.b.n+' | '+ab.b.conv+' | '+(r?pct(r.p2,2):'—')+' |','',r?'结论：'+(r.sig?(r.diff>0?'B 显著优于 A':'B 显著差于 A'):'差异不显著')+'（p='+r.pv.toFixed(3)+'，差值 '+pct(r.diff,2)+'，CI ['+pct(r.lo,2)+', '+pct(r.hi,2)+']）':'结论：数据不足'].join('\n')}
+DT.boot({title:'A/B 测试',en:'A/B Testing',subtitle:()=>A().name||'',render,md});
+})();
+</script>

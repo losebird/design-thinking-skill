@@ -1,0 +1,45 @@
+<!-- title: 环形图 -->
+<style>
+.intro{font-size:14px;color:var(--muted);margin:0 0 12px}
+.lay{display:grid;grid-template-columns:440px 1fr;gap:24px;align-items:start}
+.flower{width:100%;max-width:440px;aspect-ratio:1}
+.flower .pt{cursor:pointer}
+.flower .pt:focus{outline:none}.flower .pt:focus-visible ellipse{stroke:var(--text);stroke-width:3}
+.ctr{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.ctr .ed{font-weight:650;font-size:16px;border-bottom:1px dashed var(--border);flex:1}
+.pl{display:flex;flex-direction:column;gap:8px}
+.pi{display:grid;grid-template-columns:14px 140px 1fr auto;gap:10px;align-items:start;border:1px solid var(--border);border-radius:10px;padding:8px 10px}
+.pi.on{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-s)}
+.pi .sw{width:14px;height:14px;border-radius:50%;margin-top:4px}
+.pi .lb{font-weight:600}
+@media (max-width:860px){.lay{grid-template-columns:1fr}.flower{max-width:340px;margin:0 auto;display:block}.pi{grid-template-columns:14px 1fr auto}.pi .tx{grid-column:2/4}}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed}=DT;
+const PAL=['#5E9FE8','#EAC26B','#72BC8F','#BF8EDA','#DE9255','#DF84A8','#4FB9C9','#E97366'];
+let cur=-1;
+const R=()=>{const r=DT.get(DT.target||'radials.radial',{});r.items=r.items||[];return r};
+function wrap(t,n){t=String(t||'');const out=[];for(let i=0;i<t.length&&out.length<2;i+=n)out.push(t.slice(i,i+n));if(t.length>n*2)out[1]=out[1].slice(0,n-1)+'…';return out}
+function svg(r){const n=Math.max(r.items.length,1),cx=220,cy=220;let g='';
+ r.items.forEach((it,i)=>{const a=-90+i*360/n,on=i===cur,rad=a*Math.PI/180,dist=118,px=cx+dist*Math.cos(rad),py=cy+dist*Math.sin(rad);
+  const lines=wrap(it.label,6);
+  g+='<g class="pt" data-i="'+i+'" tabindex="0" role="button" aria-label="'+esc(it.label)+'"><ellipse cx="'+px+'" cy="'+py+'" rx="'+(on?84:78)+'" ry="'+(on?44:40)+'" transform="rotate('+a+' '+px+' '+py+')" fill="'+PAL[i%8]+'" opacity="'+(on?1:.8)+'" stroke="var(--bg)" stroke-width="2"/>'+
+   lines.map((l,k)=>'<text x="'+px+'" y="'+(py+5+(k-(lines.length-1)/2)*17)+'" text-anchor="middle" font-size="14" font-weight="650" fill="#fff">'+esc(l)+'</text>').join('')+'</g>'});
+ const cl=wrap(r.center,6);
+ g+='<circle cx="'+cx+'" cy="'+cy+'" r="62" fill="var(--bg)" stroke="var(--border)" stroke-width="2"/>'+cl.map((l,k)=>'<text x="'+cx+'" y="'+(cy+6+(k-(cl.length-1)/2)*20)+'" text-anchor="middle" font-size="16" font-weight="700" fill="var(--text)">'+esc(l)+'</text>').join('');
+ return '<svg class="flower" viewBox="0 0 440 440" role="group" aria-label="'+esc(r.title||'环形图')+'">'+g+'</svg>'}
+function render(){const app=document.getElementById('app');app.innerHTML='';const r=R();
+ if(r.intro)app.appendChild(h('p',{class:'intro'},esc(r.intro)));
+ const lay=h('div',{class:'lay'});const sv=h('div',{},svg(r));lay.appendChild(sv);
+ sv.querySelectorAll('.pt').forEach(e=>{const go=()=>{cur=+e.dataset.i===cur?-1:+e.dataset.i;render();const t=document.querySelector('.pi.on .tx');t&&t.focus()};e.addEventListener('click',go);e.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go()}})});
+ const rt=h('div');const c=h('div',{class:'ctr'},'<span class="hint">中心：</span>');c.appendChild(ed(h('div'),r,'center','核心问题 / 主题',()=>{sv.innerHTML=svg(r)}));rt.appendChild(c);
+ const pl=h('div',{class:'pl'});r.items.forEach((it,i)=>{const p=h('div',{class:'pi'+(i===cur?' on':'')});p.appendChild(h('span',{class:'sw',style:'background:'+PAL[i%8]}));
+  p.appendChild(ed(h('div',{class:'lb'}),it,'label','视角 / 要素',()=>{sv.innerHTML=svg(r)}));const tx=ed(h('div',{class:'tx'}),it,'text','从这个角度看到了什么？');tx.dataset.multi='1';p.appendChild(tx);
+  const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{r.items.splice(i,1);cur=-1;save();render()};p.appendChild(x);pl.appendChild(p)});
+ const a=h('button',{class:'ghost'},'+ 花瓣');a.onclick=()=>{if(r.items.length>=8){DT.toast('建议不超过 8 个，保持重点');}r.items.push({id:DT.nid('r'),label:'',text:''});cur=r.items.length-1;save();render()};pl.appendChild(a);
+ rt.appendChild(pl);lay.appendChild(rt);app.appendChild(lay)}
+function md(){const r=R();return ['# '+(r.title||''),'','中心：'+(r.center||''),'',...r.items.map(i=>'- **'+i.label+'**：'+(i.text||''))].join('\n')}
+DT.boot({title:R().title||'环形图',en:R().en||'',render,md});
+})();
+</script>

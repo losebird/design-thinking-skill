@@ -1,0 +1,1494 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "设计思维项目数据",
+  "description": "所有阶段共用的一份项目 JSON。每个模板只读取自己的部分；缺失的部分可以省略。详见 references/tools-index.md。",
+  "type": "object",
+  "properties": {
+    "meta": {
+      "type": "object",
+      "properties": {
+        "project": {
+          "type": "string",
+          "description": "项目名，也用于浏览器本地保存的键"
+        },
+        "challenge": {
+          "type": "string",
+          "description": "设计挑战"
+        },
+        "phase": {
+          "enum": [
+            "empathize",
+            "define",
+            "ideate",
+            "prototype",
+            "test",
+            "reflect"
+          ]
+        },
+        "macro": {
+          "enum": [
+            "diverge",
+            "pivot",
+            "converge"
+          ]
+        },
+        "generatedBy": {
+          "enum": [
+            "ai",
+            "mixed",
+            "human"
+          ],
+          "description": "ai=AI 假设；mixed=调研+AI 推断；human=基于真实调研"
+        },
+        "updatedAt": {
+          "type": "string"
+        }
+      }
+    },
+    "personas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string",
+            "description": "emoji"
+          },
+          "image": {
+            "type": "string",
+            "description": "图片 URL"
+          },
+          "snapshot": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "jobs": {
+            "type": "object",
+            "properties": {
+              "functional": {
+                "type": "string"
+              },
+              "emotional": {
+                "type": "string"
+              },
+              "social": {
+                "type": "string"
+              }
+            }
+          },
+          "pains": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            }
+          },
+          "behaviors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "time": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "motivation": {
+            "type": "string"
+          },
+          "quote": {
+            "type": "string"
+          },
+          "imagePrompt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      }
+    },
+    "personaSteps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "done": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "empathyMap": {
+      "type": "object",
+      "properties": {
+        "personaId": {
+          "type": "string"
+        },
+        "view": {
+          "enum": [
+            "simple",
+            "full"
+          ]
+        },
+        "sees": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "evidence": {
+                "enum": [
+                  "quote",
+                  "observed",
+                  "inferred",
+                  "assumed"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "text"
+            ]
+          }
+        },
+        "hears": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "evidence": {
+                "enum": [
+                  "quote",
+                  "observed",
+                  "inferred",
+                  "assumed"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "text"
+            ]
+          }
+        },
+        "says": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "evidence": {
+                "enum": [
+                  "quote",
+                  "observed",
+                  "inferred",
+                  "assumed"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "text"
+            ]
+          }
+        },
+        "does": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "evidence": {
+                "enum": [
+                  "quote",
+                  "observed",
+                  "inferred",
+                  "assumed"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "text"
+            ]
+          }
+        },
+        "thinks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "evidence": {
+                "enum": [
+                  "quote",
+                  "observed",
+                  "inferred",
+                  "assumed"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "text"
+            ]
+          }
+        },
+        "feels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "evidence": {
+                "enum": [
+                  "quote",
+                  "observed",
+                  "inferred",
+                  "assumed"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "text"
+            ]
+          }
+        },
+        "pains": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "evidence": {
+                "enum": [
+                  "quote",
+                  "observed",
+                  "inferred",
+                  "assumed"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "text"
+            ]
+          }
+        },
+        "gains": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "evidence": {
+                "enum": [
+                  "quote",
+                  "observed",
+                  "inferred",
+                  "assumed"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "text"
+            ]
+          }
+        },
+        "contradictions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "a": {
+                "type": "string"
+              },
+              "b": {
+                "type": "string"
+              },
+              "insight": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "a",
+              "b"
+            ]
+          }
+        },
+        "coreInsight": {
+          "type": "string"
+        },
+        "toVerify": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "journey": {
+      "type": "object",
+      "properties": {
+        "personaId": {
+          "type": "string"
+        },
+        "scenario": {
+          "type": "string"
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "actions": {
+                "type": "string"
+              },
+              "touchpoints": {
+                "type": "string"
+              },
+              "thoughts": {
+                "type": "string"
+              },
+              "emotion": {
+                "type": "number",
+                "minimum": -2,
+                "maximum": 2
+              },
+              "pains": {
+                "type": "string"
+              },
+              "opportunities": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ]
+          }
+        }
+      }
+    },
+    "hook": {
+      "type": "object",
+      "properties": {
+        "product": {
+          "type": "string"
+        },
+        "trigger": {
+          "type": "object",
+          "properties": {
+            "external": {
+              "type": "string"
+            },
+            "internal": {
+              "type": "string"
+            }
+          }
+        },
+        "action": {
+          "type": "object",
+          "properties": {
+            "behavior": {
+              "type": "string"
+            },
+            "ability": {
+              "type": "string"
+            }
+          }
+        },
+        "reward": {
+          "type": "object",
+          "properties": {
+            "tribe": {
+              "type": "string"
+            },
+            "hunt": {
+              "type": "string"
+            },
+            "self": {
+              "type": "string"
+            }
+          }
+        },
+        "investment": {
+          "type": "object",
+          "properties": {
+            "what": {
+              "type": "string"
+            },
+            "next": {
+              "type": "string"
+            }
+          }
+        },
+        "bmat": {
+          "type": "object",
+          "properties": {
+            "m": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "a": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "t": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 5
+            }
+          }
+        },
+        "ethics": {
+          "type": "object",
+          "properties": {
+            "improves": {
+              "enum": [
+                "yes",
+                "no"
+              ]
+            },
+            "selfUse": {
+              "enum": [
+                "yes",
+                "no"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "define": {
+      "type": "object",
+      "properties": {
+        "insights": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "votes": {
+                "type": "integer"
+              },
+              "selected": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        },
+        "jtbd": {
+          "type": "object",
+          "properties": {
+            "situation": {
+              "type": "string"
+            },
+            "motivation": {
+              "type": "string"
+            },
+            "outcome": {
+              "type": "string"
+            },
+            "functional": {
+              "type": "string"
+            },
+            "emotional": {
+              "type": "string"
+            },
+            "social": {
+              "type": "string"
+            }
+          }
+        },
+        "pov": {
+          "type": "object",
+          "properties": {
+            "format": {
+              "enum": [
+                "standard",
+                "story",
+                "storyPain",
+                "hmw"
+              ]
+            },
+            "user": {
+              "type": "string"
+            },
+            "need": {
+              "type": "string"
+            },
+            "insight": {
+              "type": "string"
+            },
+            "benefit": {
+              "type": "string"
+            },
+            "pain": {
+              "type": "string"
+            }
+          }
+        },
+        "hmw": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "star": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        }
+      }
+    },
+    "ideate": {
+      "type": "object",
+      "properties": {
+        "scamper": {
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string"
+            },
+            "S": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "star": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            "C": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "star": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            "A": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "star": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            "M": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "star": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            "P": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "star": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            "E": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "star": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            "R": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "star": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          }
+        },
+        "matrix": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "enum": [
+                "value",
+                "urgency"
+              ]
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "from": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "x": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "text"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "prototype": {
+      "type": "object",
+      "properties": {
+        "box": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "enum": [
+                "问题盒子",
+                "解决方案盒子",
+                "项目盒子",
+                "流程盒子"
+              ]
+            },
+            "logo": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "slogan": {
+              "type": "string"
+            },
+            "color": {
+              "enum": [
+                "blue",
+                "green",
+                "orange",
+                "red",
+                "purple",
+                "teal",
+                "pink",
+                "gray"
+              ]
+            },
+            "benefits": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            "features": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            },
+            "who": {
+              "type": "string"
+            },
+            "which": {
+              "type": "string"
+            },
+            "when": {
+              "type": "string"
+            },
+            "where": {
+              "type": "string"
+            },
+            "why": {
+              "type": "string"
+            },
+            "price": {
+              "type": "string"
+            },
+            "company": {
+              "type": "string"
+            }
+          }
+        },
+        "plan": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "physical",
+                "service",
+                "digital",
+                ""
+              ]
+            },
+            "fidelity": {
+              "enum": [
+                0,
+                1,
+                2
+              ]
+            },
+            "learn": {
+              "type": "string"
+            },
+            "core": {
+              "type": "string"
+            },
+            "rules": {
+              "type": "array",
+              "items": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "test": {
+      "type": "object",
+      "properties": {
+        "ab": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "hypothesis": {
+              "type": "string"
+            },
+            "variable": {
+              "type": "string"
+            },
+            "metric": {
+              "type": "string"
+            },
+            "a": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "desc": {
+                  "type": "string"
+                },
+                "n": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "conv": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "b": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "desc": {
+                  "type": "string"
+                },
+                "n": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "conv": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "alpha": {
+              "enum": [
+                0.1,
+                0.05,
+                0.01
+              ]
+            },
+            "power": {
+              "enum": [
+                0.8,
+                0.9
+              ]
+            },
+            "baseline": {
+              "type": "number"
+            },
+            "mde": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "boards": {
+      "type": "object",
+      "description": "通用看板，键名与 presets/boards.json 同名时自动补齐结构",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "en": {
+            "type": "string"
+          },
+          "intro": {
+            "type": "string"
+          },
+          "cols": {
+            "type": "integer"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "hint": {
+                  "type": "string"
+                },
+                "color": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "title"
+              ]
+            }
+          },
+          "cards": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "votes": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "id"
+                ]
+              }
+            }
+          },
+          "voting": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "perPerson": {
+                "type": "integer"
+              }
+            }
+          },
+          "timer": {
+            "type": "object",
+            "properties": {
+              "minutes": {
+                "type": "number"
+              }
+            }
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "step": {
+            "type": "integer"
+          },
+          "actionsEnabled": {
+            "type": "boolean"
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "owner": {
+                  "type": "string"
+                },
+                "due": {
+                  "type": "string"
+                },
+                "done": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tables": {
+      "type": "object",
+      "description": "通用表格，键名与 presets/tables.json 同名时自动补齐列定义",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "en": {
+            "type": "string"
+          },
+          "intro": {
+            "type": "string"
+          },
+          "rowLabel": {
+            "type": "string"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "text",
+                    "long",
+                    "select",
+                    "number",
+                    "check",
+                    "date"
+                  ]
+                },
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "colors": {
+                  "type": "object"
+                },
+                "width": {
+                  "type": "number"
+                },
+                "placeholder": {
+                  "type": "string"
+                },
+                "hint": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "label"
+              ]
+            }
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "radials": {
+      "type": "object",
+      "description": "环形图（雏菊图 / 360 度视角），不超过 8 项",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "en": {
+            "type": "string"
+          },
+          "intro": {
+            "type": "string"
+          },
+          "center": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "_target": {
+      "type": "string",
+      "description": "仅通用模板使用：要渲染的数据路径，如 boards.retro。render.py --target 会自动写入"
+    },
+    "storyboard": {
+      "type": "object",
+      "description": "场景故事板",
+      "properties": {
+        "personaId": {
+          "type": "string"
+        },
+        "scenario": {
+          "type": "string"
+        },
+        "toVerify": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "frames": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "title",
+              "action"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "emoji": {
+                "type": "string"
+              },
+              "thought": {
+                "type": "string"
+              },
+              "emotion": {
+                "type": "integer",
+                "minimum": -2,
+                "maximum": 2
+              },
+              "hookStage": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "trigger",
+                  "action",
+                  "reward",
+                  "investment"
+                ]
+              },
+              "action": {
+                "type": "string"
+              },
+              "imagePrompt": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "valueCanvas": {
+      "type": "object",
+      "description": "价值主张画布",
+      "properties": {
+        "personaId": {
+          "type": "string"
+        },
+        "solution": {
+          "type": "string"
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "gains": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "importance": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "pains": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "severity": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "jobs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "functional",
+                  "emotional",
+                  "social"
+                ]
+              }
+            }
+          }
+        },
+        "creators": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "relievers": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "toVerify": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "researchPlan": {
+      "type": "object",
+      "description": "用户研究计划",
+      "properties": {
+        "hypotheses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "risk": {
+                "type": "string",
+                "enum": [
+                  "H",
+                  "M",
+                  "L"
+                ]
+              },
+              "selected": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "recruit": {
+          "type": "object"
+        },
+        "script": {
+          "type": "object"
+        },
+        "analysis": {
+          "type": "object"
+        },
+        "progress": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+<!-- title: 表格 -->
+<style>
+.intro{font-size:14px;color:var(--muted);margin:0 0 12px}
+.tw{overflow-x:auto;border:1px solid var(--border);border-radius:12px}
+table.t{border-collapse:collapse;width:100%;font-size:14px}
+.t th,.t td{border-bottom:1px solid var(--border);border-right:1px solid var(--border);padding:8px 10px;vertical-align:top;text-align:left}
+.t th:last-child,.t td:last-child{border-right:0}
+.t tr:last-child td{border-bottom:0}
+.t th{background:var(--soft);font-weight:600;font-size:13.5px;white-space:nowrap}
+.t th small{display:block;font-weight:400;color:var(--muted);white-space:normal;font-size:11.5px}
+.t td .ed{min-height:1.6em}
+.t td select{min-height:30px;padding:2px 6px;font-size:13px;border-radius:999px}
+.t td input[type=checkbox]{width:20px;height:20px;min-height:auto}
+.t td input[type=number],.t td input[type=date]{min-height:30px;padding:2px 6px;width:100%;min-width:90px}
+.t .ops{white-space:nowrap;width:1%}
+.t .ops .icon{width:26px;height:26px;min-height:26px;font-size:13px}
+.t .rn{color:var(--muted);font-size:12px;width:1%}
+.addr{margin-top:10px}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed}=DT;
+const TINT={blue:['var(--blue-s)','var(--blue)'],green:['var(--green-s)','var(--green)'],orange:['var(--orange-s)','var(--orange)'],red:['var(--red-s)','var(--red)'],purple:['var(--purple-s)','var(--purple)'],gray:['var(--surface)','var(--muted)'],yellow:['var(--yellow-s)','var(--yellow)']};
+const T=()=>{const t=DT.get(DT.target||'tables.table',{});t.columns=t.columns||[{key:'a',label:'列 1'}];t.rows=t.rows||[];return t};
+function render(){const app=document.getElementById('app');app.innerHTML='';const t=T();
+ if(t.intro)app.appendChild(h('p',{class:'intro'},esc(t.intro)));
+ const tw=h('div',{class:'tw'});const tb=h('table',{class:'t'});
+ tb.innerHTML='<thead><tr><th class="rn">#</th>'+t.columns.map(c=>'<th'+(c.width?' style="min-width:'+c.width+'px"':'')+'>'+esc(c.label)+(c.hint?'<small>'+esc(c.hint)+'</small>':'')+'</th>').join('')+'<th class="ops"><span class="hint">操作</span></th></tr></thead>';
+ const body=h('tbody');
+ t.rows.forEach((r,i)=>{const tr=h('tr');tr.appendChild(h('td',{class:'rn'},String(i+1)));
+  t.columns.forEach(c=>{const td=h('td');const ty=c.type||'text';
+   if(ty==='select'){const s=h('select',{'aria-label':c.label});s.innerHTML='<option value=""></option>'+(c.options||[]).map(o=>'<option'+(r[c.key]===o?' selected':'')+'>'+esc(o)+'</option>').join('');
+     const paint=()=>{const col=(c.colors||{})[s.value];const tt=TINT[col];s.style.background=tt?tt[0]:'';s.style.color=tt?tt[1]:'';s.style.borderColor=tt?'transparent':''};paint();s.onchange=()=>{r[c.key]=s.value;paint();save()};td.appendChild(s)}
+   else if(ty==='check'){const cb=h('input',{type:'checkbox','aria-label':c.label});cb.checked=!!r[c.key];cb.onchange=()=>{r[c.key]=cb.checked;save()};td.appendChild(cb)}
+   else if(ty==='number'||ty==='date'){const n=h('input',{type:ty,'aria-label':c.label});n.value=r[c.key]==null?'':r[c.key];n.onchange=()=>{r[c.key]=ty==='number'?(n.value===''?null:+n.value):n.value;save()};td.appendChild(n)}
+   else{const e=ed(h('div'),r,c.key,c.placeholder||'');if(ty==='long')e.dataset.multi='1';td.appendChild(e)}
+   tr.appendChild(td)});
+  const op=h('td',{class:'ops'});const u=h('button',{class:'icon','aria-label':'上移'},'↑'),d=h('button',{class:'icon','aria-label':'下移'},'↓'),x=h('button',{class:'icon','aria-label':'删除行'},'×');
+  u.onclick=()=>{if(i>0){[t.rows[i-1],t.rows[i]]=[t.rows[i],t.rows[i-1]];save();render()}};d.onclick=()=>{if(i<t.rows.length-1){[t.rows[i+1],t.rows[i]]=[t.rows[i],t.rows[i+1]];save();render()}};x.onclick=()=>{t.rows.splice(i,1);save();render()};
+  op.append(u,d,x);tr.appendChild(op);body.appendChild(tr)});
+ tb.appendChild(body);tw.appendChild(tb);app.appendChild(tw);
+ if(!t.rows.length)app.appendChild(h('div',{class:'empty',style:'margin-top:10px'},'还没有内容'));
+ const a=h('button',{class:'ghost addr'},'+ 添加'+(t.rowLabel||'一行'));a.onclick=()=>{const r={id:DT.nid('r')};t.columns.forEach(c=>r[c.key]=c.type==='check'?false:'');t.rows.push(r);save();render()};app.appendChild(a)}
+function md(){const t=T();const cell=v=>String(v==null?'':v===true?'✓':v===false?'':v).replace(/\|/g,'/').replace(/\n/g,' ');
+ return ['# '+(t.title||'表格'),'','| '+t.columns.map(c=>c.label).join(' | ')+' |','|'+t.columns.map(()=>'---').join('|')+'|',...t.rows.map(r=>'| '+t.columns.map(c=>cell(r[c.key])).join(' | ')+' |')].join('\n')}
+DT.boot({title:T().title||'表格',en:T().en||'',render,md});
+})();
+</script>

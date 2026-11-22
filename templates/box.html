@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>盒子原则 · 设计思维</title>
+<style>
+:root{--text:#2C2C2B;--muted:#7D7A75;--bg:#FFFFFF;--soft:#F9F8F7;--surface:#F0EFED;--border:#E6E5E3;
+--blue:#2783DE;--blue-s:#E5F2FC;--green:#46A171;--green-s:#E8F1EC;--orange:#D5803B;--orange-s:#FBEBDE;--red:#E56458;--red-s:#FCE9E7;--purple:#9A6BC0;--purple-s:#F3ECF8;--yellow:#C9A227;--yellow-s:#FBF3DB;--teal:#3A9DAE;--teal-s:#E3F3F5;--pink:#C9658F;--pink-s:#FAE8F0}
+@media (prefers-color-scheme:dark){:root{--text:#FFFFFF;--muted:rgba(255,255,255,.65);--bg:#191919;--soft:#202020;--surface:#383836;--border:rgba(255,255,255,.2);
+--blue:#5E9FE8;--blue-s:rgba(94,159,232,.12);--green:#72BC8F;--green-s:rgba(114,188,143,.12);--orange:#DE9255;--orange-s:rgba(222,146,85,.12);--red:#E97366;--red-s:rgba(233,115,102,.12);--purple:#BF8EDA;--purple-s:rgba(191,142,218,.12);--yellow:#EAC26B;--yellow-s:rgba(234,194,107,.12);--teal:#4FB9C9;--teal-s:rgba(79,185,201,.12);--pink:#DF84A8;--pink-s:rgba(223,132,168,.12)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:24px 32px 48px}
+/* 顶部导航栏（所有非仪表盘页面注入） */
+#dt-nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:0;background:var(--bg);border-bottom:1px solid var(--border);padding:0 24px;height:40px;font-size:13.5px}
+#dt-nav a{color:var(--muted);text-decoration:none;padding:0 10px;height:40px;display:flex;align-items:center;border-bottom:2px solid transparent}
+#dt-nav a:hover{color:var(--text);background:var(--soft)}
+#dt-nav .dt-nav-home{color:var(--blue);font-weight:600;padding-left:0}
+#dt-nav .dt-nav-home:hover{background:var(--blue-s)}
+#dt-nav .dt-nav-sep{flex:1}
+#dt-nav .dt-nav-proj{font-size:12.5px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body:has(#dt-nav) .wrap{padding-top:16px}
+.dt-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.dt-head h1{font-size:24px;margin:0;font-weight:650}
+.dt-head h1 small{font-size:14px;color:var(--muted);font-weight:400;margin-left:8px}
+.dt-head .sub{font-size:13.5px;color:var(--muted);margin-top:2px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;font-size:14px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer;min-height:36px}
+button:hover{background:var(--soft)}
+button:focus-visible,[contenteditable]:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+button.ghost{border-style:dashed;color:var(--muted);font-size:13px;min-height:32px;padding:4px 10px}
+button.icon{border:0;background:transparent;color:var(--muted);width:28px;height:28px;min-height:28px;padding:0;border-radius:6px;font-size:16px;line-height:1}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;border-radius:0}
+.seg button[aria-pressed=true]{background:var(--surface);font-weight:600}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:2px 10px;border-radius:999px;background:var(--orange-s);color:var(--orange);font-weight:550;white-space:nowrap}
+button.badge{border:0;min-height:0;cursor:pointer;font:inherit;font-size:12.5px;font-weight:550}button.badge:hover{filter:brightness(.96)}
+.badge.ok{background:var(--green-s);color:var(--green)}
+.badge.info{background:var(--blue-s);color:var(--blue)}
+.badge.mute{background:var(--surface);color:var(--muted)}
+.box{border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:var(--bg)}
+.box.soft{background:var(--soft)}
+.sec{font-size:17px;font-weight:650;margin:28px 0 4px}
+.secsub{font-size:13.5px;color:var(--muted);margin:0 0 12px}
+.hint{font-size:12.5px;color:var(--muted)}
+.card{position:relative;background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:8px 32px 8px 10px}
+.card>.icon.del{position:absolute;top:4px;right:4px}
+.ed{outline:none;min-height:1.4em;word-break:break-word}
+.ed:empty:before{content:attr(data-ph);color:var(--muted)}
+.ev{font-size:12px;border:0;padding:1px 8px;min-height:22px;border-radius:999px;cursor:pointer}
+.ev.quote{background:var(--blue-s);color:var(--blue)}.ev.observed{background:var(--green-s);color:var(--green)}
+.ev.inferred{background:var(--purple-s);color:var(--purple)}.ev.assumed{background:var(--orange-s);color:var(--orange)}
+input,select,textarea{font:inherit;font-size:14px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 8px;min-height:36px;max-width:100%}
+textarea{resize:vertical}
+.core{border-radius:12px;padding:16px 20px;background:var(--blue-s);border-left:4px solid var(--blue)}
+.core .lbl{font-size:13px;color:var(--blue);font-weight:650;margin-bottom:4px}
+.core .ed{font-size:16px;font-weight:550}
+.verify{border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-top:16px}
+.verify ul{margin:6px 0 0;padding-left:20px}.verify li{margin:4px 0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:8px 16px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+.toast.show{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:10;padding:16px}
+.modal.open{display:flex}
+.modal .panel{background:var(--bg);border-radius:12px;padding:20px;width:min(640px,100%);box-shadow:0 4px 24px rgba(0,0,0,.18)}
+.modal textarea{width:100%;min-height:220px;font-family:Menlo,Consolas,monospace;font-size:12.5px}
+.empty{color:var(--muted);font-size:14px;padding:12px;border:1px dashed var(--border);border-radius:8px;text-align:center}
+.foot{margin-top:40px;font-size:12.5px;color:var(--muted);text-align:center}
+.foot a{color:var(--muted)}
+@media (max-width:720px){.wrap{padding:16px}.dt-head h1{font-size:21px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.lay{display:grid;grid-template-columns:400px 1fr;gap:28px;align-items:start}
+.stage{height:420px;perspective:1100px;display:flex;align-items:center;justify-content:center;touch-action:none;cursor:grab;user-select:none;border-radius:12px;background:var(--soft);border:1px solid var(--border)}
+.stage:active{cursor:grabbing}
+.cube{position:relative;width:220px;height:300px;transform-style:preserve-3d;transition:transform .6s}
+.cube.drag{transition:none}
+.f{position:absolute;left:50%;top:50%;border-radius:4px;padding:14px;overflow:hidden;color:#fff;display:flex;flex-direction:column;gap:6px;backface-visibility:hidden;font-size:13px;line-height:1.45}
+.f h4{margin:0;font-size:12px;letter-spacing:.06em;opacity:.85;font-weight:600}
+.f ul{margin:0;padding-left:16px}.f li{margin:2px 0}
+.f.front{justify-content:center;align-items:center;text-align:center}
+.f.front .logo{font-size:56px;line-height:1}
+.f.front .nm{font-size:24px;font-weight:750;margin-top:6px}
+.f.front .sl{font-size:14px;opacity:.92}
+.f.front .tp{position:absolute;top:10px;left:12px;font-size:11.5px;background:rgba(255,255,255,.22);padding:1px 8px;border-radius:999px}
+.f.back{background:#fff!important;color:#2C2C2B;border:2px solid #2C2C2B}
+.f.back table{border-collapse:collapse;width:100%;font-size:12.5px}.f.back td{border-bottom:1px solid #2C2C2B;padding:3px 0}
+.f.back .ttl{font-size:17px;font-weight:800;border-bottom:6px solid #2C2C2B;padding-bottom:2px}
+.f.w5 dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 8px;font-size:12.5px}.f.w5 dt{font-weight:700}.f.w5 dd{margin:0}
+.ctl{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
+.ctl button{min-height:32px;padding:4px 10px;font-size:13px}
+.net{display:grid;grid-template-columns:repeat(4,auto);gap:4px;justify-content:center;overflow-x:auto}
+.net .f{position:relative;left:auto;top:auto;transform:none!important;backface-visibility:visible}
+.frm{display:flex;flex-direction:column;gap:14px}
+.row{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:start}
+.row>.lb{font-size:13.5px;color:var(--muted);padding-top:3px}
+.row .ed{border-bottom:1px dashed var(--border);padding:2px 0}
+.lst{display:flex;flex-direction:column;gap:6px}
+.sw{display:flex;gap:6px;flex-wrap:wrap}.sw button{width:28px;height:28px;min-height:28px;padding:0;border-radius:50%;border:2px solid transparent}
+.sw button[aria-pressed=true]{border-color:var(--text)}
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.opt{border:1px solid var(--border);border-radius:10px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:4px;min-height:110px;background:var(--bg)}
+.opt[aria-pressed=true]{border-color:var(--green);box-shadow:0 0 0 2px var(--green-s);background:var(--green-s)}
+.opt b{font-size:15px}.opt span{font-size:13px;color:var(--muted)}
+.fid{margin-top:8px}
+.fid input[type=range]{width:100%}
+.fid .lbs{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted)}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.rules label{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:13.5px;cursor:pointer}
+.rules input{min-height:0;margin-top:3px}
+@media (max-width:900px){.lay{grid-template-columns:1fr}.cards3,.rules{grid-template-columns:1fr}.net{grid-template-columns:repeat(2,auto)}}
+</style>
+</head>
+<body data-tpl="box">
+<div class="wrap">
+<header class="dt-head" id="dt-head"></header>
+<main id="app"></main>
+<div class="foot">设计思维 Skill · 修改会自动保存在本浏览器 · 点「复制给 AI」把结果带回对话</div>
+</div>
+<script id="dt-data" type="application/json">/*DT_DATA*/</script>
+<script>
+const DT=(function(){
+ const raw=document.getElementById('dt-data').textContent.trim();
+ let init={};try{init=raw&&raw.indexOf('DT_DATA')<0?JSON.parse(raw):{}}catch(e){console.error('数据解析失败',e)}
+ const tpl=document.body.dataset.tpl||'page';
+ const clone=o=>JSON.parse(JSON.stringify(o));
+ const PRJ=(init.meta&&init.meta.project)||'default',SK='dt:shared:'+PRJ,OWN='dt:'+tpl+':'+PRJ+':'+(init._target||'');
+ const strip=o=>{const c=clone(o);delete c._target;delete c._rev;return c};
+ const HS=(function(t){let x=5381;for(let i=0;i<t.length;i++)x=((x<<5)+x+t.charCodeAt(i))|0;return String(x>>>0)})(JSON.stringify(strip(init)));
+ const REV=init._rev||'';
+ // 同一项目的所有页面共享一份数据（dt:shared:<项目>）；若本页比共享数据旧，则只在本页独立保存，避免覆盖。
+ let st,fresh=false,KEY=SK,older=false;
+ function readK(k){try{const s=localStorage.getItem(k);return s?JSON.parse(s):null}catch(e){return null}}
+ (function(){const o=readK(SK);
+  if(o&&o.__base===HS){st=o.st}
+  else if(o&&o.__rev&&REV&&REV<o.__rev){older=true;KEY=OWN;const m=readK(OWN);st=m&&m.__base===HS?m.st:strip(init)}
+  else{if(o){try{localStorage.setItem(SK+':prev',JSON.stringify(o))}catch(e){}fresh=true}st=strip(init);try{localStorage.setItem(SK,JSON.stringify({__base:HS,__rev:REV,st}))}catch(e){}}})();
+ st.meta=st.meta||{};
+ let opts={};
+ const $=id=>document.getElementById(id);
+ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ let seq=Date.now()%100000;const nid=p=>(p||'x')+(++seq).toString(36);
+ function get(path,def){if(!path)return st;let o=st;const ks=path.split('.');for(let i=0;i<ks.length;i++){if(o[ks[i]]==null){if(def===undefined)return undefined;o[ks[i]]=i===ks.length-1?def:{}}o=o[ks[i]]}return o}
+ function save(){st.meta.updatedAt=new Date().toISOString();try{localStorage.setItem(KEY,JSON.stringify({__base:HS,__rev:REV,st:strip(st)}))}catch(e){}}
+ function toast(t){let e=$('dt-toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1800)}
+ function ed(el,obj,key,ph,onChange){el.contentEditable='true';el.spellcheck=false;el.classList.add('ed');if(ph)el.dataset.ph=ph;el.textContent=obj[key]==null?'':obj[key];
+  el.addEventListener('input',()=>{obj[key]=el.textContent;save();onChange&&onChange()});
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&el.dataset.multi!=='1'){e.preventDefault();el.blur()}});return el}
+ function h(tag,attrs,html){const e=document.createElement(tag);if(attrs)for(const k in attrs){if(k==='class')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else e.setAttribute(k,attrs[k])}if(html!=null)e.innerHTML=html;return e}
+ function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+ async function copy(t,msg){try{await navigator.clipboard.writeText(t);toast(msg||'已复制')}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(msg||'已复制')}catch(_){toast('复制失败，请改用导出 JSON')}ta.remove()}}
+ const out=()=>strip(st);
+ function aiBadge(){const g=st.meta.generatedBy||'ai';const m={ai:['','AI 假设 · 待验证'],mixed:['info','调研 + AI 推断'],human:['ok','基于真实调研']}[g]||['','AI 假设 · 待验证'];return '<button class="badge '+m[0]+'" id="dt-src" title="数据来源（点击切换）：AI 假设 / 调研 + AI 推断 / 基于真实调研">'+m[1]+'</button>'}
+ const PATHS={persona:'personas, personaSteps','empathy-map':'empathyMap',journey:'journey',hook:'hook',pov:'define',scamper:'ideate.scamper, ideate.matrix',matrix:'ideate.matrix',box:'prototype','ab-test':'test.ab',storyboard:'storyboard','value-canvas':'valueCanvas',overview:'meta','research-plan':'researchPlan',dashboard:'全部'};
+ const PATH=()=>init._target||PATHS[tpl]||'全部';
+ function header(){const hd=$('dt-head');
+  hd.innerHTML='<div><h1>'+esc(opts.title)+'<small>'+esc(opts.en||'')+'</small></h1><div class="sub">'+esc(st.meta.project||'')+(opts.subtitle?' · '+esc(opts.subtitle()):'')+' '+aiBadge()+'</div></div><div class="tools" id="dt-tools"></div>';
+  $('dt-src').onclick=()=>{const o=['ai','mixed','human'];st.meta.generatedBy=o[(o.indexOf(st.meta.generatedBy||'ai')+1)%3];save();header()};const t=$('dt-tools');(opts.extra||[]).forEach(b=>t.appendChild(b));
+  const b=(txt,cls,fn,title)=>{const x=h('button',{class:cls||''},txt);if(title)x.title=title;x.onclick=fn;t.appendChild(x)};
+  b('复制给 AI','primary',()=>copy('以下是我在可视化页面中修改后的设计思维项目数据（当前页面「'+opts.title+'」，负责路径：'+PATH()+'）。'+(older?'注意：本页是旧版本，只合并本页负责的路径。':'各页面数据已同步，与 project.json 不同的部分都是我的修改。')+'请合并回 project.json，然后继续：\n```json\n'+JSON.stringify(out(),null,2)+'\n```','已复制，粘贴回对话即可继续'),'把修改后的完整数据复制到剪贴板');
+  if(opts.md)b('导出 Markdown','',()=>dl(tpl+'.md',opts.md(),'text/markdown'));
+  b('导出 JSON','',()=>dl((st.meta.project||'project')+'.json',JSON.stringify(out(),null,2),'application/json'));
+  b('导入','',openImport,'粘贴 JSON 数据替换当前页面');
+  b('重置','',()=>{if(!confirm('清除本项目所有页面的本地修改，恢复 agent 生成的初始数据？'))return;try{localStorage.removeItem(KEY)}catch(e){}st=strip(init);st.meta=st.meta||{};rerender();toast('已恢复初始数据')},'清除本地修改')}
+ function openImport(){const m=$('dt-modal');m.classList.add('open');const ta=$('dt-imp');ta.value='';ta.focus()}
+ function doImport(){let t=$('dt-imp').value.trim().replace(/^```(json)?/,'').replace(/```$/,'').trim();try{const o=JSON.parse(t);st=strip(o);st.meta=st.meta||{};save();$('dt-modal').classList.remove('open');rerender();toast('已导入')}catch(e){toast('JSON 格式不正确')}}
+ function rerender(){header();opts.render&&opts.render()}
+ function evBtn(obj){const EV=['quote','observed','inferred','assumed'],L={quote:'原话',observed:'观察',inferred:'推断',assumed:'假设'};obj.evidence=obj.evidence||'assumed';
+  const b=h('button',{class:'ev '+obj.evidence,title:'切换证据类型'},L[obj.evidence]);b.onclick=e=>{e.stopPropagation();obj.evidence=EV[(EV.indexOf(obj.evidence)+1)%4];b.className='ev '+obj.evidence;b.textContent=L[obj.evidence];save()};return b}
+ function list(container,arr,prefix,ph,onChange){container.innerHTML='';arr.forEach((it,i)=>{const c=h('div',{class:'card'});const t=h('div');ed(t,it,'text',ph,onChange);c.appendChild(t);
+   const d=h('button',{class:'icon del','aria-label':'删除',title:'删除'},'×');d.onclick=()=>{arr.splice(i,1);save();list(container,arr,prefix,ph,onChange);onChange&&onChange()};c.appendChild(d);container.appendChild(c)});
+  const a=h('button',{class:'ghost'},'+ 添加');a.onclick=()=>{arr.push({id:nid(prefix),text:''});save();list(container,arr,prefix,ph,onChange);const e=container.querySelectorAll('.card .ed');e.length&&e[e.length-1].focus()};container.appendChild(a)}
+ function boot(o){opts=o;
+  // 非仪表盘页面注入固定顶部导航栏
+  if(tpl!=='dashboard'){
+    const nb=document.createElement('nav');nb.id='dt-nav';nb.setAttribute('aria-label','项目导航');
+    nb.innerHTML='<a href="dashboard.html" class="dt-nav-home" title="返回项目仪表盘">⬡ 仪表盘</a><a href="overview.html" class="dt-nav-ov" title="查看全部工具">工具总览</a><span class="dt-nav-sep"></span><span class="dt-nav-proj" id="dt-nav-proj"></span>';
+    document.body.insertBefore(nb,document.body.firstChild);
+    // 更新项目名
+    setTimeout(()=>{const el=document.getElementById('dt-nav-proj');if(el)el.textContent=st.meta&&st.meta.name||st.meta&&st.meta.project||'';},50);
+  }
+  document.body.insertAdjacentHTML('beforeend','<div class="toast" id="dt-toast" role="status" aria-live="polite"></div><div class="modal" id="dt-modal" role="dialog" aria-label="导入 JSON"><div class="panel"><b>导入 JSON</b><p class="hint">粘贴 agent 给你的项目 JSON（可带 ```json 代码块）。将替换本页当前数据。</p><textarea id="dt-imp"></textarea><div class="tools" style="justify-content:flex-end;margin-top:12px"><button id="dt-imp-c">取消</button><button class="primary" id="dt-imp-ok">导入</button></div></div></div>');
+  $('dt-imp-c').onclick=()=>$('dt-modal').classList.remove('open');$('dt-imp-ok').onclick=doImport;
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')$('dt-modal').classList.remove('open')});
+  window.addEventListener('storage',e=>{if(e.key!==KEY||!e.newValue)return;try{const o=JSON.parse(e.newValue);if(o.__base===HS){st=o.st;st.meta=st.meta||{};rerender()}}catch(_){}});
+  rerender();if(fresh)setTimeout(()=>toast('已载入 agent 生成的新版本数据（旧的本地修改已备份）'),300);if(older)setTimeout(()=>toast('本页数据比其他已打开的页面旧，修改只保存在本页'),300)}
+ return {get st(){return st},get,save,toast,esc,ed,h,nid,dl,copy,boot,rerender,evBtn,list,target:init._target||''};
+})();
+
+(function(){
+const {h,esc,save,ed}=DT;
+const COL={blue:'#2783DE',green:'#46A171',orange:'#D5803B',red:'#E56458',purple:'#9A6BC0',teal:'#3A9DAE',pink:'#C9658F',gray:'#5F5E5B'};
+const TYPES=['问题盒子','解决方案盒子','项目盒子','流程盒子'];
+const W5=[['who','谁 Who','目标顾客是谁？'],['which','哪些 Which','要达成哪些目标？'],['when','何时 When','何时可用？'],['where','何地 Where','在哪里使用？'],['why','为什么 Why','用户为什么要用它？']];
+const KIND=[['physical','实体原型','纸、硬纸板、乐高、铝箔、橡皮泥等快速搭建'],['service','服务原型','角色扮演模拟服务流程与触点'],['digital','数字原型','视频、可点击演示、落地页、线框图']];
+const FID=[['低保真','初期阶段：草图、纸模型，验证方向'],['中保真','首个解决方案：可点击线框/简易实物，验证流程'],['高保真','接近最终方案：外观与交互接近真实，验证细节与意愿']];
+const RULES=['尽早制作，越简单越好','不要爱上你的原型','原型即迭代：迭代、迭代、再迭代'];
+let rx=-14,ry=-28,view='3d',dragging=null;
+const P=()=>{const p=DT.get('prototype',{});p.box=p.box||{};const b=p.box;b.benefits=b.benefits||[];b.features=b.features||[];p.plan=p.plan||{};p.plan.rules=p.plan.rules||[];return p};
+function faces(b){const c=COL[b.color]||COL.blue,li=a=>a.filter(x=>x.text).map(x=>'<li>'+esc(x.text)+'</li>').join('');
+ const F={
+  front:[220,300,'<span class="tp">'+esc(b.type||'解决方案盒子')+'</span><div class="logo">'+esc(b.logo||'📦')+'</div><div class="nm">'+esc(b.name||'产品名称')+'</div><div class="sl">'+esc(b.slogan||'一句话标语')+'</div>'],
+  right:[160,300,'<h4>核心益处</h4><ul>'+li(b.benefits)+'</ul>'],
+  back:[220,300,'<div class="ttl">产品成分</div><div style="font-size:11.5px">核心功能 / 产品属性</div><table>'+b.features.filter(x=>x.text).map(x=>'<tr><td>'+esc(x.text)+'</td></tr>').join('')+'</table>'],
+  left:[160,300,'<h4>5W</h4><dl>'+W5.map(w=>'<dt>'+w[1].split(' ')[0]+'</dt><dd>'+esc(b[w[0]]||'—')+'</dd>').join('')+'</dl>'],
+  top:[220,160,'<h4>价格 / 获取方式</h4><div style="font-size:15px;font-weight:650">'+esc(b.price||'—')+'</div>'],
+  bottom:[220,160,'<h4>企业 / 团队信息</h4><div>'+esc(b.company||'—')+'</div>']};
+ return {F,c}}
+function cubeHTML(b){const {F,c}=faces(b);const T={front:'translateZ(80px)',back:'rotateY(180deg) translateZ(80px)',right:'rotateY(90deg) translateZ(110px)',left:'rotateY(-90deg) translateZ(110px)',top:'rotateX(90deg) translateZ(150px)',bottom:'rotateX(-90deg) translateZ(150px)'};
+ return Object.keys(F).map(k=>{const [w,hh,html]=F[k];const bg=k==='front'?c:k==='back'?'#fff':'color-mix(in srgb,'+c+' 82%,#000)';
+  return '<div class="f '+k+(k==='left'?' w5':'')+'" style="width:'+w+'px;height:'+hh+'px;margin:-'+hh/2+'px 0 0 -'+w/2+'px;background:'+bg+';'+(view==='3d'?'transform:'+T[k]:'')+'">'+html+'</div>'}).join('')}
+function netHTML(b){const {F,c}=faces(b);const ord=['left','front','right','back'];const cell=(k)=>{const [w,hh,html]=F[k];const bg=k==='front'?c:k==='back'?'#fff':'color-mix(in srgb,'+c+' 82%,#000)';return '<div class="f '+k+(k==='left'?' w5':'')+'" style="width:'+w+'px;height:'+hh+'px;background:'+bg+'">'+html+'</div>'};
+ return '<div class="net">'+ord.map(cell).join('')+cell('top')+cell('bottom')+'</div>'}
+function setRot(cube){cube.style.transform='rotateX('+rx+'deg) rotateY('+ry+'deg)'}
+function render(){const app=document.getElementById('app');app.innerHTML='';const p=P(),b=p.box;
+ app.appendChild(h('p',{class:'secsub'},'把你的方案想象成货架上的一个产品包装盒：正面写名称、标志和标语，侧面写核心益处，背面像“营养成分表”一样列出功能与属性。盒子也可以是问题盒子、项目盒子或流程盒子。'));
+ const lay=h('div',{class:'lay'});const L=h('div');
+ const sg=h('div',{class:'seg',style:'margin-bottom:8px'});[['3d','立体盒子'],['net','展开图']].forEach(o=>{const x=h('button',{'aria-pressed':view===o[0]?'true':'false'},o[1]);x.onclick=()=>{view=o[0];render()};sg.appendChild(x)});L.appendChild(sg);
+ let cube;
+ if(view==='3d'){const stg=h('div',{class:'stage','aria-label':'可拖动旋转的产品盒子'});cube=h('div',{class:'cube'},cubeHTML(b));stg.appendChild(cube);setRot(cube);L.appendChild(stg);
+  stg.addEventListener('pointerdown',e=>{dragging={x:e.clientX,y:e.clientY,rx,ry};cube.classList.add('drag');stg.setPointerCapture(e.pointerId)});
+  stg.addEventListener('pointermove',e=>{if(!dragging)return;ry=dragging.ry+(e.clientX-dragging.x)*.5;rx=Math.max(-80,Math.min(80,dragging.rx-(e.clientY-dragging.y)*.5));setRot(cube)});
+  const up=()=>{dragging=null;cube.classList.remove('drag')};stg.addEventListener('pointerup',up);stg.addEventListener('pointercancel',up);
+  const ctl=h('div',{class:'ctl'});[['正面',-10,-20],['益处',-10,-90],['背面',-10,-180],['5W',-10,90],['顶部',-80,0],['底部',80,0]].forEach(v=>{const x=h('button',{},v[0]);x.onclick=()=>{rx=v[1];ry=v[2];setRot(cube)};ctl.appendChild(x)});L.appendChild(ctl);
+  L.appendChild(h('p',{class:'hint',style:'text-align:center'},'拖动盒子可旋转'))}
+ else L.appendChild(h('div',{style:'background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:12px'},netHTML(b)));
+ lay.appendChild(L);
+ const upd=()=>{if(view==='3d'&&cube){cube.innerHTML=cubeHTML(b)}else{const n=L.querySelector('.net');n&&(n.outerHTML=netHTML(b))}};
+ const F=h('div',{class:'frm'});
+ const row=(lb,el)=>{const r=h('div',{class:'row'});r.appendChild(h('div',{class:'lb'},lb));r.appendChild(el);F.appendChild(r);return r};
+ const tp=h('select',{'aria-label':'盒子类型'});TYPES.forEach(t=>{const o=h('option',{},t);if((b.type||'解决方案盒子')===t)o.selected=true;tp.appendChild(o)});tp.onchange=()=>{b.type=tp.value;save();upd()};row('盒子类型',tp);
+ row('标志',ed(h('div'),b,'logo','一个 emoji，例如 🍱',upd));row('产品名称',ed(h('div'),b,'name','起一个名字',upd));row('标语',ed(h('div'),b,'slogan','一句话说清价值',upd));
+ const sw=h('div',{class:'sw'});Object.keys(COL).forEach(k=>{const x=h('button',{style:'background:'+COL[k],'aria-label':k,'aria-pressed':(b.color||'blue')===k?'true':'false'});x.onclick=()=>{b.color=k;save();render()};sw.appendChild(x)});row('主色',sw);
+ const bl=h('div',{class:'lst'});DT.list(bl,b.benefits,'bn','核心益处（建议 3 条）',upd);row('核心益处',bl);
+ const fl=h('div',{class:'lst'});DT.list(fl,b.features,'ft','功能 / 属性',upd);row('产品成分',fl);
+ W5.forEach(w=>row(w[1],ed(h('div'),b,w[0],w[2],upd)));
+ row('价格 / 获取',ed(h('div'),b,'price','如何获得？多少钱？',upd));row('企业信息',ed(h('div'),b,'company','谁提供？',upd));
+ lay.appendChild(F);app.appendChild(lay);
+ // 原型规划
+ const pl=p.plan;
+ app.appendChild(h('div',{class:'sec'},'原型规划'));app.appendChild(h('p',{class:'secsub'},'选择原型类型与保真度，并写清这次原型要学习什么。'));
+ const ks=h('div',{class:'cards3'});KIND.forEach(k=>{const x=h('button',{class:'opt','aria-pressed':pl.kind===k[0]?'true':'false'},'<b>'+k[1]+'</b><span>'+k[2]+'</span>');x.onclick=()=>{pl.kind=pl.kind===k[0]?'':k[0];save();render()};ks.appendChild(x)});app.appendChild(ks);
+ const fd=h('div',{class:'fid box'});const fi=pl.fidelity==null?0:pl.fidelity;
+ fd.innerHTML='<b>保真度：<span id="fv">'+FID[fi][0]+'</span></b><div class="hint" id="fh">'+FID[fi][1]+'</div>';
+ const rg=h('input',{type:'range',min:'0',max:'2',step:'1','aria-label':'原型保真度'});rg.value=fi;rg.oninput=()=>{pl.fidelity=+rg.value;save();fd.querySelector('#fv').textContent=FID[rg.value][0];fd.querySelector('#fh').textContent=FID[rg.value][1]};
+ fd.appendChild(rg);fd.appendChild(h('div',{class:'lbs'},'<span>低</span><span>中</span><span>高</span>'));app.appendChild(fd);
+ const lr=h('div',{class:'box',style:'margin-top:10px'});lr.appendChild(h('div',{class:'hint'},'这个原型要验证的问题（以学习为目的）'));const le=ed(h('div',{style:'font-weight:550;margin-top:4px'}),pl,'learn','例如：用户是否愿意在柜机前多等 30 秒换取热食？');le.dataset.multi='1';lr.appendChild(le);
+ lr.appendChild(h('div',{class:'hint',style:'margin-top:8px'},'对用户来说最核心的功能是什么？'));lr.appendChild(ed(h('div',{style:'margin-top:4px'}),pl,'core','只做这个，其余先不做'));app.appendChild(lr);
+ const ru=h('div',{class:'rules',style:'margin-top:10px'});RULES.forEach((t,i)=>{const lab=h('label');const c=h('input',{type:'checkbox'});c.checked=!!pl.rules[i];c.onchange=()=>{pl.rules[i]=c.checked;save()};lab.appendChild(c);lab.appendChild(h('span',{},t));ru.appendChild(lab)});app.appendChild(ru)}
+function md(){const p=P(),b=p.box,pl=p.plan;const L=['# 盒子原则：'+(b.name||''),'','- 类型：'+(b.type||'解决方案盒子'),'- 标语：'+(b.slogan||''),'','## 核心益处',...b.benefits.map(x=>'- '+x.text),'','## 产品成分',...b.features.map(x=>'- '+x.text),'','## 5W',...W5.map(w=>'- '+w[1]+'：'+(b[w[0]]||'')),'','- 价格/获取：'+(b.price||''),'- 企业信息：'+(b.company||''),'','## 原型规划','- 类型：'+((KIND.find(k=>k[0]===pl.kind)||[0,''])[1]),'- 保真度：'+FID[pl.fidelity||0][0],'- 要学习：'+(pl.learn||''),'- 核心功能：'+(pl.core||'')];return L.join('\n')}
+DT.boot({title:'盒子原则',en:'Box Principle · Prototype',subtitle:()=>P().box.name||'',render,md});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,470 @@
+<!-- title: 用户研究计划 -->
+<style>
+.phase{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
+.ph{border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12.5px;color:var(--muted);text-align:center;position:relative;background:var(--bg)}
+.ph b{display:block;font-size:13px;color:var(--text)}
+.ph.on{border-color:var(--blue);background:var(--blue-s)}
+.ph.on b{color:var(--blue)}
+
+/* 卡片 */
+.card{border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;background:var(--bg)}
+.card-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.card-hd h4{margin:0;font-size:15px}
+.badge{font-size:12px;border-radius:20px;padding:2px 10px;font-weight:600}
+.b-blue{background:var(--blue-s);color:var(--blue)}
+.b-green{background:var(--green-s);color:var(--green)}
+.b-orange{background:var(--orange-s);color:var(--orange)}
+.b-purple{background:var(--purple-s);color:var(--purple)}
+.b-red{background:var(--red-s);color:var(--red)}
+
+/* 两列 */
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.lf{display:flex;flex-direction:column;gap:8px}
+
+/* 假设列表 */
+.hyp-row{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg)}
+.hyp-row.sel{border-color:var(--blue);background:var(--blue-s)}
+.risk-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.risk-h{background:var(--red)}.risk-m{background:var(--orange)}.risk-l{background:var(--green)}
+.risk-sel{display:flex;gap:4px}
+.risk-sel button{width:28px;height:28px;min-height:28px;padding:0;font-size:11px;border-radius:6px}
+.risk-sel button.on{font-weight:700}
+.rH button.on{background:var(--red-s);color:var(--red);border-color:var(--red)}
+.rM button.on{background:var(--orange-s);color:var(--orange);border-color:var(--orange)}
+.rL button.on{background:var(--green-s);color:var(--green);border-color:var(--green)}
+
+/* 招募 */
+.crit-row{display:grid;grid-template-columns:100px 1fr auto;gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--border)}
+.crit-row:last-child{border:0}
+.crit-row .lb{font-size:13px;color:var(--muted)}
+
+/* 访谈问题 */
+.q-row{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:start;padding:7px 8px;border-bottom:1px solid var(--border)}
+.q-row:last-child{border:0}
+.q-num{width:24px;height:24px;border-radius:50%;background:var(--blue-s);color:var(--blue);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.q-type{font-size:11.5px;padding:1px 7px;border-radius:12px;white-space:nowrap;margin-top:4px}
+.qt-open{background:var(--green-s);color:var(--green)}
+.qt-probe{background:var(--blue-s);color:var(--blue)}
+.qt-scenario{background:var(--orange-s);color:var(--orange)}
+.qt-close{background:var(--surface);color:var(--muted)}
+.q-col{display:flex;flex-direction:column;gap:4px}
+
+/* 分析框架 */
+.fw-tab{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.fw-tab button{font-size:13px}
+.fw-tab button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.affinity-cols{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.aff-col{min-width:160px;border:1px solid var(--border);border-radius:10px;background:var(--bg)}
+.aff-col-hd{padding:8px 10px;font-size:13px;font-weight:600;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.aff-col-body{padding:6px 8px;display:flex;flex-direction:column;gap:4px;min-height:60px}
+.aff-card{background:var(--yellow-s,#fffde7);border:1px solid #ffe082;border-radius:6px;padding:5px 8px;font-size:13px}
+.metric-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--border)}
+.metric-row:last-child{border:0}
+
+/* AI prompt 预览 */
+.prompt-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-all;max-height:260px;overflow-y:auto;color:var(--text)}
+.prompt-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+
+/* 进度追踪 */
+.track-row{display:grid;grid-template-columns:120px 1fr auto;gap:10px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--border)}
+.track-row:last-child{border:0}
+.pbar{height:8px;border-radius:4px;background:var(--border);overflow:hidden}
+.pbar-fill{height:100%;background:var(--blue);border-radius:4px;transition:width .3s}
+.status-dot{width:10px;height:10px;border-radius:50%}
+.s-done{background:var(--green)}.s-doing{background:var(--blue)}.s-todo{background:var(--border)}
+
+@media(max-width:720px){.phase{grid-template-columns:repeat(3,1fr)}.cols2,.cols3{grid-template-columns:1fr}.affinity-cols{flex-direction:column}.metric-row{grid-template-columns:1fr 1fr auto}}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed,nid}=DT;
+
+const RISK={'H':'高','M':'中','L':'低'};
+const RISK_C={'H':'rH','M':'rM','L':'rL'};
+const QTYPE={open:'开放',probe:'追问',scenario:'情境',close:'验证'};
+const FW_TABS={affinity:'亲和图',metrics:'评估指标',insights:'洞察提炼'};
+
+const D=()=>{
+  const r=DT.get('researchPlan',{});
+  r.hypotheses=r.hypotheses||[];
+  r.recruit=r.recruit||{n:5,sessions:5,duration:45,mode:'remote',criteria:[],screener:[]};
+  r.script=r.script||{warmup:[],main:[],wrap:[]};
+  r.analysis=r.analysis||{fw:'affinity',affinityGroups:[],metrics:[],insights:[]};
+  r.progress=r.progress||{sessions:[],status:'plan'};
+  return r;
+};
+
+// 从其他页面读取假设
+function importHypotheses(d){
+  const src=DT.get()||{};
+  const hyps=[];
+  // 从 toVerify 字段收集
+  const collect=(obj,label)=>{
+    if(!obj) return;
+    if(Array.isArray(obj)){obj.forEach(s=>typeof s==='string'&&hyps.push({id:nid('h'),text:s,source:label,risk:'M',selected:true}));}
+    else if(typeof obj==='object'){
+      ['toVerify','hypothesis'].forEach(k=>{if(obj[k]) collect(obj[k],label);});
+    }
+  };
+  collect(src.pov&&src.define&&src.define.pov,'PoV');
+  collect(src.storyboard,'故事板');
+  collect(src.valueCanvas,'价值主张');
+  collect((src.boards||{}).mvp,'MVP 画布');
+  // MVP hypothesis 字段
+  const mvp=Object.values(src.boards||{}).find(b=>b.preset==='mvp'||b.hypothesis);
+  if(mvp&&mvp.hypothesis) hyps.push({id:nid('h'),text:mvp.hypothesis,source:'MVP 画布',risk:'H',selected:true});
+  // 去重
+  const seen=new Set(d.hypotheses.map(x=>x.text));
+  const added=hyps.filter(x=>!seen.has(x.text));
+  d.hypotheses.push(...added);
+  save();render();
+  DT.toast(added.length?`已导入 ${added.length} 条假设`:'没有找到新假设，请先填写其他页面的"待验证"字段');
+}
+
+function buildPrompt(d,type){
+  const hyps=d.hypotheses.filter(x=>x.selected);
+  const r=d.recruit;
+  const lines=[];
+  if(type==='guide'){
+    lines.push('你是一名用户研究员，请帮我优化以下访谈提纲。\n');
+    lines.push('【研究目标】验证以下核心假设：');
+    hyps.forEach((h,i)=>lines.push(`${i+1}. [风险${RISK[h.risk]||'中'}] ${h.text}`));
+    lines.push(`\n【受访者】${r.n||5} 名，单次 ${r.duration||45} 分钟，${r.mode==='remote'?'远程视频':'面对面'}。`);
+    lines.push('\n【当前草稿提纲】');
+    ['warmup','main','wrap'].forEach(sec=>{
+      const qs=d.script[sec]||[];
+      if(qs.length){lines.push({warmup:'开场热身：',main:'核心问题：',wrap:'收尾：'}[sec]);qs.forEach((q,i)=>lines.push(`  ${i+1}. [${QTYPE[q.type]||'开放'}] ${q.text}`));}
+    });
+    lines.push('\n请帮我：1）补充遗漏角度；2）把"是否/会不会"型问题改为开放式；3）增加 2 条情境式提问；4）提供追问模板。');
+  } else if(type==='recruit'){
+    lines.push('请帮我撰写用户招募筛选问卷（3–5 题），用于招募符合以下条件的受访者：\n');
+    (r.criteria||[]).forEach(c=>lines.push(`- ${c.text}`));
+    lines.push(`\n目标人数：${r.n||5} 人。每题给出"合格"与"不合格"的判断标准。`);
+  } else if(type==='analysis'){
+    lines.push('以下是用户访谈的原始笔记片段，请帮我：\n1）按亲和图归类；\n2）识别 3 条最重要的洞察；\n3）对照以下假设，标注"验证✓"或"推翻✗"或"存疑?"：\n');
+    hyps.forEach((h,i)=>lines.push(`假设 ${i+1}：${h.text}`));
+    lines.push('\n【原始笔记（粘贴于此）】\n（请在此粘贴访谈笔记）');
+  } else if(type==='eval'){
+    lines.push('请对照设计思维研究计划质量标准，评估以下研究计划，给出 1–5 分和改进建议：\n');
+    lines.push(`假设数量：${hyps.length}，高风险假设：${hyps.filter(x=>x.risk==='H').length}`);
+    lines.push(`计划访谈人数：${r.n||5}，时长：${r.duration||45} 分钟`);
+    const qs=(d.script.warmup||[]).concat(d.script.main||[]).concat(d.script.wrap||[]);
+    lines.push(`问题数量：${qs.length}，开放式：${qs.filter(q=>q.type==='open').length}`);
+    lines.push('\n评估维度：\n- 假设是否可证伪？\n- 问题是否以开放式为主？\n- 是否包含情境式提问？\n- 招募标准是否足够具体？\n- 分析框架是否与假设对应？');
+  }
+  return lines.join('\n');
+}
+
+function render(){
+  const app=document.getElementById('app');app.innerHTML='';
+  const d=D();
+  const hyps=d.hypotheses;
+  const r=d.recruit;
+
+  // 阶段指示
+  const ph=h('div',{class:'phase'});
+  [['① 假设','假设清单',hyps.length],['② 招募','招募方案',r.n],['③ 提纲','访谈脚本',(d.script.main||[]).length],['④ 分析','分析框架',d.analysis.fw],['⑤ 追踪','进度追踪',d.progress.sessions.length]].forEach(([t,s,on])=>{
+    ph.appendChild(h('div',{class:'ph'+(on?' on':'')},'<b>'+t+'</b>'+s));
+  });
+  app.appendChild(ph);
+
+  // ① 假设清单
+  app.appendChild(h('h3',{class:'sec'},'① 核心假设清单'));
+  app.appendChild(h('p',{class:'secsub'},'列出所有需要验证的假设，标注风险等级（高 = 若错则方案失败），勾选本轮要验证的。'));
+
+  const importBtn=h('button',{},'从其他页面导入假设');
+  importBtn.onclick=()=>importHypotheses(d);
+  app.appendChild(importBtn);
+
+  const hl=h('div',{style:'margin-top:10px;display:flex;flex-direction:column;gap:6px'});
+  hyps.forEach((hyp,i)=>{
+    const row=h('div',{class:'hyp-row'+(hyp.selected?' sel':'')});
+    const cb=h('input',{type:'checkbox','aria-label':'选择此假设'});cb.checked=!!hyp.selected;
+    cb.onchange=()=>{hyp.selected=cb.checked;save();render()};
+    row.appendChild(cb);
+    row.appendChild(ed(h('div',{style:'flex:1'}),hyp,'text','假设：用户……（可证伪的陈述）'));
+    // 来源
+    if(hyp.source) row.appendChild(h('span',{style:'font-size:12px;color:var(--muted);white-space:nowrap'},hyp.source));
+    // 风险
+    const rs=h('div',{class:'risk-sel '+RISK_C[hyp.risk||'M']});
+    ['H','M','L'].forEach(lv=>{
+      const b=h('button',{title:RISK[lv]+'风险'},lv);
+      if((hyp.risk||'M')===lv) b.classList.add('on');
+      b.onclick=()=>{hyp.risk=lv;save();render()};
+      rs.appendChild(b);
+    });
+    row.appendChild(rs);
+    const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{hyps.splice(i,1);save();render()};
+    row.appendChild(x);
+    hl.appendChild(row);
+  });
+  const addH=h('button',{class:'ghost'},'+ 手动添加假设');
+  addH.onclick=()=>{hyps.push({id:nid('h'),text:'',risk:'M',selected:true});save();render()};
+  hl.appendChild(addH);
+  app.appendChild(hl);
+
+  // 假设摘要
+  const hH=hyps.filter(x=>x.risk==='H').length,hM=hyps.filter(x=>x.risk==='M').length,hL=hyps.filter(x=>x.risk==='L').length;
+  if(hyps.length){
+    const sm=h('div',{style:'display:flex;gap:8px;margin-top:8px;flex-wrap:wrap'});
+    [[`高风险 ${hH} 条`,'b-red'],[`中风险 ${hM} 条`,'b-orange'],[`低风险 ${hL} 条`,'b-green']].forEach(([t,c])=>sm.appendChild(h('span',{class:'badge '+c},t)));
+    app.appendChild(sm);
+  }
+
+  // ② 招募方案
+  app.appendChild(h('h3',{class:'sec'},'② 招募方案'));
+  const rb=h('div',{class:'card'});
+  const rg=h('div',{class:'cols3',style:'margin-bottom:12px'});
+  // 人数/时长/方式
+  const nDiv=h('div');nDiv.appendChild(h('label',{style:'font-size:13px;color:var(--muted)'},'访谈人数'));
+  const nI=h('input',{type:'number',min:3,max:30,style:'width:100%'});nI.value=r.n||5;nI.onchange=()=>{r.n=parseInt(nI.value)||5;save()};nDiv.appendChild(nI);rg.appendChild(nDiv);
+  const dDiv=h('div');dDiv.appendChild(h('label',{style:'font-size:13px;color:var(--muted)'},'单次时长（分钟）'));
+  const dI=h('input',{type:'number',min:20,max:120,style:'width:100%'});dI.value=r.duration||45;dI.onchange=()=>{r.duration=parseInt(dI.value)||45;save()};dDiv.appendChild(dI);rg.appendChild(dDiv);
+  const mDiv=h('div');mDiv.appendChild(h('label',{style:'font-size:13px;color:var(--muted)'},'访谈形式'));
+  const mS=h('select',{style:'width:100%'});[['remote','远程视频'],['inperson','面对面'],['diary','日记研究'],['usability','可用性测试']].forEach(([v,t])=>{const o=h('option',{value:v},t);if(r.mode===v)o.selected=true;mS.appendChild(o)});
+  mS.onchange=()=>{r.mode=mS.value;save()};mDiv.appendChild(mS);rg.appendChild(mDiv);
+  rb.appendChild(rg);
+
+  // 招募标准
+  rb.appendChild(h('div',{style:'font-size:13.5px;font-weight:600;margin-bottom:6px'},'招募标准'));
+  const cTable=h('div',{style:'border:1px solid var(--border);border-radius:8px;overflow:hidden'});
+  (r.criteria||[]).forEach((c,i)=>{
+    const row=h('div',{class:'crit-row'});
+    const typeS=h('select');[['include','必须满足'],['exclude','排除'],['prefer','优先']].forEach(([v,t])=>{const o=h('option',{value:v},t);if(c.type===v)o.selected=true;typeS.appendChild(o)});
+    typeS.onchange=()=>{c.type=typeS.value;save()};row.appendChild(typeS);
+    row.appendChild(ed(h('div',{style:'flex:1'}),c,'text','条件描述'));
+    const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{r.criteria.splice(i,1);save();render()};row.appendChild(x);
+    cTable.appendChild(row);
+  });
+  const addC=h('button',{class:'ghost',style:'margin:6px'},'+ 添加标准');
+  addC.onclick=()=>{r.criteria.push({id:nid('c'),type:'include',text:''});save();render()};
+  cTable.appendChild(addC);
+  rb.appendChild(cTable);
+
+  // 招募 prompt
+  const rpBtn=h('button',{style:'margin-top:10px'},'生成招募筛选问卷 prompt');
+  rpBtn.onclick=()=>{
+    const p=buildPrompt(d,'recruit');
+    navigator.clipboard&&navigator.clipboard.writeText(p).then(()=>DT.toast('招募问卷 prompt 已复制'));
+    document.getElementById('prompt-preview').textContent=p;
+    document.getElementById('prompt-section').style.display='';
+  };
+  rb.appendChild(rpBtn);
+  app.appendChild(rb);
+
+  // ③ 访谈提纲
+  app.appendChild(h('h3',{class:'sec'},'③ 访谈提纲'));
+  app.appendChild(h('p',{class:'secsub'},'分三段：开场热身（建立信任）→ 核心问题（聚焦假设）→ 收尾（意外收获）。'));
+
+  [['warmup','开场热身','b-green',3],['main','核心问题','b-blue',8],['wrap','收尾','b-orange',2]].forEach(([sec,title,badge,suggest])=>{
+    const sb=h('div',{class:'card'});
+    const hd=h('div',{class:'card-hd'});
+    hd.appendChild(h('h4',{},title));
+    const info=h('span',{class:'badge '+badge},`建议 ${suggest} 题 · 已有 ${(d.script[sec]||[]).length} 题`);
+    hd.appendChild(info);
+    sb.appendChild(hd);
+    const qt=h('div',{style:'border:1px solid var(--border);border-radius:8px;overflow:hidden'});
+    (d.script[sec]||[]).forEach((q,i)=>{
+      const row=h('div',{class:'q-row'});
+      row.appendChild(h('div',{class:'q-num'},String(i+1)));
+      const qc=h('div',{class:'q-col'});
+      qc.appendChild(ed(h('div'),q,'text','问题……'));
+      const ts=h('div',{style:'display:flex;gap:4px;flex-wrap:wrap'});
+      Object.entries(QTYPE).forEach(([v,t])=>{
+        const b=h('button',{class:'q-type qt-'+v+(q.type===v?' on':''),style:'border:1px solid transparent;cursor:pointer;min-height:24px'},t);
+        if(q.type===v) b.style.fontWeight='700';
+        b.onclick=()=>{q.type=v;save();render()};
+        ts.appendChild(b);
+      });
+      qc.appendChild(ts);
+      row.appendChild(qc);
+      const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{d.script[sec].splice(i,1);save();render()};
+      row.appendChild(x);
+      qt.appendChild(row);
+    });
+    const addQ=h('button',{class:'ghost',style:'margin:6px'},'+ 添加问题');
+    addQ.onclick=()=>{d.script[sec].push({id:nid('q'),text:'',type:'open'});save();render()};
+    qt.appendChild(addQ);
+    sb.appendChild(qt);
+    app.appendChild(sb);
+  });
+
+  // 提纲优化 prompt
+  const gpBtn=h('button',{class:'primary'},'让 AI 优化提纲');
+  gpBtn.onclick=()=>{
+    const p=buildPrompt(d,'guide');
+    navigator.clipboard&&navigator.clipboard.writeText(p).then(()=>DT.toast('提纲优化 prompt 已复制'));
+    document.getElementById('prompt-preview').textContent=p;
+    document.getElementById('prompt-section').style.display='';
+  };
+  app.appendChild(gpBtn);
+
+  // ④ 分析框架
+  app.appendChild(h('h3',{class:'sec'},'④ 分析框架'));
+  const an=d.analysis;
+  const ftab=h('div',{class:'fw-tab'});
+  Object.entries(FW_TABS).forEach(([k,t])=>{
+    const b=h('button',{class:an.fw===k?'on':''},t);
+    b.onclick=()=>{an.fw=k;save();render()};
+    ftab.appendChild(b);
+  });
+  app.appendChild(ftab);
+
+  if(an.fw==='affinity'){
+    const ac=h('div',{style:'border:1px solid var(--border);border-radius:12px;padding:12px'});
+    ac.appendChild(h('p',{style:'font-size:13px;color:var(--muted);margin-bottom:10px'},'把访谈原始笔记按主题归类。每组是一个洞察方向。'));
+    const cols=h('div',{class:'affinity-cols'});
+    (an.affinityGroups||[]).forEach((g,gi)=>{
+      const col=h('div',{class:'aff-col'});
+      const ghd=h('div',{class:'aff-col-hd'});
+      ghd.appendChild(ed(h('div',{style:'flex:1'}),g,'label','主题名'));
+      const x=h('button',{class:'icon','aria-label':'删除'},'+');x.textContent='×';x.onclick=()=>{an.affinityGroups.splice(gi,1);save();render()};
+      ghd.appendChild(x);
+      col.appendChild(ghd);
+      const body=h('div',{class:'aff-col-body'});
+      (g.cards||[]).forEach((c,ci)=>{
+        const card=h('div',{class:'aff-card'});
+        card.appendChild(ed(h('div'),c,'text','笔记片段…'));
+        body.appendChild(card);
+      });
+      const addCard=h('button',{class:'ghost',style:'font-size:12px;margin:4px 8px'},'+ 卡片');
+      addCard.onclick=()=>{g.cards=g.cards||[];g.cards.push({id:nid('k'),text:''});save();render()};
+      body.appendChild(addCard);
+      col.appendChild(body);
+      cols.appendChild(col);
+    });
+    const addG=h('button',{class:'ghost'},'+ 添加主题组');
+    addG.onclick=()=>{an.affinityGroups.push({id:nid('g'),label:'',cards:[]});save();render()};
+    cols.appendChild(addG);
+    ac.appendChild(cols);
+    app.appendChild(ac);
+  } else if(an.fw==='metrics'){
+    const mc=h('div',{style:'border:1px solid var(--border);border-radius:12px;overflow:hidden'});
+    mc.appendChild(h('div',{class:'metric-row',style:'font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--border)'},'<b>指标名</b><b>目标值</b><b>实际值</b><span></span>'));
+    (an.metrics||[]).forEach((m,i)=>{
+      const row=h('div',{class:'metric-row'});
+      row.appendChild(ed(h('div'),m,'name','指标名'));
+      row.appendChild(ed(h('div'),m,'target','目标值'));
+      row.appendChild(ed(h('div'),m,'actual','实际'));
+      const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{an.metrics.splice(i,1);save();render()};
+      row.appendChild(x);
+      mc.appendChild(row);
+    });
+    const addM=h('button',{class:'ghost',style:'margin:6px'},'+ 添加指标');
+    addM.onclick=()=>{an.metrics.push({id:nid('m'),name:'',target:'',actual:''});save();render()};
+    mc.appendChild(addM);
+    app.appendChild(mc);
+  } else {
+    const ic=h('div',{style:'display:flex;flex-direction:column;gap:6px'});
+    (an.insights||[]).forEach((ins,i)=>{
+      const row=h('div',{class:'card',style:'padding:10px'});
+      const hdr=h('div',{style:'display:flex;gap:8px;align-items:center;margin-bottom:6px'});
+      const vs=h('select');[['verify','✓ 验证'],['refute','✗ 推翻'],['partial','? 存疑'],['new','⚡ 新发现']].forEach(([v,t])=>{const o=h('option',{value:v},t);if(ins.verdict===v)o.selected=true;vs.appendChild(o)});
+      vs.onchange=()=>{ins.verdict=vs.value;save()};
+      hdr.appendChild(vs);
+      hdr.appendChild(ed(h('div',{style:'flex:1'}),ins,'hypothesis','对应假设'));
+      const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{an.insights.splice(i,1);save();render()};
+      hdr.appendChild(x);
+      row.appendChild(hdr);
+      row.appendChild(ed(h('div',{style:'font-size:13.5px'}),ins,'finding','具体发现…'));
+      ic.appendChild(row);
+    });
+    const addI=h('button',{class:'ghost'},'+ 添加洞察');
+    addI.onclick=()=>{an.insights.push({id:nid('i'),verdict:'new',hypothesis:'',finding:''});save();render()};
+    ic.appendChild(addI);
+    app.appendChild(ic);
+  }
+
+  // 分析 prompt
+  const apBtn=h('button',{},'让 AI 分析访谈笔记');
+  apBtn.onclick=()=>{
+    const p=buildPrompt(d,'analysis');
+    navigator.clipboard&&navigator.clipboard.writeText(p).then(()=>DT.toast('分析 prompt 已复制，请在 AI 对话中粘贴并附上笔记'));
+    document.getElementById('prompt-preview').textContent=p;
+    document.getElementById('prompt-section').style.display='';
+  };
+  app.appendChild(apBtn);
+
+  // ⑤ 进度追踪
+  app.appendChild(h('h3',{class:'sec'},'⑤ 进度追踪'));
+  const prog=d.progress;
+  const total=r.n||5;
+  const done=(prog.sessions||[]).filter(s=>s.status==='done').length;
+  const pct=total?Math.round(done/total*100):0;
+  const pg=h('div',{class:'card'});
+  const pgbar=h('div',{class:'pbar',style:'margin-bottom:10px'});pgbar.appendChild(h('div',{class:'pbar-fill',style:`width:${pct}%`}));pg.appendChild(h('div',{style:'font-size:13px;color:var(--muted);margin-bottom:4px'},`已完成 ${done} / ${total} 场访谈`));pg.appendChild(pgbar);
+  const st=h('div',{style:'border:1px solid var(--border);border-radius:8px;overflow:hidden'});
+  for(let i=0;i<total;i++){
+    const s=prog.sessions[i]||(prog.sessions[i]={id:nid('s'),label:`访谈 ${i+1}`,status:'todo',note:''});
+    const row=h('div',{class:'track-row'});
+    row.appendChild(ed(h('div'),s,'label',`受访者 ${i+1}`));
+    row.appendChild(ed(h('div',{style:'font-size:13px'}),s,'note','备注'));
+    const ss=h('select',{style:'width:80px'});[['todo','待安排'],['doing','进行中'],['done','已完成']].forEach(([v,t])=>{const o=h('option',{value:v},t);if(s.status===v)o.selected=true;ss.appendChild(o)});
+    ss.onchange=()=>{s.status=ss.value;save();render()};
+    row.appendChild(ss);
+    st.appendChild(row);
+  }
+  pg.appendChild(st);
+  app.appendChild(pg);
+
+  // prompt 预览区（隐藏，按需展示）
+  const ps=h('div',{id:'prompt-section',style:'display:none'});
+  ps.appendChild(h('h3',{class:'sec'},'AI Prompt 预览'));
+  ps.appendChild(h('p',{class:'secsub'},'以下内容已复制到剪贴板。粘贴到 Claude / GPT / DeepSeek 对话窗口，把 AI 回复导入回页面。'));
+  const pb=h('div',{class:'prompt-box',id:'prompt-preview'});
+  ps.appendChild(pb);
+  const pa=h('div',{class:'prompt-actions'});
+  const cpAll=h('button',{class:'primary'},'复制给 AI');
+  cpAll.onclick=()=>{const t=document.getElementById('prompt-preview').textContent;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>DT.toast('已复制'))};
+  const evalBtn=h('button',{},'让 AI 评分（质量自评）');
+  evalBtn.onclick=()=>{
+    const p=buildPrompt(d,'eval');
+    navigator.clipboard&&navigator.clipboard.writeText(p).then(()=>DT.toast('质量自评 prompt 已复制'));
+    document.getElementById('prompt-preview').textContent=p;
+    document.getElementById('prompt-section').style.display='';
+  };
+  const closeBtn=h('button',{class:'ghost'},'收起');closeBtn.onclick=()=>{ps.style.display='none'};
+  pa.append(cpAll,evalBtn,closeBtn);
+  ps.appendChild(pa);
+  app.appendChild(ps);
+
+  // 全局质量自评按钮（底部常驻）
+  const qb=h('div',{style:'margin-top:16px;display:flex;gap:8px;flex-wrap:wrap'});
+  const qBtn=h('button',{},'让 AI 评分本研究计划');
+  qBtn.onclick=()=>{
+    const p=buildPrompt(d,'eval');
+    navigator.clipboard&&navigator.clipboard.writeText(p).then(()=>DT.toast('质量自评 prompt 已复制'));
+    document.getElementById('prompt-preview').textContent=p;
+    document.getElementById('prompt-section').style.display='';
+    document.getElementById('prompt-section').scrollIntoView({behavior:'smooth'});
+  };
+  qb.appendChild(qBtn);
+  app.appendChild(qb);
+}
+
+function md(){
+  const d=D();
+  const hyps=d.hypotheses.filter(x=>x.selected);
+  const qs=(d.script.warmup||[]).concat(d.script.main||[]).concat(d.script.wrap||[]);
+  const pname=DT.get('meta',{}).name||DT.get('meta',{}).project||'';
+  const lines=[
+    `# 用户研究计划 — ${pname}`,
+    `\n## 核心假设（${hyps.length} 条）`,
+    ...hyps.map((hyp,i)=>`${i+1}. [${RISK[hyp.risk]||'中'}风险] ${hyp.text}`),
+    `\n## 招募方案`,
+    `- 人数：${d.recruit.n||5} 人`,
+    `- 时长：${d.recruit.duration||45} 分钟`,
+    `- 形式：${{'remote':'远程视频','inperson':'面对面','diary':'日记研究','usability':'可用性测试'}[d.recruit.mode]||d.recruit.mode}`,
+    `- 招募标准：${(d.recruit.criteria||[]).map(c=>c.text).filter(Boolean).join('；') || '（未填写）'}`,
+    `\n## 访谈提纲（${qs.length} 题）`,
+    ...qs.map((q,i)=>`${i+1}. [${QTYPE[q.type]||'开放'}] ${q.text}`),
+    `\n## 分析框架：${FW_TABS[d.analysis.fw]||d.analysis.fw}`,
+    `\n## 进度：${(d.progress.sessions||[]).filter(s=>s.status==='done').length} / ${d.recruit.n||5} 场已完成`,
+  ];
+  return lines.join('\n');
+}
+
+DT.boot({title:'用户研究计划',en:'Research Plan',render,md});
+})();
+</script>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>价值主张画布 · 设计思维</title>
+<style>
+:root{--text:#2C2C2B;--muted:#7D7A75;--bg:#FFFFFF;--soft:#F9F8F7;--surface:#F0EFED;--border:#E6E5E3;
+--blue:#2783DE;--blue-s:#E5F2FC;--green:#46A171;--green-s:#E8F1EC;--orange:#D5803B;--orange-s:#FBEBDE;--red:#E56458;--red-s:#FCE9E7;--purple:#9A6BC0;--purple-s:#F3ECF8;--yellow:#C9A227;--yellow-s:#FBF3DB;--teal:#3A9DAE;--teal-s:#E3F3F5;--pink:#C9658F;--pink-s:#FAE8F0}
+@media (prefers-color-scheme:dark){:root{--text:#FFFFFF;--muted:rgba(255,255,255,.65);--bg:#191919;--soft:#202020;--surface:#383836;--border:rgba(255,255,255,.2);
+--blue:#5E9FE8;--blue-s:rgba(94,159,232,.12);--green:#72BC8F;--green-s:rgba(114,188,143,.12);--orange:#DE9255;--orange-s:rgba(222,146,85,.12);--red:#E97366;--red-s:rgba(233,115,102,.12);--purple:#BF8EDA;--purple-s:rgba(191,142,218,.12);--yellow:#EAC26B;--yellow-s:rgba(234,194,107,.12);--teal:#4FB9C9;--teal-s:rgba(79,185,201,.12);--pink:#DF84A8;--pink-s:rgba(223,132,168,.12)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:24px 32px 48px}
+/* 顶部导航栏（所有非仪表盘页面注入） */
+#dt-nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:0;background:var(--bg);border-bottom:1px solid var(--border);padding:0 24px;height:40px;font-size:13.5px}
+#dt-nav a{color:var(--muted);text-decoration:none;padding:0 10px;height:40px;display:flex;align-items:center;border-bottom:2px solid transparent}
+#dt-nav a:hover{color:var(--text);background:var(--soft)}
+#dt-nav .dt-nav-home{color:var(--blue);font-weight:600;padding-left:0}
+#dt-nav .dt-nav-home:hover{background:var(--blue-s)}
+#dt-nav .dt-nav-sep{flex:1}
+#dt-nav .dt-nav-proj{font-size:12.5px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body:has(#dt-nav) .wrap{padding-top:16px}
+.dt-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.dt-head h1{font-size:24px;margin:0;font-weight:650}
+.dt-head h1 small{font-size:14px;color:var(--muted);font-weight:400;margin-left:8px}
+.dt-head .sub{font-size:13.5px;color:var(--muted);margin-top:2px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;font-size:14px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer;min-height:36px}
+button:hover{background:var(--soft)}
+button:focus-visible,[contenteditable]:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+button.ghost{border-style:dashed;color:var(--muted);font-size:13px;min-height:32px;padding:4px 10px}
+button.icon{border:0;background:transparent;color:var(--muted);width:28px;height:28px;min-height:28px;padding:0;border-radius:6px;font-size:16px;line-height:1}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;border-radius:0}
+.seg button[aria-pressed=true]{background:var(--surface);font-weight:600}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:2px 10px;border-radius:999px;background:var(--orange-s);color:var(--orange);font-weight:550;white-space:nowrap}
+button.badge{border:0;min-height:0;cursor:pointer;font:inherit;font-size:12.5px;font-weight:550}button.badge:hover{filter:brightness(.96)}
+.badge.ok{background:var(--green-s);color:var(--green)}
+.badge.info{background:var(--blue-s);color:var(--blue)}
+.badge.mute{background:var(--surface);color:var(--muted)}
+.box{border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:var(--bg)}
+.box.soft{background:var(--soft)}
+.sec{font-size:17px;font-weight:650;margin:28px 0 4px}
+.secsub{font-size:13.5px;color:var(--muted);margin:0 0 12px}
+.hint{font-size:12.5px;color:var(--muted)}
+.card{position:relative;background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:8px 32px 8px 10px}
+.card>.icon.del{position:absolute;top:4px;right:4px}
+.ed{outline:none;min-height:1.4em;word-break:break-word}
+.ed:empty:before{content:attr(data-ph);color:var(--muted)}
+.ev{font-size:12px;border:0;padding:1px 8px;min-height:22px;border-radius:999px;cursor:pointer}
+.ev.quote{background:var(--blue-s);color:var(--blue)}.ev.observed{background:var(--green-s);color:var(--green)}
+.ev.inferred{background:var(--purple-s);color:var(--purple)}.ev.assumed{background:var(--orange-s);color:var(--orange)}
+input,select,textarea{font:inherit;font-size:14px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 8px;min-height:36px;max-width:100%}
+textarea{resize:vertical}
+.core{border-radius:12px;padding:16px 20px;background:var(--blue-s);border-left:4px solid var(--blue)}
+.core .lbl{font-size:13px;color:var(--blue);font-weight:650;margin-bottom:4px}
+.core .ed{font-size:16px;font-weight:550}
+.verify{border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-top:16px}
+.verify ul{margin:6px 0 0;padding-left:20px}.verify li{margin:4px 0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:8px 16px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+.toast.show{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:10;padding:16px}
+.modal.open{display:flex}
+.modal .panel{background:var(--bg);border-radius:12px;padding:20px;width:min(640px,100%);box-shadow:0 4px 24px rgba(0,0,0,.18)}
+.modal textarea{width:100%;min-height:220px;font-family:Menlo,Consolas,monospace;font-size:12.5px}
+.empty{color:var(--muted);font-size:14px;padding:12px;border:1px dashed var(--border);border-radius:8px;text-align:center}
+.foot{margin-top:40px;font-size:12.5px;color:var(--muted);text-align:center}
+.foot a{color:var(--muted)}
+@media (max-width:720px){.wrap{padding:16px}.dt-head h1{font-size:21px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.vc{display:grid;grid-template-columns:1fr 60px 1fr;gap:0;align-items:stretch}
+.vm{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;border:2px solid var(--text);border-radius:8px;overflow:hidden;min-height:460px}
+.vm .z{padding:10px;border-color:var(--text)}
+.vm .prod{grid-row:1/3;border-right:2px solid var(--text)}
+.vm .crt{border-bottom:2px solid var(--text)}
+.cp{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;border:2px solid var(--text);border-radius:230px;overflow:hidden;min-height:460px}
+.cp .z{padding:14px 18px}
+.cp .gain{padding-left:42px;padding-top:34px;border-bottom:2px solid var(--text);border-right:2px solid var(--text)}
+.cp .pain{padding-left:42px;padding-bottom:34px;border-right:2px solid var(--text)}
+.cp .job{grid-column:2;grid-row:1/3;padding-right:42px;padding-top:40px}
+.z h3{margin:0 0 2px;font-size:14.5px}.z .hint{display:block;margin-bottom:6px}
+.z .lst{display:flex;flex-direction:column;gap:6px}
+.arrow{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;color:var(--muted);font-size:12px;text-align:center}
+.arrow b{font-size:22px;color:var(--text)}
+.it{position:relative;background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:13.5px}
+.it.un{border-color:var(--red);background:var(--red-s)}
+.it .row{display:flex;gap:6px;align-items:flex-start}
+.it .row .ed{flex:1}
+.it .icon{width:24px;height:24px;min-height:24px;font-size:13px}
+.sev{border:0;background:transparent;min-height:22px;padding:0 2px;font-size:11px;letter-spacing:1px;color:var(--orange)}
+.jt{border:0;min-height:22px;padding:0 7px;border-radius:999px;font-size:11.5px}
+.jt.functional{background:var(--blue-s);color:var(--blue)}.jt.emotional{background:var(--orange-s);color:var(--orange)}.jt.social{background:var(--purple-s);color:var(--purple)}
+.tg{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.tg span{font-size:11.5px;border-radius:999px;padding:0 7px;background:var(--bg);border:1px solid var(--border);color:var(--muted)}
+.tg button{font-size:11.5px;min-height:24px;padding:0 8px;border-radius:999px}
+.tg button[aria-pressed=true]{background:var(--green-s);border-color:var(--green);color:var(--green)}
+.fit{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+.fit .k{border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.fit .k b{font-size:26px;font-variant-numeric:tabular-nums}
+.fit .bar{height:8px;border-radius:4px;background:var(--surface);overflow:hidden;margin-top:6px}.fit .bar i{display:block;height:100%}
+.gap li{margin:3px 0}
+.pn{display:flex;gap:10px;align-items:baseline;margin-bottom:12px;flex-wrap:wrap}
+.pn .ed{font-weight:650;font-size:16px;border-bottom:1px dashed var(--border);min-width:200px}
+@media (max-width:900px){.vc{grid-template-columns:1fr}.arrow{flex-direction:row;padding:8px}.arrow b{transform:rotate(90deg)}.cp{border-radius:24px}.cp .z{padding:12px!important}.fit{grid-template-columns:1fr}}
+@media (max-width:520px){.vm,.cp{grid-template-columns:1fr;grid-template-rows:auto}.vm .prod,.cp .job{grid-row:auto;grid-column:auto;border-right:0}.vm .prod{border-bottom:2px solid var(--text)}.cp .gain,.cp .pain{border-right:0}.cp .pain{border-bottom:2px solid var(--text)}}
+</style>
+</head>
+<body data-tpl="value-canvas">
+<div class="wrap">
+<header class="dt-head" id="dt-head"></header>
+<main id="app"></main>
+<div class="foot">设计思维 Skill · 修改会自动保存在本浏览器 · 点「复制给 AI」把结果带回对话</div>
+</div>
+<script id="dt-data" type="application/json">/*DT_DATA*/</script>
+<script>
+const DT=(function(){
+ const raw=document.getElementById('dt-data').textContent.trim();
+ let init={};try{init=raw&&raw.indexOf('DT_DATA')<0?JSON.parse(raw):{}}catch(e){console.error('数据解析失败',e)}
+ const tpl=document.body.dataset.tpl||'page';
+ const clone=o=>JSON.parse(JSON.stringify(o));
+ const PRJ=(init.meta&&init.meta.project)||'default',SK='dt:shared:'+PRJ,OWN='dt:'+tpl+':'+PRJ+':'+(init._target||'');
+ const strip=o=>{const c=clone(o);delete c._target;delete c._rev;return c};
+ const HS=(function(t){let x=5381;for(let i=0;i<t.length;i++)x=((x<<5)+x+t.charCodeAt(i))|0;return String(x>>>0)})(JSON.stringify(strip(init)));
+ const REV=init._rev||'';
+ // 同一项目的所有页面共享一份数据（dt:shared:<项目>）；若本页比共享数据旧，则只在本页独立保存，避免覆盖。
+ let st,fresh=false,KEY=SK,older=false;
+ function readK(k){try{const s=localStorage.getItem(k);return s?JSON.parse(s):null}catch(e){return null}}
+ (function(){const o=readK(SK);
+  if(o&&o.__base===HS){st=o.st}
+  else if(o&&o.__rev&&REV&&REV<o.__rev){older=true;KEY=OWN;const m=readK(OWN);st=m&&m.__base===HS?m.st:strip(init)}
+  else{if(o){try{localStorage.setItem(SK+':prev',JSON.stringify(o))}catch(e){}fresh=true}st=strip(init);try{localStorage.setItem(SK,JSON.stringify({__base:HS,__rev:REV,st}))}catch(e){}}})();
+ st.meta=st.meta||{};
+ let opts={};
+ const $=id=>document.getElementById(id);
+ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ let seq=Date.now()%100000;const nid=p=>(p||'x')+(++seq).toString(36);
+ function get(path,def){if(!path)return st;let o=st;const ks=path.split('.');for(let i=0;i<ks.length;i++){if(o[ks[i]]==null){if(def===undefined)return undefined;o[ks[i]]=i===ks.length-1?def:{}}o=o[ks[i]]}return o}
+ function save(){st.meta.updatedAt=new Date().toISOString();try{localStorage.setItem(KEY,JSON.stringify({__base:HS,__rev:REV,st:strip(st)}))}catch(e){}}
+ function toast(t){let e=$('dt-toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1800)}
+ function ed(el,obj,key,ph,onChange){el.contentEditable='true';el.spellcheck=false;el.classList.add('ed');if(ph)el.dataset.ph=ph;el.textContent=obj[key]==null?'':obj[key];
+  el.addEventListener('input',()=>{obj[key]=el.textContent;save();onChange&&onChange()});
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&el.dataset.multi!=='1'){e.preventDefault();el.blur()}});return el}
+ function h(tag,attrs,html){const e=document.createElement(tag);if(attrs)for(const k in attrs){if(k==='class')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else e.setAttribute(k,attrs[k])}if(html!=null)e.innerHTML=html;return e}
+ function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+ async function copy(t,msg){try{await navigator.clipboard.writeText(t);toast(msg||'已复制')}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(msg||'已复制')}catch(_){toast('复制失败，请改用导出 JSON')}ta.remove()}}
+ const out=()=>strip(st);
+ function aiBadge(){const g=st.meta.generatedBy||'ai';const m={ai:['','AI 假设 · 待验证'],mixed:['info','调研 + AI 推断'],human:['ok','基于真实调研']}[g]||['','AI 假设 · 待验证'];return '<button class="badge '+m[0]+'" id="dt-src" title="数据来源（点击切换）：AI 假设 / 调研 + AI 推断 / 基于真实调研">'+m[1]+'</button>'}
+ const PATHS={persona:'personas, personaSteps','empathy-map':'empathyMap',journey:'journey',hook:'hook',pov:'define',scamper:'ideate.scamper, ideate.matrix',matrix:'ideate.matrix',box:'prototype','ab-test':'test.ab',storyboard:'storyboard','value-canvas':'valueCanvas',overview:'meta','research-plan':'researchPlan',dashboard:'全部'};
+ const PATH=()=>init._target||PATHS[tpl]||'全部';
+ function header(){const hd=$('dt-head');
+  hd.innerHTML='<div><h1>'+esc(opts.title)+'<small>'+esc(opts.en||'')+'</small></h1><div class="sub">'+esc(st.meta.project||'')+(opts.subtitle?' · '+esc(opts.subtitle()):'')+' '+aiBadge()+'</div></div><div class="tools" id="dt-tools"></div>';
+  $('dt-src').onclick=()=>{const o=['ai','mixed','human'];st.meta.generatedBy=o[(o.indexOf(st.meta.generatedBy||'ai')+1)%3];save();header()};const t=$('dt-tools');(opts.extra||[]).forEach(b=>t.appendChild(b));
+  const b=(txt,cls,fn,title)=>{const x=h('button',{class:cls||''},txt);if(title)x.title=title;x.onclick=fn;t.appendChild(x)};
+  b('复制给 AI','primary',()=>copy('以下是我在可视化页面中修改后的设计思维项目数据（当前页面「'+opts.title+'」，负责路径：'+PATH()+'）。'+(older?'注意：本页是旧版本，只合并本页负责的路径。':'各页面数据已同步，与 project.json 不同的部分都是我的修改。')+'请合并回 project.json，然后继续：\n```json\n'+JSON.stringify(out(),null,2)+'\n```','已复制，粘贴回对话即可继续'),'把修改后的完整数据复制到剪贴板');
+  if(opts.md)b('导出 Markdown','',()=>dl(tpl+'.md',opts.md(),'text/markdown'));
+  b('导出 JSON','',()=>dl((st.meta.project||'project')+'.json',JSON.stringify(out(),null,2),'application/json'));
+  b('导入','',openImport,'粘贴 JSON 数据替换当前页面');
+  b('重置','',()=>{if(!confirm('清除本项目所有页面的本地修改，恢复 agent 生成的初始数据？'))return;try{localStorage.removeItem(KEY)}catch(e){}st=strip(init);st.meta=st.meta||{};rerender();toast('已恢复初始数据')},'清除本地修改')}
+ function openImport(){const m=$('dt-modal');m.classList.add('open');const ta=$('dt-imp');ta.value='';ta.focus()}
+ function doImport(){let t=$('dt-imp').value.trim().replace(/^```(json)?/,'').replace(/```$/,'').trim();try{const o=JSON.parse(t);st=strip(o);st.meta=st.meta||{};save();$('dt-modal').classList.remove('open');rerender();toast('已导入')}catch(e){toast('JSON 格式不正确')}}
+ function rerender(){header();opts.render&&opts.render()}
+ function evBtn(obj){const EV=['quote','observed','inferred','assumed'],L={quote:'原话',observed:'观察',inferred:'推断',assumed:'假设'};obj.evidence=obj.evidence||'assumed';
+  const b=h('button',{class:'ev '+obj.evidence,title:'切换证据类型'},L[obj.evidence]);b.onclick=e=>{e.stopPropagation();obj.evidence=EV[(EV.indexOf(obj.evidence)+1)%4];b.className='ev '+obj.evidence;b.textContent=L[obj.evidence];save()};return b}
+ function list(container,arr,prefix,ph,onChange){container.innerHTML='';arr.forEach((it,i)=>{const c=h('div',{class:'card'});const t=h('div');ed(t,it,'text',ph,onChange);c.appendChild(t);
+   const d=h('button',{class:'icon del','aria-label':'删除',title:'删除'},'×');d.onclick=()=>{arr.splice(i,1);save();list(container,arr,prefix,ph,onChange);onChange&&onChange()};c.appendChild(d);container.appendChild(c)});
+  const a=h('button',{class:'ghost'},'+ 添加');a.onclick=()=>{arr.push({id:nid(prefix),text:''});save();list(container,arr,prefix,ph,onChange);const e=container.querySelectorAll('.card .ed');e.length&&e[e.length-1].focus()};container.appendChild(a)}
+ function boot(o){opts=o;
+  // 非仪表盘页面注入固定顶部导航栏
+  if(tpl!=='dashboard'){
+    const nb=document.createElement('nav');nb.id='dt-nav';nb.setAttribute('aria-label','项目导航');
+    nb.innerHTML='<a href="dashboard.html" class="dt-nav-home" title="返回项目仪表盘">⬡ 仪表盘</a><a href="overview.html" class="dt-nav-ov" title="查看全部工具">工具总览</a><span class="dt-nav-sep"></span><span class="dt-nav-proj" id="dt-nav-proj"></span>';
+    document.body.insertBefore(nb,document.body.firstChild);
+    // 更新项目名
+    setTimeout(()=>{const el=document.getElementById('dt-nav-proj');if(el)el.textContent=st.meta&&st.meta.name||st.meta&&st.meta.project||'';},50);
+  }
+  document.body.insertAdjacentHTML('beforeend','<div class="toast" id="dt-toast" role="status" aria-live="polite"></div><div class="modal" id="dt-modal" role="dialog" aria-label="导入 JSON"><div class="panel"><b>导入 JSON</b><p class="hint">粘贴 agent 给你的项目 JSON（可带 ```json 代码块）。将替换本页当前数据。</p><textarea id="dt-imp"></textarea><div class="tools" style="justify-content:flex-end;margin-top:12px"><button id="dt-imp-c">取消</button><button class="primary" id="dt-imp-ok">导入</button></div></div></div>');
+  $('dt-imp-c').onclick=()=>$('dt-modal').classList.remove('open');$('dt-imp-ok').onclick=doImport;
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')$('dt-modal').classList.remove('open')});
+  window.addEventListener('storage',e=>{if(e.key!==KEY||!e.newValue)return;try{const o=JSON.parse(e.newValue);if(o.__base===HS){st=o.st;st.meta=st.meta||{};rerender()}}catch(_){}});
+  rerender();if(fresh)setTimeout(()=>toast('已载入 agent 生成的新版本数据（旧的本地修改已备份）'),300);if(older)setTimeout(()=>toast('本页数据比其他已打开的页面旧，修改只保存在本页'),300)}
+ return {get st(){return st},get,save,toast,esc,ed,h,nid,dl,copy,boot,rerender,evBtn,list,target:init._target||''};
+})();
+
+(function(){
+const {h,esc,save,ed}=DT;
+const JT={functional:'功能',emotional:'情感',social:'社交'};
+let link=null;
+const V=()=>{const v=DT.get('valueCanvas',{});['jobs','pains','gains','products','relievers','creators'].forEach(k=>v[k]=v[k]||[]);return v};
+function persona(){const ps=DT.st.personas||[];const v=V();return ps.find(p=>p.id===v.personaId)||ps[0]||{}}
+const short=t=>{t=String(t||'');return t.length>10?t.slice(0,10)+'…':t};
+function cover(v){const cp=new Set(),cg=new Set();v.relievers.forEach(r=>(r.targets||[]).forEach(t=>cp.add(t)));v.creators.forEach(r=>(r.targets||[]).forEach(t=>cg.add(t)));return {cp,cg}}
+function zone(cls,title,hint,arr,key,opt){const z=h('div',{class:'z '+cls});z.appendChild(h('h3',{},title));z.appendChild(h('span',{class:'hint'},hint));const L=h('div',{class:'lst'});const v=V(),{cp,cg}=cover(v);
+ arr.forEach((it,i)=>{const un=(key==='pains'&&!cp.has(it.id))||(key==='gains'&&!cg.has(it.id));const c=h('div',{class:'it'+(un&&(it.severity||1)>=2?' un':'')});const r=h('div',{class:'row'});
+  if(key==='jobs'){const b=h('button',{class:'jt '+(it.type||'functional'),title:'切换类型'},JT[it.type||'functional']);b.onclick=()=>{const o=Object.keys(JT);it.type=o[(o.indexOf(it.type||'functional')+1)%3];save();render()};r.appendChild(b)}
+  r.appendChild(ed(h('div'),it,'text',opt.ph,()=>{}));
+  if(key==='pains'||key==='gains'){const s=h('button',{class:'sev',title:'重要程度（点击切换）','aria-label':'重要程度 '+(it.severity||1)},'●'.repeat(it.severity||1)+'○'.repeat(3-(it.severity||1)));s.onclick=()=>{it.severity=(it.severity||1)%3+1;save();render()};r.appendChild(s)}
+  if(opt.target){const lk=h('button',{class:'icon',title:'关联到'+(opt.target==='pains'?'痛点':'收益'),'aria-label':'关联'},'🔗');lk.onclick=()=>{link=link===it.id?null:it.id;render()};r.appendChild(lk)}
+  const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{arr.splice(i,1);if(key==='pains'||key==='gains')[...v.relievers,...v.creators].forEach(q=>q.targets=(q.targets||[]).filter(t=>t!==it.id));save();render()};r.appendChild(x);c.appendChild(r);
+  if(opt.target){const tg=h('div',{class:'tg'});const T=v[opt.target];it.targets=it.targets||[];
+   if(link===it.id){T.forEach(p=>{const b=h('button',{'aria-pressed':it.targets.includes(p.id)?'true':'false'},esc(short(p.text)));b.onclick=()=>{const k=it.targets.indexOf(p.id);k<0?it.targets.push(p.id):it.targets.splice(k,1);save();render()};tg.appendChild(b)});if(!T.length)tg.appendChild(h('span',{},'先在右侧添加'+(opt.target==='pains'?'痛点':'收益')))}
+   else it.targets.forEach(t=>{const p=T.find(q=>q.id===t);p&&tg.appendChild(h('span',{},'→ '+esc(short(p.text))))});
+   c.appendChild(tg)}
+  L.appendChild(c)});
+ const a=h('button',{class:'ghost'},'+ 添加');a.onclick=()=>{const n={id:DT.nid(key.slice(0,2)),text:''};if(key==='jobs')n.type='functional';if(key==='pains'||key==='gains')n.severity=2;if(opt.target)n.targets=[];arr.push(n);save();render();const e=z.parentNode&&document.querySelectorAll('.z.'+cls+' .it .ed');e.length&&e[e.length-1].focus()};L.appendChild(a);z.appendChild(L);return z}
+function render(){const app=document.getElementById('app');app.innerHTML='';const v=V();
+ app.appendChild(h('p',{class:'secsub'},'右边是顾客档案（Customer Profile）：顾客要完成的任务、遇到的痛点、渴望的收益；左边是价值地图：我们的产品与服务如何缓解痛点、创造收益。点 🔗 把止痛剂/增益创造关联到具体的痛点/收益，检验是否“契合”。'));
+ const pn=h('div',{class:'pn'});pn.appendChild(h('span',{class:'hint'},'产品 / 方案'));pn.appendChild(ed(h('div'),v,'product','方案名称'));pn.appendChild(h('span',{class:'hint'},'顾客：'+esc(persona().name||'未指定画像')));app.appendChild(pn);
+ const g=h('div',{class:'vc'});
+ const vm=h('div',{class:'vm',role:'group','aria-label':'价值地图'});
+ vm.appendChild(zone('prod','🎁 产品与服务','价值主张由哪些产品、服务构成？',v.products,'products',{ph:'产品 / 服务'}));
+ vm.appendChild(zone('crt','📈 增益创造','如何带来顾客想要的收益？',v.creators,'creators',{ph:'如何创造收益',target:'gains'}));
+ vm.appendChild(zone('rel','💊 止痛剂','如何缓解具体的痛点？',v.relievers,'relievers',{ph:'如何缓解痛点',target:'pains'}));
+ g.appendChild(vm);
+ g.appendChild(h('div',{class:'arrow','aria-hidden':'true'},'<b>⇄</b>契合'));
+ const cp=h('div',{class:'cp',role:'group','aria-label':'顾客档案'});
+ cp.appendChild(zone('gain','😊 收益 Gains','想要的结果、惊喜、成功标准',v.gains,'gains',{ph:'想获得什么'}));
+ cp.appendChild(zone('job','🧩 顾客任务 Jobs','要完成的功能 / 情感 / 社交任务',v.jobs,'jobs',{ph:'要完成什么任务'}));
+ cp.appendChild(zone('pain','😣 痛点 Pains','阻碍、风险、糟糕的结果',v.pains,'pains',{ph:'被什么卡住'}));
+ g.appendChild(cp);app.appendChild(g);
+ const {cp:CP,cg:CG}=cover(v);const sp=v.pains.reduce((a,p)=>a+(p.severity||1),0),sg=v.gains.reduce((a,p)=>a+(p.severity||1),0);
+ const fp=sp?v.pains.filter(p=>CP.has(p.id)).reduce((a,p)=>a+(p.severity||1),0)/sp:0,fg=sg?v.gains.filter(p=>CG.has(p.id)).reduce((a,p)=>a+(p.severity||1),0)/sg:0;
+ const orphan=[...v.relievers,...v.creators].filter(r=>!(r.targets||[]).length);
+ app.appendChild(h('div',{class:'sec'},'契合度检查'));app.appendChild(h('p',{class:'secsub'},'按重要程度加权。红框 = 重要但尚未被任何止痛剂/增益创造覆盖。'));
+ const f=h('div',{class:'fit'});
+ const K=(t,val,c,sub)=>{const d=h('div',{class:'k'});d.innerHTML='<div class="hint">'+t+'</div><b>'+Math.round(val*100)+'%</b><div class="bar"><i style="width:'+val*100+'%;background:'+c+'"></i></div><div class="hint" style="margin-top:6px">'+sub+'</div>';f.appendChild(d)};
+ K('痛点覆盖',fp,'var(--red)',v.pains.filter(p=>!CP.has(p.id)).length+' 个痛点未覆盖');K('收益覆盖',fg,'var(--green)',v.gains.filter(p=>!CG.has(p.id)).length+' 个收益未覆盖');
+ const d=h('div',{class:'k gap'});d.innerHTML='<div class="hint">没有对应顾客需求的功能</div><b>'+orphan.length+'</b>'+(orphan.length?'<ul style="margin:6px 0 0;padding-left:18px;font-size:13px">'+orphan.map(o=>'<li>'+esc(o.text)+'</li>').join('')+'</ul><div class="hint">可能是“方案找问题”，考虑删除或找到证据</div>':'<div class="hint" style="margin-top:6px">每个功能都对应了痛点或收益 ✓</div>');f.appendChild(d);
+ app.appendChild(f);
+ if(v.toVerify&&v.toVerify.length)app.appendChild(h('div',{class:'verify'},'<b>待真人验证</b><ul>'+v.toVerify.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>'))}
+function md(){const v=V(),T=(a,k)=>a.map(x=>'- '+x.text+(x.severity?'（重要度 '+x.severity+'）':'')+(x.type?'（'+JT[x.type]+'）':'')+((x.targets||[]).length?' → '+x.targets.map(t=>((v[k]||[]).find(p=>p.id===t)||{}).text).join('；'):'')).join('\n');
+ return ['# 价值主张画布：'+(v.product||''),'','## 顾客档案（'+(persona().name||'')+'）','### 任务',T(v.jobs),'### 痛点',T(v.pains),'### 收益',T(v.gains),'','## 价值地图','### 产品与服务',T(v.products),'### 止痛剂',T(v.relievers,'pains'),'### 增益创造',T(v.creators,'gains')].join('\n')}
+DT.boot({title:'价值主张画布',en:'Value Proposition Canvas',subtitle:()=>V().product||'',render,md});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,837 @@
+{
+  "project": "community-clinic",
+  "name": "社区医院慢病复诊预约",
+  "personas": [
+    {
+      "id": "p1",
+      "name": "退休王阿姨",
+      "age": 68,
+      "occupation": "退休教师",
+      "location": "上海某老旧小区",
+      "bio": "高血压患者，每月需复诊一次取药。子女在外地，出行依赖公交或女儿偶尔开车。对手机操作不自信，习惯打电话预约或直接到院排队。",
+      "goals": [
+        "按时取到药，血压控制稳定",
+        "少排队，不耽误下午广场舞",
+        "能提前知道今天医生有没有"
+      ],
+      "frustrations": [
+        "早上7点就要去排号，冬天特别难受",
+        "电话占线，APP 不会用，女儿帮忙又觉得麻烦她",
+        "复诊和初诊排同一队，等两小时才知道没药了"
+      ],
+      "devices": [
+        "老人机",
+        "女儿帮安装了微信"
+      ],
+      "quote": "我就想快点拿到药回家，别让我等那么久",
+      "toVerify": true,
+      "snapshot": "每月独自坐公交来医院取慢病药，提前一天打电话确认号源",
+      "tags": [
+        "高频用户",
+        "低数字能力",
+        "独立意识强"
+      ],
+      "jobs": {
+        "functional": [
+          "每月稳定取到慢病药"
+        ],
+        "emotional": [
+          "保持自主，不依赖子女"
+        ],
+        "social": [
+          "在同龄人中是会独立就医的人"
+        ]
+      },
+      "pains": [
+        "挂号难、排队久",
+        "担心白跑一趟",
+        "APP不会用，电话占线"
+      ],
+      "behaviors": [
+        "提前一天打电话确认",
+        "让邻居帮忙占位",
+        "把复诊单夹在手册里"
+      ],
+      "motivation": "保持健康，不给子女添麻烦"
+    }
+  ],
+  "empathyMap": {
+    "personaId": "p1",
+    "generatedBy": "mixed",
+    "says": [
+      {
+        "id": "e1d3b0d",
+        "text": "打电话没人接，只能直接去排队",
+        "evidence": "inferred"
+      },
+      {
+        "id": "e8234aa",
+        "text": "APP 上字太小，看不清",
+        "evidence": "inferred"
+      },
+      {
+        "id": "e957cc6",
+        "text": "复诊就拿药，要排和新病人一样久的队？",
+        "evidence": "inferred"
+      }
+    ],
+    "thinks": [
+      {
+        "id": "e0a45af",
+        "text": "要不要早点去占个位？但腿不好",
+        "evidence": "inferred"
+      },
+      {
+        "id": "e3934ee",
+        "text": "女儿上班忙，不好意思总叫她帮忙",
+        "evidence": "inferred"
+      },
+      {
+        "id": "ed1615c",
+        "text": "万一今天药没了，白跑一趟",
+        "evidence": "inferred"
+      }
+    ],
+    "does": [
+      {
+        "id": "e59e206",
+        "text": "每月提前一天打电话确认号源",
+        "evidence": "inferred"
+      },
+      {
+        "id": "e6143c2",
+        "text": "让邻居帮忙占位",
+        "evidence": "inferred"
+      },
+      {
+        "id": "ef38e9c",
+        "text": "把复诊单夹在手册里防止忘带",
+        "evidence": "inferred"
+      }
+    ],
+    "feels": [
+      {
+        "id": "e8e155d",
+        "text": "焦虑：担心白跑",
+        "evidence": "inferred"
+      },
+      {
+        "id": "eb978b6",
+        "text": "委屈：明明是老患者还要抢号",
+        "evidence": "inferred"
+      },
+      {
+        "id": "ea46863",
+        "text": "宽慰：遇到熟悉的护士会被照顾",
+        "evidence": "inferred"
+      }
+    ],
+    "contradictions": [
+      {
+        "a": "e1d3b0d",
+        "b": "e3934ee",
+        "insight": "嘴上说'不麻烦'，但实际独自打不通电话后仍让女儿帮——系统的门槛已超出她的独立意愿"
+      },
+      {
+        "a": "e0a45af",
+        "b": "e6143c2",
+        "insight": "知道腿不好不该早去，却又找邻居占位——说明「避免白跑」的焦虑大于身体不适"
+      }
+    ],
+    "coreInsight": "王阿姨想要自主，但现有系统要求的数字能力和体力已超出她的舒适区",
+    "toVerify": [
+      "王阿姨打电话预约失败后实际会怎么处理？",
+      "她是否真的不愿麻烦子女，还是习惯了依赖？"
+    ]
+  },
+  "journey": {
+    "personaId": "p1",
+    "stages": [
+      {
+        "name": "决定复诊",
+        "actions": "发现药快用完，翻出上次复诊单",
+        "thoughts": "下周得去一趟，不知道号好不好挂",
+        "emotion": -1,
+        "opportunities": [
+          {
+            "text": "短信/微信提醒：您的常规复诊窗口临近，可提前预约"
+          }
+        ],
+        "id": "j727fb9"
+      },
+      {
+        "name": "预约挂号",
+        "actions": "打电话，占线；女儿帮忙在APP挂号",
+        "thoughts": "下次让女儿帮我存好，直接点",
+        "emotion": -2,
+        "opportunities": [
+          {
+            "text": "家属代预约绑定功能"
+          },
+          {
+            "text": "复诊专属通道，免抢号"
+          }
+        ],
+        "id": "j4200df"
+      },
+      {
+        "name": "候诊等待",
+        "actions": "提前1小时到院，坐在走廊椅子上等叫号",
+        "thoughts": "今天还算不太长，才等了40分钟",
+        "emotion": 0,
+        "opportunities": [
+          {
+            "text": "大屏+短信双通道叫号"
+          },
+          {
+            "text": "社区卫生站卫星取药点"
+          }
+        ],
+        "id": "j53c348"
+      },
+      {
+        "name": "诊室复诊",
+        "actions": "血压测量，医生快速确认，续开3个月处方",
+        "thoughts": "就说了两句话，这么快？那排队值得吗",
+        "emotion": 1,
+        "opportunities": [
+          {
+            "text": "AI辅助续方：医生30秒审核确认，释放排队压力"
+          }
+        ],
+        "id": "jf6fa4e"
+      },
+      {
+        "name": "取药结算",
+        "actions": "排取药队，医保刷卡",
+        "thoughts": "终于好了，可以回家了",
+        "emotion": 2,
+        "opportunities": [
+          {
+            "text": "快速通道：复诊续方直接取药，无需二次排队"
+          }
+        ],
+        "id": "j20bdee"
+      }
+    ],
+    "toVerify": true
+  },
+  "hook": {
+    "personaId": "p1",
+    "trigger": "external",
+    "triggerDesc": "药盒只剩最后一排，或女儿提醒",
+    "action": "打电话/让女儿APP挂号",
+    "reward": "variable",
+    "rewardDesc": "运气好当天取到药；运气差跑空",
+    "investment": "提前一天确认，记下复诊单",
+    "toVerify": true,
+    "ethics": {
+      "improves": "yes",
+      "selfUse": "yes"
+    }
+  },
+  "storyboard": {
+    "personaId": "p1",
+    "scenario": "王阿姨独自完成慢病复诊取药（新方案设想）",
+    "toVerify": true,
+    "frames": [
+      {
+        "title": "药快用完了",
+        "emoji": "💊",
+        "thought": "还有5粒，要去医院了",
+        "emotion": -1,
+        "hookStage": "trigger",
+        "action": "王阿姨发现药盒只剩最后一排",
+        "imagePrompt": "老人拿着药盒数药片，台灯下，细腻写实风",
+        "id": "c036b60"
+      },
+      {
+        "title": "短信提醒预约",
+        "emoji": "📱",
+        "thought": "点一下就行？真的假的",
+        "emotion": 1,
+        "hookStage": "action",
+        "action": "收到医院短信：点击续约",
+        "imagePrompt": "老人手持手机看短信，扁平插画风",
+        "id": "cfd9695"
+      },
+      {
+        "title": "选时间段",
+        "emoji": "📅",
+        "thought": "下周二早上，广场舞不冲突",
+        "emotion": 2,
+        "hookStage": "action",
+        "action": "在短信链接大字界面选择复诊时间",
+        "imagePrompt": "手机屏幕显示大字日历界面，扁平风",
+        "id": "cb7cfe3"
+      },
+      {
+        "title": "按时到院",
+        "emoji": "🏥",
+        "thought": "叫号到了，这次没怎么等",
+        "emotion": 2,
+        "hookStage": "reward",
+        "action": "凭短信二维码直接进复诊通道，5分钟完成",
+        "imagePrompt": "老人在医院走廊扫码进门，工作人员引导，明亮温馨",
+        "id": "cc7b8b5"
+      },
+      {
+        "title": "意外：系统对接失败",
+        "emoji": "⚠️",
+        "thought": "怎么刷不了医保，白来了吗",
+        "emotion": -2,
+        "hookStage": "none",
+        "action": "（风险情节）医保系统故障，续方无法结算",
+        "imagePrompt": "收银台前老人困惑，工作人员看屏幕，扁平风",
+        "id": "cad4801"
+      },
+      {
+        "title": "按时拿到药",
+        "emoji": "🎉",
+        "thought": "下次我自己就会操作了",
+        "emotion": 2,
+        "hookStage": "investment",
+        "action": "取药成功，护士教她下次直接发短信回复确认",
+        "imagePrompt": "老人拿着药袋笑，社区医院门口，温暖午后光线",
+        "id": "c1a1c98"
+      }
+    ]
+  },
+  "valueCanvas": {
+    "personaId": "p1",
+    "solution": "慢病复诊订阅系统",
+    "products": [
+      "短信/微信一键续方预约",
+      "复诊专属快速通道",
+      "家属代预约绑定"
+    ],
+    "gains": [
+      {
+        "text": "不用抢号，确定能复诊",
+        "importance": 3,
+        "id": "c01f77d"
+      },
+      {
+        "text": "节省1-2小时等待",
+        "importance": 3,
+        "id": "c87a82c"
+      },
+      {
+        "text": "不需要麻烦子女",
+        "importance": 2,
+        "id": "c488504"
+      },
+      {
+        "text": "每次复诊有记录，血压趋势可见",
+        "importance": 1,
+        "id": "c556926"
+      }
+    ],
+    "pains": [
+      {
+        "text": "每月为挂号焦虑一周",
+        "severity": 3,
+        "id": "cd8b71c"
+      },
+      {
+        "text": "挂号渠道难用（电话占线、数字门槛高）",
+        "severity": 3,
+        "id": "c6fab82"
+      },
+      {
+        "text": "排队2小时只看2分钟",
+        "severity": 2,
+        "id": "c8e3138"
+      },
+      {
+        "text": "担心药用完断药",
+        "severity": 2,
+        "id": "ce60a86"
+      }
+    ],
+    "jobs": [
+      {
+        "text": "每月稳定取到慢病药",
+        "type": "functional",
+        "id": "cf170fd"
+      },
+      {
+        "text": "保持自主，不依赖子女",
+        "type": "emotional",
+        "id": "c14b3b1"
+      },
+      {
+        "text": "在同龄人中是「会用手机的那个」",
+        "type": "social",
+        "id": "c6092cf"
+      }
+    ],
+    "toVerify": true,
+    "creators": [
+      {
+        "text": "月度自动预约提醒，无需主动操作",
+        "targets": [
+          "c01f77d",
+          "c488504"
+        ],
+        "id": "cdb2fcc"
+      },
+      {
+        "text": "复诊专属通道，平均等待<15分钟",
+        "targets": [
+          "c87a82c"
+        ],
+        "id": "c269c91"
+      },
+      {
+        "text": "血压历史记录随时查看",
+        "targets": [
+          "c556926"
+        ],
+        "id": "c1cf7d0"
+      }
+    ],
+    "relievers": [
+      {
+        "text": "短信一键点击续约，无需APP",
+        "targets": [
+          "c6fab82"
+        ],
+        "id": "cb29242"
+      },
+      {
+        "text": "慢病患者优先号，不与初诊争号",
+        "targets": [
+          "cd8b71c",
+          "c8e3138"
+        ],
+        "id": "c491c38"
+      },
+      {
+        "text": "提前10天提醒，药未断前完成预约",
+        "targets": [
+          "ce60a86"
+        ],
+        "id": "cfdb00b"
+      }
+    ]
+  },
+  "boards": {
+    "brainstorm": {
+      "preset": "brainstorm",
+      "topic": "如何让老年慢病患者减少来院次数同时保证用药安全",
+      "cards": {
+        "wild": [
+          {
+            "text": "慢病药月度快递上门，零来院",
+            "votes": 4,
+            "id": "c51ef45"
+          },
+          {
+            "text": "AI问诊辅助续方，视频复诊",
+            "votes": 2,
+            "id": "caf9410"
+          }
+        ],
+        "doable": [
+          {
+            "text": "复诊专属叫号通道，不与初诊争号",
+            "votes": 3,
+            "id": "c50dc21"
+          },
+          {
+            "text": "子女绑定一键代预约",
+            "votes": 2,
+            "id": "c8f50c9"
+          }
+        ],
+        "build": [
+          {
+            "text": "社区卫生站卫星取药点（在社区巡诊基础上扩展）",
+            "votes": 3,
+            "id": "cc551a0"
+          },
+          {
+            "text": "短信一键续约 → 未来升级为语音电话确认",
+            "votes": 1,
+            "id": "c162118"
+          }
+        ]
+      }
+    },
+    "mvp": {
+      "preset": "mvp",
+      "vision": "让慢病老人每月复诊取药无需排队、无需子女帮忙",
+      "users": "社区医院在册高血压/糖尿病老年患者（≥60岁，连续复诊≥3次）",
+      "hypothesis": "若提供短信一键续约+复诊专属通道，70%的老年慢病患者会在首次使用后持续使用",
+      "features": [
+        "短信模板一键续约预约",
+        "复诊专属叫号通道（早到晚取均可）",
+        "家属绑定代预约"
+      ],
+      "form": "与1家社区医院合作，选取50名在册慢病患者，试运行4周",
+      "metrics": "4周内独立完成预约率（不借助子女）、续约率、等待时间对比基线",
+      "success": "独立预约率 ≥ 60%，4周续约率 ≥ 50%，等待时间减少 ≥ 40%",
+      "next": "若成功：扩展到3家社区医院；若失败：访谈未独立预约用户，优化引导流程"
+    }
+  },
+  "tables": {
+    "survey": {
+      "preset": "survey",
+      "topic": "慢病患者复诊体验调研",
+      "questions": [
+        {
+          "dim": "痛点验证",
+          "q": "上次复诊，从出门到取到药，大约花了多少时间？",
+          "type": "select",
+          "options": [
+            "不到1小时",
+            "1-2小时",
+            "2-3小时",
+            "3小时以上"
+          ]
+        },
+        {
+          "dim": "渠道偏好",
+          "q": "您通常用什么方式预约挂号？",
+          "type": "select",
+          "options": [
+            "电话",
+            "家人帮忙用APP",
+            "直接去现场排队",
+            "社区卫生站"
+          ]
+        },
+        {
+          "dim": "独立意愿",
+          "q": "如果短信发给您一个链接，点一下就能预约下次复诊，您愿意自己试试吗？",
+          "type": "scale"
+        },
+        {
+          "dim": "家庭依赖",
+          "q": "您在医疗预约上多大程度依赖子女或家人帮助？",
+          "type": "scale"
+        },
+        {
+          "dim": "断药风险",
+          "q": "过去一年有没有出现药用完但还没来得及复诊的情况？",
+          "type": "select",
+          "options": [
+            "从未",
+            "1次",
+            "2-3次",
+            "3次以上"
+          ]
+        },
+        {
+          "dim": "新方案反应",
+          "q": "如果复诊有专属快速通道（平均等待不超过15分钟），您对这项改变的期待程度？",
+          "type": "scale"
+        }
+      ]
+    }
+  },
+  "radials": {
+    "stakeholders": {
+      "preset": "stakeholders",
+      "center": "慢病复诊系统",
+      "petals": [
+        {
+          "label": "慢病老年患者",
+          "note": "主用户，高频但数字能力弱"
+        },
+        {
+          "label": "子女/家属",
+          "note": "代理决策者，需减少其负担"
+        },
+        {
+          "label": "全科医生",
+          "note": "执行续方，不能增加工作量"
+        },
+        {
+          "label": "医院管理层",
+          "note": "关注效率、医保合规"
+        },
+        {
+          "label": "社区卫生站",
+          "note": "潜在合作方，最后一公里"
+        },
+        {
+          "label": "医保局",
+          "note": "政策与报销规则制定方"
+        }
+      ]
+    }
+  },
+  "meta": {
+    "project": "community-clinic"
+  },
+  "researchPlan": {
+    "hypotheses": [
+      {
+        "id": "he339a5",
+        "text": "短信一键续约后，70% 老年慢病患者能独立完成预约（不借助子女）",
+        "source": "MVP 画布",
+        "risk": "H",
+        "selected": true
+      },
+      {
+        "id": "h049077",
+        "text": "复诊专属通道能将平均等待时间从 60 分钟降至 15 分钟以内",
+        "source": "旅程图",
+        "risk": "H",
+        "selected": true
+      },
+      {
+        "id": "hb2ba48",
+        "text": "老年用户首次使用后 4 周续约率 >=50%",
+        "source": "MVP 画布",
+        "risk": "H",
+        "selected": true
+      },
+      {
+        "id": "h644071",
+        "text": "子女绑定代预约功能能减少老人对子女的依赖感",
+        "source": "移情图",
+        "risk": "M",
+        "selected": true
+      }
+    ],
+    "recruit": {
+      "n": 5,
+      "sessions": [],
+      "duration": 45,
+      "mode": "inperson",
+      "criteria": [
+        {
+          "id": "ccc8d85",
+          "type": "include",
+          "text": "60 岁以上，确诊高血压或糖尿病等慢性病"
+        },
+        {
+          "id": "c4a939e",
+          "type": "include",
+          "text": "近 3 个月有过社区医院复诊经历"
+        },
+        {
+          "id": "cc64bd7",
+          "type": "prefer",
+          "text": "独自出行为主（非家属陪同）"
+        },
+        {
+          "id": "c5de593",
+          "type": "exclude",
+          "text": "有互联网医院或APP熟练使用经验（避免非典型用户）"
+        }
+      ],
+      "screener": []
+    },
+    "script": {
+      "warmup": [
+        {
+          "id": "q76181e",
+          "text": "您平时是怎么来医院复诊的？能给我描述一下上次的经历吗？",
+          "type": "open"
+        },
+        {
+          "id": "q2be3c7",
+          "text": "您一般提前多久准备复诊的事情？",
+          "type": "open"
+        }
+      ],
+      "main": [
+        {
+          "id": "q9dee4e",
+          "text": "您是怎么预约挂号的？打电话还是有人帮您？",
+          "type": "open"
+        },
+        {
+          "id": "q65bf9e",
+          "text": "假设医院给您发了一条短信，里面有个链接，点一下就能预约下次复诊，您会怎么做？",
+          "type": "scenario"
+        },
+        {
+          "id": "q1027f2",
+          "text": "您刚才说的那个情况，能说说当时心里在想什么吗？",
+          "type": "probe"
+        },
+        {
+          "id": "qa13a38",
+          "text": "有没有过药用完了但还没来得及复诊的情况？当时怎么办的？",
+          "type": "open"
+        },
+        {
+          "id": "qc43958",
+          "text": "如果有专门给老患者的快速通道，不用排长队，您会怎么看？",
+          "type": "open"
+        }
+      ],
+      "wrap": [
+        {
+          "id": "q3fdc49",
+          "text": "复诊最让您头疼的是什么？如果能改一件事，改哪个？",
+          "type": "open"
+        },
+        {
+          "id": "qd57075",
+          "text": "还有什么想告诉我们的吗？",
+          "type": "open"
+        }
+      ]
+    },
+    "analysis": {
+      "fw": "affinity",
+      "affinityGroups": [
+        {
+          "id": "g757b81",
+          "label": "预约行为",
+          "cards": []
+        },
+        {
+          "id": "gd5411b",
+          "label": "等待体验",
+          "cards": []
+        },
+        {
+          "id": "gda7023",
+          "label": "数字门槛",
+          "cards": []
+        }
+      ],
+      "metrics": [],
+      "insights": []
+    },
+    "progress": {
+      "sessions": [],
+      "status": "plan"
+    }
+  },
+  "define": {
+    "pov": {
+      "user": "每月复诊的慢病老年患者",
+      "need": "能在不依赖子女的情况下，可预期地完成每月复诊取药",
+      "insight": "复诊本质上是「续方」，却被迫走与初诊相同的流程，导致医疗资源错配与患者尊严受损",
+      "toVerify": true
+    }
+  },
+  "ideate": {
+    "scamper": {
+      "subject": "社区医院慢病复诊预约流程",
+      "S": [
+        {
+          "id": "s1",
+          "text": "把「现场排号」替换为「月度续方订阅」：慢病患者每月自动生成复诊预约",
+          "star": false
+        }
+      ],
+      "C": [
+        {
+          "id": "s1",
+          "text": "将复诊预约与送药上门结合：老人无需出门取药",
+          "star": false
+        }
+      ],
+      "A": [
+        {
+          "id": "s1",
+          "text": "借鉴会员卡模式：老慢病患者有「优先通道」，类似银行VIP",
+          "star": false
+        }
+      ],
+      "M": [
+        {
+          "id": "s1",
+          "text": "缩短复诊时长至5分钟标准化流程（血压+问询+续方）",
+          "star": false
+        }
+      ],
+      "P": [
+        {
+          "id": "s1",
+          "text": "复诊等待时间做健康科普：老年高血压饮食讲座",
+          "star": false
+        }
+      ],
+      "E": [
+        {
+          "id": "s1",
+          "text": "取消慢病患者手动挂号：系统自动依据上次诊断建议下次复诊时间",
+          "star": false
+        }
+      ],
+      "R": [
+        {
+          "id": "s1",
+          "text": "不是患者来医院，而是医院「送」到社区：社区卫生站月度巡诊点",
+          "star": false
+        }
+      ]
+    },
+    "matrix": {
+      "mode": "value",
+      "items": [
+        {
+          "id": "ic3f5b1",
+          "text": "月度续方订阅（自动预约）",
+          "x": 4,
+          "y": 3,
+          "note": "quick-win"
+        },
+        {
+          "id": "i9fd583",
+          "text": "复诊专属叫号通道",
+          "x": 5,
+          "y": 2,
+          "note": "quick-win"
+        },
+        {
+          "id": "i9667cf",
+          "text": "家属代预约绑定",
+          "x": 5,
+          "y": 2,
+          "note": "quick-win"
+        },
+        {
+          "id": "ic4682c",
+          "text": "社区卫星取药点",
+          "x": 3,
+          "y": 3,
+          "note": "big-bet"
+        },
+        {
+          "id": "idad9cd",
+          "text": "AI辅助续方审核",
+          "x": 3,
+          "y": 3,
+          "note": "big-bet"
+        },
+        {
+          "id": "ifc9b3b",
+          "text": "健康科普等候屏",
+          "x": 5,
+          "y": 1,
+          "note": "fill-in"
+        },
+        {
+          "id": "i6db2d9",
+          "text": "区块链处方共享",
+          "x": 3,
+          "y": 1,
+          "note": "thankless"
+        }
+      ]
+    }
+  },
+  "prototype": {
+    "box": {
+      "currentSolution": "现场排号 + 电话预约",
+      "constraints": [
+        "医保系统对接复杂",
+        "老年用户数字鸿沟",
+        "医生工作量不能增加"
+      ],
+      "reframe": "不是「如何让老人学会APP」，而是「如何让复诊系统适应老人行为模式」",
+      "toVerify": true
+    }
+  }
+}

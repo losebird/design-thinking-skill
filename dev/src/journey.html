@@ -1,0 +1,57 @@
+<!-- title: 顾客旅程图 -->
+<style>
+.jw{overflow-x:auto;border:1px solid var(--border);border-radius:12px;padding-bottom:4px}
+.jg{display:grid;min-width:max-content}
+.rh{position:sticky;left:0;background:var(--soft);z-index:2;padding:10px 12px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-weight:600;font-size:14px;width:108px}
+.rh small{display:block;font-weight:400;color:var(--muted);font-size:11.5px}
+.cell{width:210px;padding:8px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);font-size:14px}
+.cell .ed{min-height:2.6em}
+.stg{background:var(--blue-s);display:flex;align-items:center;gap:4px}
+.stg .ed{font-weight:650;color:var(--blue);flex:1;min-height:auto}
+.stg .icon{width:24px;height:24px;min-height:24px;font-size:13px}
+.pain{background:var(--red-s)}.opp{background:var(--green-s)}
+.emo{padding:0;position:relative;height:150px;cursor:pointer}
+.emo-svg{position:absolute;left:0;top:0;pointer-events:none}
+.emo .ctl{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);display:flex;gap:4px}
+.emo .ctl button{width:28px;height:28px;min-height:28px;padding:0;font-size:12px}
+.lvl{position:absolute;top:6px;left:8px;font-size:12px;color:var(--muted)}
+.addc{display:flex;align-items:center;justify-content:center;padding:8px;border-bottom:1px solid var(--border)}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed}=DT;
+const ROWS=[['actions','用户行为','做了什么'],['touchpoints','触点','App、门店、人……'],['thoughts','想法','心里在想什么'],['emotion','情绪曲线','点击格子设定 -2~+2'],['pains','痛点','卡在哪里'],['opportunities','机会点','我们能做什么']];
+const FACE={'-2':'😣','-1':'🙁','0':'😐','1':'🙂','2':'😄'};
+const COLW=210,EH=150;
+const J=()=>{const j=DT.get('journey',{});j.stages=j.stages||[];return j};
+function persona(){const ps=DT.st.personas||[];const j=J();return ps.find(p=>p.id===j.personaId)||ps[0]||{}}
+function yOf(v){return 22+(2-v)/4*(EH-60)}
+function render(){const app=document.getElementById('app');app.innerHTML='';const j=J(),S=j.stages;
+ const info=h('p',{class:'secsub'},'用户画像：<b>'+esc(persona().name||'未指定')+'</b>'+(j.scenario?' · 情境：'+esc(j.scenario):'')+'　横向滚动查看全部阶段');app.appendChild(info);
+ const w=h('div',{class:'jw'});const g=h('div',{class:'jg'});g.style.gridTemplateColumns='108px repeat('+S.length+','+COLW+'px) 120px';
+ g.appendChild(h('div',{class:'rh'},'阶段'));
+ S.forEach((s,i)=>{const c=h('div',{class:'cell stg'});c.appendChild(ed(h('div'),s,'name','阶段名'));
+  const l=h('button',{class:'icon','aria-label':'左移',title:'左移'},'‹');l.onclick=()=>{if(i>0){[S[i-1],S[i]]=[S[i],S[i-1]];save();render()}};
+  const r=h('button',{class:'icon','aria-label':'右移',title:'右移'},'›');r.onclick=()=>{if(i<S.length-1){[S[i+1],S[i]]=[S[i],S[i+1]];save();render()}};
+  const x=h('button',{class:'icon','aria-label':'删除阶段',title:'删除阶段'},'×');x.onclick=()=>{if(confirm('删除阶段「'+(s.name||'')+'」？')){S.splice(i,1);save();render()}};c.append(l,r,x);g.appendChild(c)});
+ const ad=h('div',{class:'addc'});const ab=h('button',{class:'ghost'},'+ 阶段');ab.onclick=()=>{S.push({id:DT.nid('j'),name:'新阶段',actions:'',touchpoints:'',thoughts:'',emotion:0,pains:'',opportunities:''});save();render()};ad.appendChild(ab);g.appendChild(ad);
+ ROWS.forEach(([k,l,hint],ri)=>{g.appendChild(h('div',{class:'rh'},l+'<small>'+hint+'</small>'));
+  S.forEach((s,i)=>{if(k==='emotion'){const c=h('div',{class:'cell emo',title:'点击设定情绪高低'});s.emotion=+s.emotion||0;
+     c.appendChild(h('span',{class:'lvl'},FACE[s.emotion]+' '+(s.emotion>0?'+':'')+s.emotion));
+     c.onclick=e=>{if(e.target.closest('button'))return;const rc=c.getBoundingClientRect();const y=e.clientY-rc.top;const v=Math.max(-2,Math.min(2,Math.round(2-(y-22)/(EH-60)*4)));s.emotion=v;save();render()};
+     const ctl=h('div',{class:'ctl'});const up=h('button',{'aria-label':'情绪升高'},'▲'),dn=h('button',{'aria-label':'情绪降低'},'▼');up.onclick=()=>{s.emotion=Math.min(2,s.emotion+1);save();render()};dn.onclick=()=>{s.emotion=Math.max(-2,s.emotion-1);save();render()};ctl.append(up,dn);c.appendChild(ctl);
+     if(i===0){const W=COLW*S.length;let pts=S.map((t,k)=>[(k+.5)*COLW,yOf(+t.emotion||0)]);
+      let d=pts.map((p,k)=>(k?'L':'M')+p[0]+' '+p[1]).join(' ');
+      const svg='<svg class="emo-svg" width="'+W+'" height="'+EH+'" aria-hidden="true"><line x1="0" x2="'+W+'" y1="'+yOf(0)+'" y2="'+yOf(0)+'" stroke="var(--border)" stroke-dasharray="4 4"/><path d="'+d+'" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linejoin="round"/>'+pts.map((p,k)=>{const v=+S[k].emotion||0;return '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="7" fill="'+(v<0?'var(--red)':v>0?'var(--green)':'var(--muted)')+'" stroke="var(--bg)" stroke-width="2"/>'}).join('')+'</svg>';
+      c.insertAdjacentHTML('afterbegin',svg);c.style.overflow='visible';c.style.zIndex='1'}
+     g.appendChild(c)}
+   else{const c=h('div',{class:'cell'+(k==='pains'?' pain':k==='opportunities'?' opp':'')});const e=ed(h('div'),s,k,'…');e.dataset.multi='1';c.appendChild(e);g.appendChild(c)}});
+  g.appendChild(h('div',{style:'border-bottom:1px solid var(--border)'}))});
+ w.appendChild(g);app.appendChild(w);
+ const low=S.filter(s=>(+s.emotion||0)<0);
+ if(low.length){app.appendChild(h('h3',{class:'sec'},'情绪低谷 = 最值得切入的机会'));const c=h('div',{class:'box soft'},low.map(s=>'<div style="margin:4px 0"><b>'+esc(s.name)+'</b> '+FACE[s.emotion]+'　'+esc(s.pains||'')+(s.opportunities?' → <span style="color:var(--green)">'+esc(s.opportunities)+'</span>':'')+'</div>').join(''));app.appendChild(c)}}
+function md(){const S=J().stages;const r=(k)=>'| '+S.map(s=>String(s[k]==null?'':s[k]).replace(/\|/g,'/').replace(/\n/g,' ')).join(' | ')+' |';
+ return ['# 顾客旅程图：'+(persona().name||''),'','| 维度 | '+S.map(s=>s.name).join(' | ')+' |','|---|'+S.map(()=>'---').join('|')+'|',...ROWS.map(([k,l])=>'| '+l+' '+r(k))].join('\n')}
+DT.boot({title:'顾客旅程图',en:'Customer Journey Map',subtitle:()=>persona().name||'',render,md});
+})();
+</script>

@@ -1,0 +1,92 @@
+<!-- title: 用户画像 -->
+<style>
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:center}
+.tab{border-radius:999px;padding:6px 14px}
+.tab[aria-selected=true]{background:var(--text);color:var(--bg);border-color:var(--text)}
+.poster{display:grid;grid-template-columns:300px 1fr;gap:16px}
+.idc{background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.ava{width:120px;height:120px;border-radius:50%;background:var(--blue-s);color:var(--blue);display:grid;place-items:center;font-size:52px;font-weight:700;overflow:hidden;align-self:center}
+.ava img{width:100%;height:100%;object-fit:cover}
+.pname{font-size:22px;font-weight:700;text-align:center}
+.snap{font-size:14px;color:var(--muted);text-align:center}
+.tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.tag{display:inline-flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:999px;padding:2px 4px 2px 10px;font-size:13px}
+.tag .icon{width:20px;height:20px;min-height:20px;font-size:13px}
+.quote{font-size:16px;font-weight:600;border-left:4px solid var(--orange);padding:6px 12px;background:var(--orange-s);border-radius:0 8px 8px 0}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fld{border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.fld h3{font-size:15px;margin:0 0 2px;display:flex;gap:8px;align-items:baseline}
+.fld h3 .n{font-size:12px;color:var(--muted);font-weight:500}
+.fld .hint{margin-bottom:8px}
+.fld .cards{display:flex;flex-direction:column;gap:6px}
+.fld.wide{grid-column:1/-1}
+.job{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:start;margin-bottom:6px}
+.job b{font-size:12.5px;padding:2px 0;border-radius:6px;text-align:center}
+.job .f{background:var(--blue-s);color:var(--blue)}.job .e{background:var(--orange-s);color:var(--orange)}.job .s{background:var(--purple-s);color:var(--purple)}
+.job .ed{background:var(--soft);border-radius:8px;padding:4px 8px}
+.tl{display:flex;flex-direction:column;gap:0}
+.tli{display:grid;grid-template-columns:70px 14px 1fr 28px;gap:8px;align-items:start;padding:4px 0}
+.tli .tm{font-family:Menlo,Consolas,monospace;font-size:13px;color:var(--muted);text-align:right}
+.tli .dot{width:10px;height:10px;border-radius:50%;background:var(--green);margin-top:6px;box-shadow:0 0 0 3px var(--green-s)}
+.mot{font-size:15px;font-weight:600;color:var(--green)}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.step{border:1px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;background:var(--bg);text-align:left;min-height:92px;display:flex;flex-direction:column;gap:4px}
+.step .no{font-size:12px;color:var(--muted)}
+.step .nm{font-weight:600;font-size:14px}
+.step .q{font-size:12px;color:var(--muted);line-height:1.4}
+.step.done{background:var(--green-s);border-color:transparent}
+.step.done .no:after{content:" ✓ 已完成";color:var(--green);font-weight:600}
+.cmp{width:100%;border-collapse:collapse;font-size:14px}
+.cmp th,.cmp td{border:1px solid var(--border);padding:8px 10px;vertical-align:top;text-align:left}
+.cmp th{background:var(--soft);font-weight:600;width:110px}
+.cmpw{overflow-x:auto}
+.prompt{display:flex;gap:8px;align-items:flex-start;margin-top:8px}
+.prompt .ed{flex:1;font-size:13px;background:var(--soft);border-radius:8px;padding:6px 8px;color:var(--muted)}
+@media (max-width:860px){.poster{grid-template-columns:1fr}.steps{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.fields{grid-template-columns:1fr}}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed}=DT;
+const STEPS=[['找到用户','用户是谁？有多少？他们会做什么？'],['提出假设','用户之间有什么差异？'],['确认','有数据或证据支持这些假设吗？'],['找出模式','最初的分群还适用吗？有没有其他重要人群？'],['创建画像','如何描述这个人物角色？'],['定义情境','有哪些用例？处在什么环境？'],['检验','你认识这样的人吗？'],['传播','如何让团队和决策者记住 TA？'],['创建场景','在给定情境下使用产品时会发生什么？'],['持续演进','有新信息吗？画像需要重绘吗？']];
+let cur=0,view='card';
+const P=()=>DT.get('personas',[]);
+function steps(){const s=DT.get('personaSteps',[]);while(s.length<10)s.push({done:false});return s}
+function blank(){return{id:DT.nid('p'),name:'新用户画像',avatar:'',snapshot:'年龄 · 城市 · 职业 · 收入 · 家庭',tags:[],jobs:{functional:'',emotional:'',social:''},pains:[],behaviors:[],motivation:'',quote:'',imagePrompt:''}}
+const vt=h('div',{class:'seg',role:'group','aria-label':'视图'});const b1=h('button',{},'画像卡'),b2=h('button',{},'多画像对比');vt.append(b1,b2);
+b1.onclick=()=>{view='card';render()};b2.onclick=()=>{view='cmp';render()};
+function render(){const app=document.getElementById('app');app.innerHTML='';const ps=P();b1.setAttribute('aria-pressed',view==='card');b2.setAttribute('aria-pressed',view==='cmp');
+ if(cur>=ps.length)cur=Math.max(0,ps.length-1);
+ const tabs=h('div',{class:'tabs',role:'tablist'});ps.forEach((p,i)=>{const t=h('button',{class:'tab',role:'tab','aria-selected':String(i===cur&&view==='card')},esc(p.name||'未命名'));t.onclick=()=>{cur=i;view='card';render()};tabs.appendChild(t)});
+ const add=h('button',{class:'ghost'},'+ 新画像');add.onclick=()=>{ps.push(blank());cur=ps.length-1;view='card';save();render()};tabs.appendChild(add);app.appendChild(tabs);
+ if(!ps.length){app.appendChild(h('div',{class:'empty'},'还没有用户画像，点「+ 新画像」开始。'))}
+ else if(view==='cmp')app.appendChild(compare(ps));else app.appendChild(card(ps[cur],ps));
+ app.appendChild(h('h3',{class:'sec'},'构建画像的 10 个步骤'));app.appendChild(h('p',{class:'secsub'},'点击标记完成。画像是迭代出来的，每一轮都会更清晰。'));
+ const sw=h('div',{class:'steps'});steps().forEach((s,i)=>{const b=h('button',{class:'step'+(s.done?' done':''),'aria-pressed':String(!!s.done)},'<span class="no">第 '+(i+1)+' 步</span><span class="nm">'+STEPS[i][0]+'</span><span class="q">'+STEPS[i][1]+'</span>');b.onclick=()=>{s.done=!s.done;save();render()};sw.appendChild(b)});app.appendChild(sw)}
+function card(p,ps){p.jobs=p.jobs||{};p.tags=p.tags||[];p.pains=p.pains||[];p.behaviors=p.behaviors||[];
+ const w=h('div',{class:'poster'});const id=h('div',{class:'idc'});
+ const av=h('div',{class:'ava'});if(p.image)av.innerHTML='<img alt="'+esc(p.name)+'" src="'+esc(p.image)+'">';else av.textContent=p.avatar||(p.name||'?').trim().slice(-1);id.appendChild(av);
+ id.appendChild(ed(h('div',{class:'pname'}),p,'name','名字或昵称',()=>{const t=document.querySelectorAll('.tab')[cur];if(t)t.textContent=p.name}));
+ id.appendChild(ed(h('div',{class:'snap'}),p,'snapshot','年龄 · 城市 · 职业 · 收入 · 家庭'));
+ const tg=h('div',{class:'tags'});p.tags.forEach((t,i)=>{const e=h('span',{class:'tag'},esc(t));const x=h('button',{class:'icon','aria-label':'删除标签'},'×');x.onclick=()=>{p.tags.splice(i,1);save();render()};e.appendChild(x);tg.appendChild(e)});
+ const at=h('button',{class:'ghost'},'+ 标签');at.onclick=()=>{const v=prompt('新标签（3–5 个关键词为宜）');if(v){p.tags.push(v.trim());save();render()}};tg.appendChild(at);id.appendChild(tg);
+ id.appendChild(ed(h('div',{class:'quote'}),p,'quote','一句带情绪的代表性引言'));
+ const pr=h('div',{},'<div class="hint">配图提示词（交给生图 AI，再把图片地址填回 image 字段）</div>');const pw=h('div',{class:'prompt'});const pe=ed(h('div'),p,'imagePrompt','描述外貌、场景、风格……');pw.appendChild(pe);const cb=h('button',{},'复制');cb.onclick=()=>DT.copy(p.imagePrompt||'');pw.appendChild(cb);pr.appendChild(pw);id.appendChild(pr);
+ const del=h('button',{class:'ghost',style:'align-self:center'},'删除此画像');del.onclick=()=>{if(confirm('删除「'+p.name+'」？')){ps.splice(cur,1);save();render()}};id.appendChild(del);
+ w.appendChild(id);
+ const f=h('div',{class:'fields'});
+ const jb=h('div',{class:'fld wide'},'<h3>目标 & 需求<span class="n">Jobs-to-be-Done · 用第一人称“我想……”</span></h3><div class="hint">区分功能型、情感型、社交型需求</div>');
+ [['functional','功能','f'],['emotional','情感','e'],['social','社交','s']].forEach(([k,l,c])=>{const r=h('div',{class:'job'},'<b class="'+c+'">'+l+'</b>');r.appendChild(ed(h('div'),p.jobs,k,'我想……'));jb.appendChild(r)});f.appendChild(jb);
+ const pn=h('div',{class:'fld'},'<h3>痛点 & 阻力<span class="n">2–4 条</span></h3><div class="hint">“现有方案让我……”</div>');const pc=h('div',{class:'cards'});pn.appendChild(pc);DT.list(pc,p.pains,'pn','现有方案让我……');f.appendChild(pn);
+ const mo=h('div',{class:'fld'},'<h3>动机 / 价值取向</h3><div class="hint">行为背后的 WHY：省时间？彰显身份？社群认同？</div>');mo.appendChild(ed(h('div',{class:'mot'}),p,'motivation','一句话提炼'));f.appendChild(mo);
+ const bh=h('div',{class:'fld wide'},'<h3>典型行为 & 场景<span class="n">一天的时间线，越具体越好</span></h3>');const tl=h('div',{class:'tl'});
+ p.behaviors.forEach((b,i)=>{const r=h('div',{class:'tli'});r.appendChild(ed(h('div',{class:'tm'}),b,'time','时间'));r.appendChild(h('span',{class:'dot'}));r.appendChild(ed(h('div'),b,'action','在哪个触点，做了什么'));const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{p.behaviors.splice(i,1);save();render()};r.appendChild(x);tl.appendChild(r)});
+ const ab=h('button',{class:'ghost',style:'margin-top:6px'},'+ 时间点');ab.onclick=()=>{p.behaviors.push({time:'',action:''});save();render()};bh.append(tl,ab);f.appendChild(bh);
+ w.appendChild(f);return w}
+function compare(ps){const rows=[['基本信息',p=>p.snapshot],['标签',p=>(p.tags||[]).join('、')],['功能需求',p=>(p.jobs||{}).functional],['情感需求',p=>(p.jobs||{}).emotional],['社交需求',p=>(p.jobs||{}).social],['痛点',p=>(p.pains||[]).map(x=>'· '+x.text).join('<br>')],['动机',p=>p.motivation],['引言',p=>p.quote]];
+ const t=h('table',{class:'cmp'});t.innerHTML='<thead><tr><th></th>'+ps.map(p=>'<th style="width:auto">'+esc(p.name)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(([l,f])=>'<tr><th>'+l+'</th>'+ps.map(p=>'<td>'+(l==='痛点'?(f(p)||''):esc(f(p)||''))+'</td>').join('')+'</tr>').join('')+'</tbody>';
+ const w=h('div',{class:'cmpw'});w.appendChild(t);return w}
+function md(){return P().map(p=>['# '+p.name,'> '+(p.quote||''),'','- 基本信息：'+(p.snapshot||''),'- 标签：'+(p.tags||[]).join('、'),'- 功能需求：'+((p.jobs||{}).functional||''),'- 情感需求：'+((p.jobs||{}).emotional||''),'- 社交需求：'+((p.jobs||{}).social||''),'- 痛点：'+(p.pains||[]).map(x=>x.text).join('；'),'- 动机：'+(p.motivation||''),'','## 典型一天',...(p.behaviors||[]).map(b=>'- '+b.time+' '+b.action),''].join('\n')).join('\n')}
+DT.boot({title:'用户画像',en:'Persona Canvas',subtitle:()=>P().length+' 个画像',extra:[vt],render,md});
+})();
+</script>

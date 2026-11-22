@@ -1,0 +1,81 @@
+<!-- title: 场景故事板 -->
+<style>
+.top{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:baseline;margin-bottom:14px}
+.top .lb{font-size:13.5px;color:var(--muted)}
+.top .ed{border-bottom:1px dashed var(--border)}
+.top select{min-height:32px}
+.strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;counter-reset:fr}
+.fr{border:2px solid var(--text);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;background:var(--bg)}
+.fr.sel{box-shadow:0 0 0 3px var(--blue-s);border-color:var(--blue)}
+.fr .hd{display:flex;align-items:center;gap:6px;padding:6px 8px;border-bottom:2px solid var(--text);background:var(--soft)}
+.fr .no{font-weight:800;font-size:13px;background:var(--text);color:var(--bg);border-radius:6px;padding:0 7px}
+.fr .hd .ed{flex:1;font-weight:650;font-size:14px}
+.fr .hd .icon{width:24px;height:24px;min-height:24px;font-size:13px}
+.pic{height:150px;display:flex;align-items:center;justify-content:center;position:relative;background:var(--bg);cursor:pointer}
+.pic img{width:100%;height:100%;object-fit:cover}
+.pic .emj{font-size:64px;line-height:1}
+.pic .bub{position:absolute;top:8px;right:8px;max-width:62%;background:var(--bg);border:1.5px solid var(--text);border-radius:14px;padding:4px 9px;font-size:12.5px;line-height:1.35}
+.pic .bub:after{content:"";position:absolute;bottom:-7px;left:14px;width:10px;height:10px;background:var(--bg);border-right:1.5px solid var(--text);border-bottom:1.5px solid var(--text);transform:rotate(45deg)}
+.pic .emo{position:absolute;bottom:6px;left:8px;font-size:22px}
+.pic .hk{position:absolute;bottom:8px;right:8px;font-size:11.5px;border-radius:999px;padding:0 8px;color:#fff}
+.cap{padding:8px 10px;border-top:2px solid var(--text);font-size:13.5px;flex:1}
+.cap .ed{min-height:2.8em}
+.mv{display:flex;gap:2px}
+.edit{margin-top:16px;display:grid;grid-template-columns:110px 1fr;gap:8px 12px;align-items:center}
+.edit .lb{font-size:13.5px;color:var(--muted)}
+.edit input[type=text]{width:100%}
+.emos,.hks{display:flex;gap:6px;flex-wrap:wrap}
+.emos button{font-size:20px;padding:2px 8px}
+.emos button[aria-pressed=true],.hks button[aria-pressed=true]{background:var(--surface);border-color:var(--text)}
+.hks button{font-size:13px;min-height:30px;padding:2px 10px}
+.arc{margin-top:18px}
+.arc svg{width:100%;height:120px;display:block}
+@media (max-width:600px){.edit{grid-template-columns:1fr}.top{grid-template-columns:1fr}}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed}=DT;
+const FACE={'-2':'😣','-1':'🙁','0':'😐','1':'🙂','2':'😄'};
+const HK={trigger:['触发','#5E9FE8'],action:['行动','#46A171'],reward:['酬赏','#C9A227'],investment:['投入','#D5803B']};
+let cur=0,pics=[];
+function picHTML(f){return (f.image?'<img src="'+DT.esc(f.image)+'" alt="'+DT.esc(f.title||'')+'">':'<span class="emj">'+DT.esc(f.visual||'🙂')+'</span>')+(f.thought?'<span class="bub">'+DT.esc(f.thought)+'</span>':'')+'<span class="emo">'+FACE[String(f.emotion||0)]+'</span>'+(f.hook&&HK[f.hook]?'<span class="hk" style="background:'+HK[f.hook][1]+'">'+HK[f.hook][0]+'</span>':'')}
+const S=()=>{const s=DT.get('storyboard',{});s.frames=s.frames||[];return s};
+function persona(){const ps=DT.st.personas||[];const s=S();return ps.find(p=>p.id===s.personaId)||ps[0]||{}}
+function arc(fr){if(fr.length<2)return '';const W=800,H=120,x=i=>30+i*(W-60)/(fr.length-1),y=v=>18+(2-(+v||0))/4*(H-40);
+ let p='M'+fr.map((f,i)=>x(i)+' '+y(f.emotion)).join(' L');
+ return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-label="情绪弧线"><line x1="20" x2="'+(W-20)+'" y1="'+y(0)+'" y2="'+y(0)+'" stroke="var(--border)" stroke-dasharray="4 4"/><path d="'+p+'" fill="none" stroke="var(--blue)" stroke-width="2.5" vector-effect="non-scaling-stroke"/>'+fr.map((f,i)=>'<circle cx="'+x(i)+'" cy="'+y(f.emotion)+'" r="5" fill="var(--blue)"/>').join('')+'</svg>'}
+function render(){const app=document.getElementById('app');app.innerHTML='';pics=[];const s=S(),F=s.frames,ps=DT.st.personas||[];
+ app.appendChild(h('p',{class:'secsub'},'把画像放进一个具体情境，按时间顺序画出“使用前—使用中—使用后”的关键时刻。每格写下动作、心里话和情绪；可以标注它对应 Hook 模型的哪一步。'));
+ const tp=h('div',{class:'top'});
+ tp.appendChild(h('span',{class:'lb'},'主角'));const sel=h('select',{'aria-label':'选择画像'});(ps.length?ps:[{id:'',name:'（无画像）'}]).forEach(p=>{const o=h('option',{value:p.id},esc((p.avatar||'')+' '+p.name));if(p.id===(persona().id||''))o.selected=true;sel.appendChild(o)});sel.onchange=()=>{s.personaId=sel.value;save();render()};tp.appendChild(sel);
+ tp.appendChild(h('span',{class:'lb'},'情境'));tp.appendChild(ed(h('div'),s,'scenario','在什么时间、地点、目标下？'));
+ tp.appendChild(h('span',{class:'lb'},'故事要验证'));tp.appendChild(ed(h('div'),s,'question','这个故事想帮我们看清什么？'));
+ app.appendChild(tp);
+ const st=h('div',{class:'strip'});
+ F.forEach((f,i)=>{const d=h('div',{class:'fr'+(i===cur?' sel':'')});
+  const hd=h('div',{class:'hd'});hd.appendChild(h('span',{class:'no'},String(i+1)));hd.appendChild(ed(h('div'),f,'title','这一格的标题'));
+  const mv=h('span',{class:'mv'});const l=h('button',{class:'icon','aria-label':'左移'},'‹'),r=h('button',{class:'icon','aria-label':'右移'},'›'),x=h('button',{class:'icon','aria-label':'删除'},'×');
+  l.onclick=()=>{if(i>0){[F[i-1],F[i]]=[F[i],F[i-1]];cur=i-1;save();render()}};r.onclick=()=>{if(i<F.length-1){[F[i+1],F[i]]=[F[i],F[i+1]];cur=i+1;save();render()}};x.onclick=()=>{F.splice(i,1);cur=Math.max(0,cur-1);save();render()};
+  mv.append(l,r,x);hd.appendChild(mv);d.appendChild(hd);
+  const pic=h('div',{class:'pic',title:'点击编辑这一格',tabindex:'0',role:'button'});
+  pic.innerHTML=picHTML(f);pics[i]=pic;
+  const go=()=>{cur=i;render();const e=document.getElementById('sb-ed');e&&e.scrollIntoView({behavior:'smooth',block:'nearest'})};pic.onclick=go;pic.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go()}};d.appendChild(pic);
+  const cap=h('div',{class:'cap'});const ce=ed(h('div'),f,'action','发生了什么？TA 做了什么？');ce.dataset.multi='1';cap.appendChild(ce);d.appendChild(cap);st.appendChild(d)});
+ const add=h('button',{class:'ghost',style:'min-height:120px'},'+ 添加一格');add.onclick=()=>{F.push({id:DT.nid('f'),title:'',visual:'🙂',action:'',thought:'',emotion:0});cur=F.length-1;save();render()};st.appendChild(add);
+ app.appendChild(st);
+ if(F[cur]){const f=F[cur];const e=h('div',{class:'edit box soft',id:'sb-ed'});e.appendChild(h('b',{style:'grid-column:1/-1'},'编辑第 '+(cur+1)+' 格'));
+  const row=(lb,el)=>{e.appendChild(h('span',{class:'lb'},lb));e.appendChild(el)};
+  const up=()=>{pics[cur]&&(pics[cur].innerHTML=picHTML(f))};
+  row('画面 emoji',ed(h('div'),f,'visual','如 🚇 🍱 😴',up));
+  const im=h('input',{type:'text',placeholder:'可选：图片地址（生图工具生成后填入）'});im.value=f.image||'';im.onchange=()=>{f.image=im.value.trim();save();render()};row('图片',im);
+  row('心里话',ed(h('div'),f,'thought','气泡里的一句话',up));
+  const em=h('div',{class:'emos'});[-2,-1,0,1,2].forEach(v=>{const b=h('button',{'aria-pressed':(+f.emotion||0)===v?'true':'false','aria-label':'情绪 '+v},FACE[v]);b.onclick=()=>{f.emotion=v;save();render()};em.appendChild(b)});row('情绪',em);
+  const hk=h('div',{class:'hks'});[['','无'],...Object.keys(HK).map(k=>[k,HK[k][0]])].forEach(([k,n])=>{const b=h('button',{'aria-pressed':(f.hook||'')===k?'true':'false'},n);b.onclick=()=>{f.hook=k;save();render()};hk.appendChild(b)});row('Hook 阶段',hk);
+  row('配图提示词',ed(h('div'),f,'imagePrompt','交给生图工具的描述（可选）'));
+  app.appendChild(e)}
+ if(F.length>1){const a=h('div',{class:'arc'});a.appendChild(h('div',{class:'sec',style:'margin-top:0'},'情绪弧线'));a.appendChild(h('div',{},arc(F)));app.appendChild(a)}
+ if(s.toVerify&&s.toVerify.length)app.appendChild(h('div',{class:'verify'},'<b>待真人验证</b><ul>'+s.toVerify.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>'))}
+function md(){const s=S();return ['# 场景故事板','','- 主角：'+(persona().name||''),'- 情境：'+(s.scenario||''),'- 要验证：'+(s.question||''),'',...s.frames.map((f,i)=>'## '+(i+1)+'. '+(f.title||'')+' '+FACE[String(f.emotion||0)]+'\n'+(f.action||'')+(f.thought?'\n> '+f.thought:'')+(f.hook?'\n（Hook：'+HK[f.hook][0]+'）':''))].join('\n')}
+DT.boot({title:'场景故事板',en:'Scenario Storyboard',subtitle:()=>persona().name||'',render,md});
+})();
+</script>

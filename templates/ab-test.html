@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A/B 测试 · 设计思维</title>
+<style>
+:root{--text:#2C2C2B;--muted:#7D7A75;--bg:#FFFFFF;--soft:#F9F8F7;--surface:#F0EFED;--border:#E6E5E3;
+--blue:#2783DE;--blue-s:#E5F2FC;--green:#46A171;--green-s:#E8F1EC;--orange:#D5803B;--orange-s:#FBEBDE;--red:#E56458;--red-s:#FCE9E7;--purple:#9A6BC0;--purple-s:#F3ECF8;--yellow:#C9A227;--yellow-s:#FBF3DB;--teal:#3A9DAE;--teal-s:#E3F3F5;--pink:#C9658F;--pink-s:#FAE8F0}
+@media (prefers-color-scheme:dark){:root{--text:#FFFFFF;--muted:rgba(255,255,255,.65);--bg:#191919;--soft:#202020;--surface:#383836;--border:rgba(255,255,255,.2);
+--blue:#5E9FE8;--blue-s:rgba(94,159,232,.12);--green:#72BC8F;--green-s:rgba(114,188,143,.12);--orange:#DE9255;--orange-s:rgba(222,146,85,.12);--red:#E97366;--red-s:rgba(233,115,102,.12);--purple:#BF8EDA;--purple-s:rgba(191,142,218,.12);--yellow:#EAC26B;--yellow-s:rgba(234,194,107,.12);--teal:#4FB9C9;--teal-s:rgba(79,185,201,.12);--pink:#DF84A8;--pink-s:rgba(223,132,168,.12)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:24px 32px 48px}
+/* 顶部导航栏（所有非仪表盘页面注入） */
+#dt-nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:0;background:var(--bg);border-bottom:1px solid var(--border);padding:0 24px;height:40px;font-size:13.5px}
+#dt-nav a{color:var(--muted);text-decoration:none;padding:0 10px;height:40px;display:flex;align-items:center;border-bottom:2px solid transparent}
+#dt-nav a:hover{color:var(--text);background:var(--soft)}
+#dt-nav .dt-nav-home{color:var(--blue);font-weight:600;padding-left:0}
+#dt-nav .dt-nav-home:hover{background:var(--blue-s)}
+#dt-nav .dt-nav-sep{flex:1}
+#dt-nav .dt-nav-proj{font-size:12.5px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body:has(#dt-nav) .wrap{padding-top:16px}
+.dt-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.dt-head h1{font-size:24px;margin:0;font-weight:650}
+.dt-head h1 small{font-size:14px;color:var(--muted);font-weight:400;margin-left:8px}
+.dt-head .sub{font-size:13.5px;color:var(--muted);margin-top:2px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;font-size:14px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer;min-height:36px}
+button:hover{background:var(--soft)}
+button:focus-visible,[contenteditable]:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+button.ghost{border-style:dashed;color:var(--muted);font-size:13px;min-height:32px;padding:4px 10px}
+button.icon{border:0;background:transparent;color:var(--muted);width:28px;height:28px;min-height:28px;padding:0;border-radius:6px;font-size:16px;line-height:1}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;border-radius:0}
+.seg button[aria-pressed=true]{background:var(--surface);font-weight:600}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:2px 10px;border-radius:999px;background:var(--orange-s);color:var(--orange);font-weight:550;white-space:nowrap}
+button.badge{border:0;min-height:0;cursor:pointer;font:inherit;font-size:12.5px;font-weight:550}button.badge:hover{filter:brightness(.96)}
+.badge.ok{background:var(--green-s);color:var(--green)}
+.badge.info{background:var(--blue-s);color:var(--blue)}
+.badge.mute{background:var(--surface);color:var(--muted)}
+.box{border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:var(--bg)}
+.box.soft{background:var(--soft)}
+.sec{font-size:17px;font-weight:650;margin:28px 0 4px}
+.secsub{font-size:13.5px;color:var(--muted);margin:0 0 12px}
+.hint{font-size:12.5px;color:var(--muted)}
+.card{position:relative;background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:8px 32px 8px 10px}
+.card>.icon.del{position:absolute;top:4px;right:4px}
+.ed{outline:none;min-height:1.4em;word-break:break-word}
+.ed:empty:before{content:attr(data-ph);color:var(--muted)}
+.ev{font-size:12px;border:0;padding:1px 8px;min-height:22px;border-radius:999px;cursor:pointer}
+.ev.quote{background:var(--blue-s);color:var(--blue)}.ev.observed{background:var(--green-s);color:var(--green)}
+.ev.inferred{background:var(--purple-s);color:var(--purple)}.ev.assumed{background:var(--orange-s);color:var(--orange)}
+input,select,textarea{font:inherit;font-size:14px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 8px;min-height:36px;max-width:100%}
+textarea{resize:vertical}
+.core{border-radius:12px;padding:16px 20px;background:var(--blue-s);border-left:4px solid var(--blue)}
+.core .lbl{font-size:13px;color:var(--blue);font-weight:650;margin-bottom:4px}
+.core .ed{font-size:16px;font-weight:550}
+.verify{border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-top:16px}
+.verify ul{margin:6px 0 0;padding-left:20px}.verify li{margin:4px 0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:8px 16px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+.toast.show{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:10;padding:16px}
+.modal.open{display:flex}
+.modal .panel{background:var(--bg);border-radius:12px;padding:20px;width:min(640px,100%);box-shadow:0 4px 24px rgba(0,0,0,.18)}
+.modal textarea{width:100%;min-height:220px;font-family:Menlo,Consolas,monospace;font-size:12.5px}
+.empty{color:var(--muted);font-size:14px;padding:12px;border:1px dashed var(--border);border-radius:8px;text-align:center}
+.foot{margin-top:40px;font-size:12.5px;color:var(--muted);text-align:center}
+.foot a{color:var(--muted)}
+@media (max-width:720px){.wrap{padding:16px}.dt-head h1{font-size:21px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.hyp{display:grid;grid-template-columns:110px 1fr;gap:8px 12px;align-items:baseline}
+.hyp .lb{font-size:13.5px;color:var(--muted)}
+.hyp .ed{border-bottom:1px dashed var(--border);padding:2px 0}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.var{border:1px solid var(--border);border-radius:12px;padding:14px;border-top:4px solid var(--c)}
+.var .nm{font-weight:700;font-size:16px;display:flex;gap:8px;align-items:center}
+.var .tag{background:var(--c);color:#fff;border-radius:6px;padding:0 8px;font-size:13px}
+.nums{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.nums label{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.nums input{width:100%}
+.rate{font-size:28px;font-weight:750;margin-top:10px;font-variant-numeric:tabular-nums}
+.rate small{font-size:13px;color:var(--muted);font-weight:400;margin-left:6px}
+.res{margin-top:16px;border-radius:12px;padding:16px 20px;border-left:4px solid var(--c);background:var(--cs)}
+.res .v{font-size:18px;font-weight:700;color:var(--c)}
+.res .d{font-size:14px;margin-top:4px}
+.kv{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.kv div{background:var(--bg);border-radius:8px;padding:8px 10px;border:1px solid var(--border)}
+.kv b{display:block;font-size:17px;font-variant-numeric:tabular-nums}.kv span{font-size:12px;color:var(--muted)}
+.ci{display:block;max-width:100%;height:auto;margin:8px auto 0}
+.set{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:12px;font-size:13.5px}
+.set select,.set input{min-height:32px}
+.plan{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:720px){.vs,.plan{grid-template-columns:1fr}.kv{grid-template-columns:1fr 1fr}.hyp{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-tpl="ab-test">
+<div class="wrap">
+<header class="dt-head" id="dt-head"></header>
+<main id="app"></main>
+<div class="foot">设计思维 Skill · 修改会自动保存在本浏览器 · 点「复制给 AI」把结果带回对话</div>
+</div>
+<script id="dt-data" type="application/json">/*DT_DATA*/</script>
+<script>
+const DT=(function(){
+ const raw=document.getElementById('dt-data').textContent.trim();
+ let init={};try{init=raw&&raw.indexOf('DT_DATA')<0?JSON.parse(raw):{}}catch(e){console.error('数据解析失败',e)}
+ const tpl=document.body.dataset.tpl||'page';
+ const clone=o=>JSON.parse(JSON.stringify(o));
+ const PRJ=(init.meta&&init.meta.project)||'default',SK='dt:shared:'+PRJ,OWN='dt:'+tpl+':'+PRJ+':'+(init._target||'');
+ const strip=o=>{const c=clone(o);delete c._target;delete c._rev;return c};
+ const HS=(function(t){let x=5381;for(let i=0;i<t.length;i++)x=((x<<5)+x+t.charCodeAt(i))|0;return String(x>>>0)})(JSON.stringify(strip(init)));
+ const REV=init._rev||'';
+ // 同一项目的所有页面共享一份数据（dt:shared:<项目>）；若本页比共享数据旧，则只在本页独立保存，避免覆盖。
+ let st,fresh=false,KEY=SK,older=false;
+ function readK(k){try{const s=localStorage.getItem(k);return s?JSON.parse(s):null}catch(e){return null}}
+ (function(){const o=readK(SK);
+  if(o&&o.__base===HS){st=o.st}
+  else if(o&&o.__rev&&REV&&REV<o.__rev){older=true;KEY=OWN;const m=readK(OWN);st=m&&m.__base===HS?m.st:strip(init)}
+  else{if(o){try{localStorage.setItem(SK+':prev',JSON.stringify(o))}catch(e){}fresh=true}st=strip(init);try{localStorage.setItem(SK,JSON.stringify({__base:HS,__rev:REV,st}))}catch(e){}}})();
+ st.meta=st.meta||{};
+ let opts={};
+ const $=id=>document.getElementById(id);
+ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ let seq=Date.now()%100000;const nid=p=>(p||'x')+(++seq).toString(36);
+ function get(path,def){if(!path)return st;let o=st;const ks=path.split('.');for(let i=0;i<ks.length;i++){if(o[ks[i]]==null){if(def===undefined)return undefined;o[ks[i]]=i===ks.length-1?def:{}}o=o[ks[i]]}return o}
+ function save(){st.meta.updatedAt=new Date().toISOString();try{localStorage.setItem(KEY,JSON.stringify({__base:HS,__rev:REV,st:strip(st)}))}catch(e){}}
+ function toast(t){let e=$('dt-toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1800)}
+ function ed(el,obj,key,ph,onChange){el.contentEditable='true';el.spellcheck=false;el.classList.add('ed');if(ph)el.dataset.ph=ph;el.textContent=obj[key]==null?'':obj[key];
+  el.addEventListener('input',()=>{obj[key]=el.textContent;save();onChange&&onChange()});
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&el.dataset.multi!=='1'){e.preventDefault();el.blur()}});return el}
+ function h(tag,attrs,html){const e=document.createElement(tag);if(attrs)for(const k in attrs){if(k==='class')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else e.setAttribute(k,attrs[k])}if(html!=null)e.innerHTML=html;return e}
+ function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+ async function copy(t,msg){try{await navigator.clipboard.writeText(t);toast(msg||'已复制')}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(msg||'已复制')}catch(_){toast('复制失败，请改用导出 JSON')}ta.remove()}}
+ const out=()=>strip(st);
+ function aiBadge(){const g=st.meta.generatedBy||'ai';const m={ai:['','AI 假设 · 待验证'],mixed:['info','调研 + AI 推断'],human:['ok','基于真实调研']}[g]||['','AI 假设 · 待验证'];return '<button class="badge '+m[0]+'" id="dt-src" title="数据来源（点击切换）：AI 假设 / 调研 + AI 推断 / 基于真实调研">'+m[1]+'</button>'}
+ const PATHS={persona:'personas, personaSteps','empathy-map':'empathyMap',journey:'journey',hook:'hook',pov:'define',scamper:'ideate.scamper, ideate.matrix',matrix:'ideate.matrix',box:'prototype','ab-test':'test.ab',storyboard:'storyboard','value-canvas':'valueCanvas',overview:'meta','research-plan':'researchPlan',dashboard:'全部'};
+ const PATH=()=>init._target||PATHS[tpl]||'全部';
+ function header(){const hd=$('dt-head');
+  hd.innerHTML='<div><h1>'+esc(opts.title)+'<small>'+esc(opts.en||'')+'</small></h1><div class="sub">'+esc(st.meta.project||'')+(opts.subtitle?' · '+esc(opts.subtitle()):'')+' '+aiBadge()+'</div></div><div class="tools" id="dt-tools"></div>';
+  $('dt-src').onclick=()=>{const o=['ai','mixed','human'];st.meta.generatedBy=o[(o.indexOf(st.meta.generatedBy||'ai')+1)%3];save();header()};const t=$('dt-tools');(opts.extra||[]).forEach(b=>t.appendChild(b));
+  const b=(txt,cls,fn,title)=>{const x=h('button',{class:cls||''},txt);if(title)x.title=title;x.onclick=fn;t.appendChild(x)};
+  b('复制给 AI','primary',()=>copy('以下是我在可视化页面中修改后的设计思维项目数据（当前页面「'+opts.title+'」，负责路径：'+PATH()+'）。'+(older?'注意：本页是旧版本，只合并本页负责的路径。':'各页面数据已同步，与 project.json 不同的部分都是我的修改。')+'请合并回 project.json，然后继续：\n```json\n'+JSON.stringify(out(),null,2)+'\n```','已复制，粘贴回对话即可继续'),'把修改后的完整数据复制到剪贴板');
+  if(opts.md)b('导出 Markdown','',()=>dl(tpl+'.md',opts.md(),'text/markdown'));
+  b('导出 JSON','',()=>dl((st.meta.project||'project')+'.json',JSON.stringify(out(),null,2),'application/json'));
+  b('导入','',openImport,'粘贴 JSON 数据替换当前页面');
+  b('重置','',()=>{if(!confirm('清除本项目所有页面的本地修改，恢复 agent 生成的初始数据？'))return;try{localStorage.removeItem(KEY)}catch(e){}st=strip(init);st.meta=st.meta||{};rerender();toast('已恢复初始数据')},'清除本地修改')}
+ function openImport(){const m=$('dt-modal');m.classList.add('open');const ta=$('dt-imp');ta.value='';ta.focus()}
+ function doImport(){let t=$('dt-imp').value.trim().replace(/^```(json)?/,'').replace(/```$/,'').trim();try{const o=JSON.parse(t);st=strip(o);st.meta=st.meta||{};save();$('dt-modal').classList.remove('open');rerender();toast('已导入')}catch(e){toast('JSON 格式不正确')}}
+ function rerender(){header();opts.render&&opts.render()}
+ function evBtn(obj){const EV=['quote','observed','inferred','assumed'],L={quote:'原话',observed:'观察',inferred:'推断',assumed:'假设'};obj.evidence=obj.evidence||'assumed';
+  const b=h('button',{class:'ev '+obj.evidence,title:'切换证据类型'},L[obj.evidence]);b.onclick=e=>{e.stopPropagation();obj.evidence=EV[(EV.indexOf(obj.evidence)+1)%4];b.className='ev '+obj.evidence;b.textContent=L[obj.evidence];save()};return b}
+ function list(container,arr,prefix,ph,onChange){container.innerHTML='';arr.forEach((it,i)=>{const c=h('div',{class:'card'});const t=h('div');ed(t,it,'text',ph,onChange);c.appendChild(t);
+   const d=h('button',{class:'icon del','aria-label':'删除',title:'删除'},'×');d.onclick=()=>{arr.splice(i,1);save();list(container,arr,prefix,ph,onChange);onChange&&onChange()};c.appendChild(d);container.appendChild(c)});
+  const a=h('button',{class:'ghost'},'+ 添加');a.onclick=()=>{arr.push({id:nid(prefix),text:''});save();list(container,arr,prefix,ph,onChange);const e=container.querySelectorAll('.card .ed');e.length&&e[e.length-1].focus()};container.appendChild(a)}
+ function boot(o){opts=o;
+  // 非仪表盘页面注入固定顶部导航栏
+  if(tpl!=='dashboard'){
+    const nb=document.createElement('nav');nb.id='dt-nav';nb.setAttribute('aria-label','项目导航');
+    nb.innerHTML='<a href="dashboard.html" class="dt-nav-home" title="返回项目仪表盘">⬡ 仪表盘</a><a href="overview.html" class="dt-nav-ov" title="查看全部工具">工具总览</a><span class="dt-nav-sep"></span><span class="dt-nav-proj" id="dt-nav-proj"></span>';
+    document.body.insertBefore(nb,document.body.firstChild);
+    // 更新项目名
+    setTimeout(()=>{const el=document.getElementById('dt-nav-proj');if(el)el.textContent=st.meta&&st.meta.name||st.meta&&st.meta.project||'';},50);
+  }
+  document.body.insertAdjacentHTML('beforeend','<div class="toast" id="dt-toast" role="status" aria-live="polite"></div><div class="modal" id="dt-modal" role="dialog" aria-label="导入 JSON"><div class="panel"><b>导入 JSON</b><p class="hint">粘贴 agent 给你的项目 JSON（可带 ```json 代码块）。将替换本页当前数据。</p><textarea id="dt-imp"></textarea><div class="tools" style="justify-content:flex-end;margin-top:12px"><button id="dt-imp-c">取消</button><button class="primary" id="dt-imp-ok">导入</button></div></div></div>');
+  $('dt-imp-c').onclick=()=>$('dt-modal').classList.remove('open');$('dt-imp-ok').onclick=doImport;
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')$('dt-modal').classList.remove('open')});
+  window.addEventListener('storage',e=>{if(e.key!==KEY||!e.newValue)return;try{const o=JSON.parse(e.newValue);if(o.__base===HS){st=o.st;st.meta=st.meta||{};rerender()}}catch(_){}});
+  rerender();if(fresh)setTimeout(()=>toast('已载入 agent 生成的新版本数据（旧的本地修改已备份）'),300);if(older)setTimeout(()=>toast('本页数据比其他已打开的页面旧，修改只保存在本页'),300)}
+ return {get st(){return st},get,save,toast,esc,ed,h,nid,dl,copy,boot,rerender,evBtn,list,target:init._target||''};
+})();
+
+(function(){
+const {h,esc,save,ed}=DT;
+const A=()=>{const t=DT.get('test',{});t.ab=t.ab||{};const ab=t.ab;ab.a=ab.a||{label:'A（对照）',n:0,conv:0};ab.b=ab.b||{label:'B（新版本）',n:0,conv:0};ab.alpha=ab.alpha||0.05;ab.power=ab.power||0.8;return ab};
+function cdf(z){const t=1/(1+.2316419*Math.abs(z)),d=.3989423*Math.exp(-z*z/2);let p=d*t*(.3193815+t*(-.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return z>0?1-p:p}
+function inv(p){// Acklam 近似
+ const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],c=[-.007784894002430293,-.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],d=[.007784695709041462,.3224671290700398,2.445134137142996,3.754408661907416];
+ const q=p<.02425?Math.sqrt(-2*Math.log(p)):p>1-.02425?Math.sqrt(-2*Math.log(1-p)):0;
+ if(p<.02425)return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+ if(p>1-.02425)return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+ const r=p-.5,s=r*r;return(((((a[0]*s+a[1])*s+a[2])*s+a[3])*s+a[4])*s+a[5])*r/(((((b[0]*s+b[1])*s+b[2])*s+b[3])*s+b[4])*s+1)}
+function calc(ab){const n1=+ab.a.n||0,x1=+ab.a.conv||0,n2=+ab.b.n||0,x2=+ab.b.conv||0;
+ if(n1<=0||n2<=0||x1>n1||x2>n2||x1<0||x2<0)return null;
+ const p1=x1/n1,p2=x2/n2,pp=(x1+x2)/(n1+n2),se0=Math.sqrt(pp*(1-pp)*(1/n1+1/n2)),z=se0?(p2-p1)/se0:0,pv=2*(1-cdf(Math.abs(z)));
+ const se=Math.sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2),za=inv(1-ab.alpha/2),diff=p2-p1;
+ const small=Math.min(x1,n1-x1,x2,n2-x2)<5;
+ return {p1,p2,diff,lift:p1?diff/p1:null,z,pv,lo:diff-za*se,hi:diff+za*se,small,sig:pv<ab.alpha}}
+function need(p1,mde,alpha,power){const p2=p1*(1+mde);if(!(p1>0&&p1<1&&p2>0&&p2<1))return null;const za=inv(1-alpha/2),zb=inv(power);return Math.ceil((za+zb)**2*(p1*(1-p1)+p2*(1-p2))/(p2-p1)**2)}
+const pct=(v,d)=>v==null||isNaN(v)?'—':(v*100).toFixed(d==null?1:d)+'%';
+function ciSVG(r,W){W=Math.max(280,Math.min(W||600,900));const span=Math.max(Math.abs(r.lo),Math.abs(r.hi),Math.abs(r.diff),0.01)*1.25,x=v=>W/2+v/span*(W/2-30);
+ return '<svg class="ci" width="'+W+'" height="120" viewBox="0 0 '+W+' 120" role="img" aria-label="B 相对 A 的差异及置信区间"><line x1="'+x(0)+'" y1="46" x2="'+x(0)+'" y2="92" stroke="var(--muted)" stroke-dasharray="4 4"/><text x="'+x(0)+'" y="110" text-anchor="middle" font-size="12" fill="var(--muted)">无差异 0</text>'+
+ '<line x1="'+x(r.lo)+'" y1="52" x2="'+x(r.hi)+'" y2="52" stroke="var(--c)" stroke-width="6" stroke-linecap="round" opacity=".45"/><circle cx="'+x(r.diff)+'" cy="52" r="8" fill="var(--c)"/>'+
+ '<text x="'+x(r.lo)+'" y="36" text-anchor="middle" font-size="12" fill="var(--text)">'+pct(r.lo,2)+'</text><text x="'+x(r.hi)+'" y="36" text-anchor="middle" font-size="12" fill="var(--text)">'+pct(r.hi,2)+'</text>'+
+ '<text x="'+x(r.diff)+'" y="80" text-anchor="middle" font-size="13" font-weight="700" fill="var(--c)">'+(r.diff>=0?'+':'')+pct(r.diff,2)+'</text></svg>'}
+function render(){const app=document.getElementById('app');app.innerHTML='';const ab=A();
+ const hy=h('div',{class:'hyp box soft'});[['name','测试名称','例如：取餐页按钮文案'],['hypothesis','假设','如果……那么……因为……'],['variable','唯一变量','一次只改变一个变量'],['metric','衡量指标','例如：点击率、下单转化率']].forEach(f=>{hy.appendChild(h('div',{class:'lb'},f[1]));const e=ed(h('div'),ab,f[0],f[2]);if(f[0]==='hypothesis')e.dataset.multi='1';hy.appendChild(e)});app.appendChild(hy);
+ const vs=h('div',{class:'vs'});const out=h('div');
+ [['a','var(--blue)'],['b','var(--orange)']].forEach(([k,c])=>{const v=ab[k];const d=h('div',{class:'var',style:'--c:'+c});
+  const nm=h('div',{class:'nm'},'<span class="tag">'+k.toUpperCase()+'</span>');nm.appendChild(ed(h('div'),v,'label','版本名称'));d.appendChild(nm);
+  const ds=ed(h('div',{class:'hint',style:'margin-top:4px'}),v,'desc','这个版本有什么不同？');ds.dataset.multi='1';d.appendChild(ds);
+  const ns=h('div',{class:'nums'});const rt=h('div',{class:'rate'});
+  const sr=()=>{rt.innerHTML=(+v.n>0?pct(v.conv/v.n):'—')+'<small>转化率</small>'};
+  [['n','样本量（访问/曝光）'],['conv','转化数（达成指标）']].forEach(f=>{const lb=h('label',{},f[1]);const i=h('input',{type:'number',min:'0',step:'1',inputmode:'numeric'});i.value=v[f[0]]||'';i.oninput=()=>{v[f[0]]=i.value===''?0:Math.max(0,Math.floor(+i.value));save();sr();result(out)};lb.appendChild(i);ns.appendChild(lb)});
+  d.appendChild(ns);sr();d.appendChild(rt);vs.appendChild(d)});
+ app.appendChild(vs);
+ const st=h('div',{class:'set'});const al=h('select',{'aria-label':'显著性水平'});[[0.1,'90%'],[0.05,'95%'],[0.01,'99%']].forEach(o=>{const x=h('option',{value:o[0]},'置信水平 '+o[1]);if(ab.alpha==o[0])x.selected=true;al.appendChild(x)});al.onchange=()=>{ab.alpha=+al.value;save();result(out);plan()};
+ st.appendChild(al);st.appendChild(h('span',{class:'hint'},'双侧两比例 z 检验；样本很少时结论仅供参考。'));app.appendChild(st);
+ app.appendChild(out);result(out);
+ app.appendChild(h('div',{class:'sec'},'需要多少样本？'));app.appendChild(h('p',{class:'secsub'},'测试开始前估算：基线转化率 + 希望检测到的最小相对提升 → 每组所需样本量。'));
+ const pw=h('div',{class:'box plan'});const pr=h('div',{class:'set',style:'margin:0'});const po=h('div',{style:'align-self:center'});
+ const inp=(k,lb,def,step)=>{const l=h('label',{style:'display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted)'},lb);const i=h('input',{type:'number',step:step,min:'0'});i.value=ab[k]!=null?ab[k]:def;ab[k]=+i.value;i.oninput=()=>{ab[k]=+i.value;save();plan()};l.appendChild(i);pr.appendChild(l)};
+ inp('baseline','基线转化率（%）',10,'0.1');inp('mde','最小相对提升（%）',20,'1');
+ const pwr=h('select',{'aria-label':'统计功效'});[[0.8,'功效 80%'],[0.9,'功效 90%']].forEach(o=>{const x=h('option',{value:o[0]},o[1]);if(ab.power==o[0])x.selected=true;pwr.appendChild(x)});pwr.onchange=()=>{ab.power=+pwr.value;save();plan()};pr.appendChild(pwr);
+ pw.appendChild(pr);pw.appendChild(po);app.appendChild(pw);
+ function plan(){const n=need(ab.baseline/100,ab.mde/100,ab.alpha,ab.power);po.innerHTML=n?'<div class="hint">每组约需</div><div style="font-size:26px;font-weight:750">'+n.toLocaleString()+' <small style="font-size:14px;font-weight:400">人</small></div><div class="hint">两组合计约 '+(2*n).toLocaleString()+' 人'+(ab.a.n&&ab.b.n?'；当前 A '+ab.a.n+' / B '+ab.b.n+(Math.min(ab.a.n,ab.b.n)>=n?' ✓ 已达到':' · 尚未达到'):'')+'</div>':'<div class="hint">请填写有效的基线与提升幅度</div>'}
+ plan();
+ const nt=h('div',{class:'verify'});nt.innerHTML='<b>测试纪律</b><ul><li>一次只改变一个变量，否则无法判断是什么带来了差异。</li><li>开始前定好样本量和停止条件，不要“看到显著就停”。</li><li>A/B 告诉你“哪个更好”，不告诉你“为什么”——结合定性访谈一起看。</li><li>样本与转化数来自真实测试时，点击页面顶部的数据来源标签，切换为“基于真实调研”。</li></ul>';app.appendChild(nt)}
+function result(out){const ab=A(),r=calc(ab);out.innerHTML='';
+ if(!r){out.appendChild(h('div',{class:'empty',style:'margin-top:14px'},'填入两个版本的样本量与转化数后，这里会显示结论（转化数不能大于样本量）'));return}
+ const c=r.sig?(r.diff>0?'var(--green)':'var(--red)'):'var(--muted)',cs=r.sig?(r.diff>0?'var(--green-s)':'var(--red-s)'):'var(--soft)';
+ const v=r.sig?(r.diff>0?'B 显著优于 A':'B 显著差于 A'):'差异不显著';
+ const d=r.sig?'在 '+Math.round((1-ab.alpha)*100)+'% 置信水平下，差异不太可能由随机波动造成。':'目前的数据还不能区分两个版本，可继续收集样本，或接受“两者差不多”。';
+ const x=h('div',{class:'res',style:'--c:'+c+';--cs:'+cs});
+ x.innerHTML='<div class="v">'+v+'</div><div class="d">'+d+(r.small?' <b>注意：</b>转化数或未转化数少于 5，近似检验不可靠。':'')+'</div><div class="kv"><div><span>A 转化率</span><b>'+pct(r.p1,2)+'</b></div><div><span>B 转化率</span><b>'+pct(r.p2,2)+'</b></div><div><span>相对提升</span><b>'+(r.lift==null?'—':(r.lift>=0?'+':'')+pct(r.lift))+'</b></div><div><span>p 值</span><b>'+(r.pv<0.001?'<0.001':r.pv.toFixed(3))+'</b></div></div>'+ciSVG(r,out.clientWidth-48)+'<div class="hint">圆点为 B − A 的差值，横条为 '+Math.round((1-ab.alpha)*100)+'% 置信区间；横条跨过 0 即不显著。</div>';
+ out.appendChild(x)}
+function md(){const ab=A(),r=calc(ab);return ['# A/B 测试：'+(ab.name||''),'','- 假设：'+(ab.hypothesis||''),'- 唯一变量：'+(ab.variable||''),'- 指标：'+(ab.metric||''),'','| 版本 | 样本 | 转化 | 转化率 |','|---|---|---|---|','| '+ab.a.label+' | '+ab.a.n+' | '+ab.a.conv+' | '+(r?pct(r.p1,2):'—')+' |','| '+ab.b.label+' | '+ab.b.n+' | '+ab.b.conv+' | '+(r?pct(r.p2,2):'—')+' |','',r?'结论：'+(r.sig?(r.diff>0?'B 显著优于 A':'B 显著差于 A'):'差异不显著')+'（p='+r.pv.toFixed(3)+'，差值 '+pct(r.diff,2)+'，CI ['+pct(r.lo,2)+', '+pct(r.hi,2)+']）':'结论：数据不足'].join('\n')}
+DT.boot({title:'A/B 测试',en:'A/B Testing',subtitle:()=>A().name||'',render,md});
+})();
+</script>
+</body>
+</html>

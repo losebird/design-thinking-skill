@@ -1,0 +1,60 @@
+<!-- title: 奔驰法 SCAMPER -->
+<style>
+.lay{display:grid;grid-template-columns:380px 1fr;gap:24px;align-items:start}
+.wheel{width:100%;max-width:380px;aspect-ratio:1}
+.wheel .sec-g{cursor:pointer}
+.wheel .sec-g:focus{outline:none}
+.wheel .sec-g:focus-visible path{stroke:var(--text);stroke-width:3}
+.subj{font-size:14px;margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.subj .ed{font-weight:650;border-bottom:1px dashed var(--border);min-width:120px}
+.panel h2{font-size:22px;margin:0;display:flex;gap:10px;align-items:baseline}
+.panel h2 .lt{font-size:30px;font-weight:800}
+.qs{margin:8px 0 14px;padding-left:20px;color:var(--muted);font-size:14px}
+.ideas{display:flex;flex-direction:column;gap:8px}
+.idea{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:start;background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:8px 6px 8px 10px}
+.idea.on{border-color:var(--yellow);background:var(--yellow-s)}
+.star{font-size:17px;color:var(--muted);border:0;background:transparent;width:30px;height:30px;min-height:30px;padding:0}
+.star.on{color:var(--yellow)}
+.short{margin-top:8px}
+.short li{margin:4px 0}
+.lt-chip{display:inline-block;min-width:22px;text-align:center;border-radius:6px;font-weight:700;font-size:12px;color:#fff;margin-right:6px;padding:0 4px}
+@media (max-width:820px){.lay{grid-template-columns:1fr}.wheel{margin:0 auto;display:block;max-width:320px}}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed}=DT;
+const K=[['S','替代','Substitute','#5E9FE8',['可以用什么替代现有的材料、流程、人或技术？','能否换一种方式验证、支付、交付？']],
+['C','结合','Combine','#EAC26B',['哪些元素、服务或场景可以合并？','能否和其他行业的产品组合？']],
+['A','适应','Adapt','#72BC8F',['还有什么类似的东西可以借鉴？','其他行业是怎么解决类似问题的？']],
+['M','修改','Modify','#BF8EDA',['放大、缩小、改变形状/颜色/频率会怎样？','哪个部分改一下体验会明显变好？']],
+['P','用作他用','Put to other uses','#DE9255',['它还能用在什么场景、给什么人用？','闲置的时间或空间能做什么？']],
+['E','去除','Eliminate','#DF84A8',['去掉哪一步、哪个部件，用户反而更轻松？','什么是可有可无的？']],
+['R','重组','Rearrange','#4FB9C9',['调换顺序、反过来做会怎样？','如果让用户先做最后一步呢？']]];
+let cur=0;
+const S=()=>{const s=DT.get('ideate.scamper',{});K.forEach(k=>s[k[0]]=s[k[0]]||[]);return s};
+function wheel(){const s=S(),R=180,r=78,cx=190,cy=190,n=7;let g='';
+ K.forEach((k,i)=>{const a0=-Math.PI/2+i*2*Math.PI/n,a1=a0+2*Math.PI/n,am=(a0+a1)/2,on=i===cur,RR=on?R+8:R;
+  const p=(a,rad)=>[cx+rad*Math.cos(a),cy+rad*Math.sin(a)];const [x0,y0]=p(a0,RR),[x1,y1]=p(a1,RR),[x2,y2]=p(a1,r),[x3,y3]=p(a0,r);
+  const [tx,ty]=p(am,(RR+r)/2);const cnt=s[k[0]].length;
+  g+='<g class="sec-g" data-i="'+i+'" tabindex="0" role="button" aria-label="'+k[1]+' '+k[2]+'，'+cnt+' 个点子"><path d="M'+x0+' '+y0+' A'+RR+' '+RR+' 0 0 1 '+x1+' '+y1+' L'+x2+' '+y2+' A'+r+' '+r+' 0 0 0 '+x3+' '+y3+'Z" fill="'+k[3]+'" opacity="'+(on?1:.55)+'" stroke="var(--bg)" stroke-width="2"/>'+
+   '<text x="'+tx+'" y="'+(ty-8)+'" text-anchor="middle" font-size="24" font-weight="800" fill="#fff">'+k[0]+'</text><text x="'+tx+'" y="'+(ty+12)+'" text-anchor="middle" font-size="12.5" fill="#fff">'+k[1]+'</text><text x="'+tx+'" y="'+(ty+28)+'" text-anchor="middle" font-size="11" fill="#fff" opacity=".9">'+cnt+' 个</text></g>'});
+ const tot=K.reduce((a,k)=>a+s[k[0]].length,0),st=K.reduce((a,k)=>a+s[k[0]].filter(x=>x.star).length,0);
+ g+='<text x="190" y="184" text-anchor="middle" font-size="30" font-weight="700" fill="var(--text)">'+tot+'</text><text x="190" y="206" text-anchor="middle" font-size="12.5" fill="var(--muted)">个点子 · ★ '+st+'</text>';
+ return '<svg class="wheel" viewBox="0 0 380 380" role="group" aria-label="SCAMPER 轮盘">'+g+'</svg>'}
+function render(){const app=document.getElementById('app');app.innerHTML='';const s=S();
+ const sj=h('div',{class:'subj'},'<span class="hint">对象：</span>');sj.appendChild(ed(h('span'),s,'subject','要改造的产品 / 服务 / 流程'));sj.appendChild(h('span',{class:'hint'},'　数量优先，先不评判；用 ★ 标出值得进入丘吉尔矩阵的点子'));app.appendChild(sj);
+ const lay=h('div',{class:'lay'});const wl=h('div',{},wheel());lay.appendChild(wl);
+ wl.querySelectorAll('.sec-g').forEach(e=>{const go=()=>{cur=+e.dataset.i;render();const t=document.querySelector('.sec-g[data-i="'+cur+'"]');t&&t.focus()};e.addEventListener('click',go);e.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go()}if(ev.key==='ArrowRight'||ev.key==='ArrowDown'){ev.preventDefault();cur=(cur+1)%7;render();document.querySelector('.sec-g[data-i="'+cur+'"]').focus()}if(ev.key==='ArrowLeft'||ev.key==='ArrowUp'){ev.preventDefault();cur=(cur+6)%7;render();document.querySelector('.sec-g[data-i="'+cur+'"]').focus()}})});
+ const k=K[cur],arr=s[k[0]];const pn=h('div',{class:'panel'},'<h2><span class="lt" style="color:'+k[3]+'">'+k[0]+'</span>'+k[1]+'<span class="hint">'+k[2]+'</span></h2><ul class="qs">'+k[4].map(q=>'<li>'+q+'</li>').join('')+'</ul>');
+ const il=h('div',{class:'ideas'});arr.forEach((it,i)=>{const r=h('div',{class:'idea'+(it.star?' on':'')});r.appendChild(ed(h('div'),it,'text','一个点子……',()=>{}));
+  const st=h('button',{class:'star'+(it.star?' on':''),'aria-label':'标记进入矩阵','aria-pressed':String(!!it.star)},it.star?'★':'☆');st.onclick=()=>{it.star=!it.star;save();render()};
+  const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{arr.splice(i,1);save();render()};r.append(st,x);il.appendChild(r)});
+ const a=h('button',{class:'ghost'},'+ 点子');a.onclick=()=>{arr.push({id:DT.nid(k[0].toLowerCase()),text:''});save();render();const e=document.querySelectorAll('.idea .ed');e.length&&e[e.length-1].focus()};il.appendChild(a);pn.appendChild(il);
+ const sh=K.flatMap(k=>s[k[0]].filter(x=>x.star).map(x=>[k,x]));
+ if(sh.length){pn.appendChild(h('h3',{class:'sec',style:'font-size:15px'},'★ 候选点子（'+sh.length+'）'));pn.appendChild(h('ul',{class:'short'},sh.map(([k,x])=>'<li><span class="lt-chip" style="background:'+k[3]+'">'+k[0]+'</span>'+esc(x.text)+'</li>').join('')));
+  const tm=h('button',{},'把候选点子放入丘吉尔矩阵');tm.onclick=()=>{const items=DT.get('ideate.matrix',{}).items||(DT.st.ideate.matrix.items=[]);let n=0;sh.forEach(([k,x])=>{if(!items.find(i=>i.from===x.id)){items.push({id:DT.nid('m'),from:x.id,text:x.text,x:3,y:3});n++}});save();DT.toast(n?'已加入 '+n+' 个点子，打开丘吉尔矩阵页面即可看到（页面间自动同步）':'都已在矩阵中')};pn.appendChild(tm)}
+ lay.appendChild(pn);app.appendChild(lay)}
+function md(){const s=S();return ['# SCAMPER：'+(s.subject||''),'',...K.flatMap(k=>['## '+k[0]+' '+k[1]+'（'+k[2]+'）',...s[k[0]].map(x=>'- '+(x.star?'★ ':'')+x.text),''])].join('\n')}
+DT.boot({title:'奔驰法 SCAMPER',en:'激发创意',subtitle:()=>S().subject||'',render,md});
+})();
+</script>

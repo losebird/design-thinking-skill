@@ -1,0 +1,92 @@
+<!-- title: 移情图 -->
+<style>
+.persona{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px}
+.avatar{width:52px;height:52px;border-radius:50%;background:var(--blue-s);color:var(--blue);display:grid;place-items:center;font-size:22px;font-weight:700}
+.persona .name{font-weight:650;font-size:17px}.persona .meta{color:var(--muted);font-size:14px}.persona .scene{margin-top:4px;font-size:14px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:13px;color:var(--muted);margin:0 0 12px}
+.legend .ev{cursor:default}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.zone{border:1px solid var(--border);border-radius:12px;padding:14px 14px 10px;background:var(--bg);min-height:150px;display:flex;flex-direction:column}
+.zone.full-only{display:none}body.full .zone.full-only{display:flex}
+.zone h2{font-size:16px;margin:0;display:flex;align-items:baseline;gap:8px}
+.zone h2 .en{font-size:12px;color:var(--muted);font-weight:400}
+.zone .hint{margin:2px 0 10px}
+.zone.says{border-top:3px solid var(--blue)}.zone.does{border-top:3px solid var(--green)}.zone.thinks{border-top:3px solid var(--purple)}.zone.feels{border-top:3px solid var(--orange)}
+.zone.sees,.zone.hears{border-top:3px solid var(--muted)}
+.zone.pains{background:var(--red-s);border-color:transparent}.zone.gains{background:var(--green-s);border-color:transparent}
+.cards{display:flex;flex-direction:column;gap:8px;flex:1}
+.pains .card,.gains .card{background:var(--bg)}
+.card .row{display:flex;gap:8px;align-items:center;margin-top:4px}
+.cid{font-size:11px;color:var(--muted);font-family:Menlo,Consolas,monospace}
+.zone>.ghost{margin-top:8px;align-self:flex-start}
+.card{transition:opacity .15s,box-shadow .15s}
+body.focusing .card{opacity:.35}
+body.focusing .card.hl{opacity:1;border-color:var(--red);box-shadow:0 0 0 2px var(--red-s)}
+.contras{display:grid;gap:10px}
+.contra{border:1px solid var(--border);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;cursor:pointer}
+.contra:hover,.contra.active{border-color:var(--red)}
+.contra .side b{font-size:12px;color:var(--muted);font-weight:500;display:block}
+.vs{font-size:12px;font-weight:700;color:var(--red);background:var(--red-s);border-radius:999px;padding:2px 8px}
+.contra .ins{grid-column:1/-1;font-size:14px;border-top:1px dashed var(--border);padding-top:8px;display:flex;gap:8px;align-items:flex-start}
+.contra .ins>span:first-child{color:var(--red);font-weight:600;white-space:nowrap}
+.newc{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.newc textarea{flex:1 1 280px;min-height:36px}
+@media (max-width:720px){.grid{grid-template-columns:1fr}.contra{grid-template-columns:1fr}.vs{justify-self:start}}
+</style>
+<script>
+(function(){
+const ZONES=[
+ {k:'sees',l:'看',en:'SEES',h:'用户在环境中看到了什么？市场、环境、身边的人',full:1},
+ {k:'hears',l:'听',en:'HEARS',h:'用户从朋友、同事、影响者那里听到了什么？',full:1},
+ {k:'says',l:'说',en:'SAYS',h:'用户的原话和公开表达，往往是理性的、社会化的'},
+ {k:'does',l:'做',en:'DOES',h:'可观察到的行为，是最可信的证据'},
+ {k:'thinks',l:'想',en:'THINKS',h:'内心真实的想法和动机，需要推断与验证'},
+ {k:'feels',l:'感受',en:'FEELS',h:'情绪驱动：焦虑、期待、挫败……'},
+ {k:'pains',l:'痛点',en:'PAINS',h:'恐惧、挫折、阻碍'},
+ {k:'gains',l:'收获',en:'GAINS',h:'愿望、目标、成功的标准'}];
+const LBL={};ZONES.forEach(z=>LBL[z.k]=z.l);
+const {h,esc,save,ed}=DT;
+let active=null;
+const M=()=>{const m=DT.get('empathyMap',{});ZONES.forEach(z=>m[z.k]=m[z.k]||[]);m.contradictions=m.contradictions||[];m.toVerify=m.toVerify||[];return m};
+function persona(){const st=DT.st,m=M();const ps=st.personas||[];return ps.find(p=>p.id===m.personaId)||ps[0]||st.persona||{}}
+function find(id){const m=M();for(const z of ZONES){const c=m[z.k].find(x=>x.id===id);if(c)return{z:z.k,c}}return null}
+function setMode(full){document.body.classList.toggle('full',full);mS.setAttribute('aria-pressed',!full);mF.setAttribute('aria-pressed',full);M().view=full?'full':'simple';save()}
+const seg=h('div',{class:'seg',role:'group','aria-label':'视图'});const mS=h('button',{},'简化 4 区'),mF=h('button',{},'完整 6 区');seg.append(mS,mF);
+mS.onclick=()=>setMode(false);mF.onclick=()=>setMode(true);
+function render(){const app=document.getElementById('app');const m=M(),p=persona();active=null;document.body.classList.remove('focusing');
+ app.innerHTML='';
+ const pe=h('section',{class:'persona','aria-label':'用户画像'},'<div class="avatar">'+esc(p.avatar||(p.name||'?').trim().slice(-1))+'</div><div><div class="name">'+esc(p.name||'未指定用户画像')+'</div><div class="meta">'+esc(p.snapshot||p.summary||'')+'</div><div class="scene">'+(m.scenario||p.scenario?'情境：'+esc(m.scenario||p.scenario):'')+'</div></div>');
+ app.appendChild(pe);
+ app.appendChild(h('div',{class:'legend'},'证据类型（点击卡片标签切换）：<span class="ev quote">原话</span><span class="ev observed">观察</span><span class="ev inferred">推断</span><span class="ev assumed">假设</span><span>· 可信度：观察 &gt; 原话 &gt; 推断 &gt; 假设</span>'));
+ const g=h('div',{class:'grid'});app.appendChild(g);
+ ZONES.forEach(z=>{const d=h('section',{class:'zone '+z.k+(z.full?' full-only':''),'aria-label':z.l},'<h2>'+z.l+'<span class="en">'+z.en+'</span></h2><div class="hint">'+z.h+'</div>');
+  const box=h('div',{class:'cards'});d.appendChild(box);
+  m[z.k].forEach((c,i)=>{const cd=h('div',{class:'card'});cd.dataset.id=c.id;const t=h('div');ed(t,c,'text','写点什么……',()=>{opts();renderC()});cd.appendChild(t);
+   const r=h('div',{class:'row'});r.appendChild(DT.evBtn(c));r.appendChild(h('span',{class:'cid'},esc(c.id)));cd.appendChild(r);
+   const x=h('button',{class:'icon del','aria-label':'删除'},'×');x.onclick=()=>{m[z.k].splice(i,1);m.contradictions=m.contradictions.filter(k=>k.a!==c.id&&k.b!==c.id);save();render()};cd.appendChild(x);box.appendChild(cd)});
+  const a=h('button',{class:'ghost'},'+ 添加');a.onclick=()=>{const c={id:z.k[0]+DT.nid(''),text:'',evidence:'assumed'};m[z.k].push(c);save();render();const e=document.querySelector('[data-id="'+c.id+'"] .ed');e&&e.focus()};d.appendChild(a);g.appendChild(d)});
+ app.appendChild(h('h3',{class:'sec'},'矛盾洞察'));
+ app.appendChild(h('p',{class:'secsub'},'真正的洞察往往藏在「说的 vs 做的 vs 想的」不一致之处。点击一条矛盾，高亮对应卡片。'));
+ app.appendChild(h('div',{class:'contras',id:'contras'}));
+ const nc=h('div',{class:'newc'},'<select id="cL" aria-label="矛盾一侧"></select><span class="vs">VS</span><select id="cR" aria-label="矛盾另一侧"></select><textarea id="cI" rows="1" placeholder="这个矛盾说明了什么？"></textarea>');
+ const ab=h('button',{},'添加矛盾');ab.onclick=()=>{const a=cL.value,b=cR.value,ins=cI.value.trim();if(!a||!b||a===b){DT.toast('请选择两张不同的卡片');return}m.contradictions.push({a,b,insight:ins});cI.value='';save();renderC();DT.toast('已添加矛盾')};nc.appendChild(ab);app.appendChild(nc);
+ const core=h('div',{class:'core',style:'margin-top:16px'},'<div class="lbl">核心洞察</div>');const ce=h('div');ed(ce,m,'coreInsight','一句话：用户真正缺的是什么？');core.appendChild(ce);app.appendChild(core);
+ if(m.toVerify.length)app.appendChild(h('div',{class:'verify'},'<b>待真人验证</b><ul>'+m.toVerify.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>'));
+ opts();renderC();setMode(m.view==='full')}
+function opts(){const m=M();const o=['says','does','thinks','feels','sees','hears'].map(k=>m[k].map(c=>'<option value="'+esc(c.id)+'">【'+LBL[k]+'】'+esc((c.text||'').slice(0,28))+'</option>').join('')).join('');
+ const L=document.getElementById('cL'),R=document.getElementById('cR');const vL=L.value,vR=R.value;L.innerHTML=o;R.innerHTML=o;if(vL)L.value=vL;if(vR)R.value=vR;else if(m.does[0])R.value=m.does[0].id}
+function renderC(){const m=M(),box=document.getElementById('contras');box.innerHTML='';
+ if(!m.contradictions.length){box.innerHTML='<div class="empty">还没有矛盾。从下方选两张卡片，写下它说明了什么。</div>';return}
+ m.contradictions.forEach((x,i)=>{const A=find(x.a),B=find(x.b);const d=h('div',{class:'contra'+(active===i?' active':''),tabindex:'0'},'<div class="side"><b>'+(A?LBL[A.z]:'已删除')+'</b>'+esc(A?A.c.text:'')+'</div><span class="vs">VS</span><div class="side"><b>'+(B?LBL[B.z]:'已删除')+'</b>'+esc(B?B.c.text:'')+'</div>');
+  const ins=h('div',{class:'ins'},'<span>洞察</span>');const it=h('span',{style:'flex:1'});ed(it,x,'insight','这个矛盾说明了什么？');it.onclick=e=>e.stopPropagation();ins.appendChild(it);
+  const del=h('button',{class:'icon','aria-label':'删除矛盾'},'×');del.onclick=e=>{e.stopPropagation();m.contradictions.splice(i,1);active=null;document.body.classList.remove('focusing');save();renderC()};ins.appendChild(del);d.appendChild(ins);
+  d.onclick=()=>focus(i);d.onkeydown=e=>{if(e.target===d&&(e.key==='Enter'||e.key===' ')){e.preventDefault();focus(i)}};box.appendChild(d)})}
+function focus(i){active=active===i?null:i;document.body.classList.toggle('focusing',active!==null);document.querySelectorAll('.card').forEach(c=>c.classList.remove('hl'));
+ if(active!==null){const x=M().contradictions[active];[x.a,x.b].forEach(id=>{const e=document.querySelector('.card[data-id="'+id+'"]');e&&e.classList.add('hl')});const f=document.querySelector('.card[data-id="'+x.a+'"]');f&&f.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'})}renderC()}
+function md(){const m=M(),p=persona(),L=['# 移情图：'+(p.name||''),''];const EV={quote:'原话',observed:'观察',inferred:'推断',assumed:'假设'};
+ ZONES.forEach(z=>{if(!m[z.k].length)return;L.push('## '+z.l);m[z.k].forEach(c=>L.push('- ['+EV[c.evidence||'assumed']+'] '+c.text));L.push('')});
+ if(m.contradictions.length){L.push('## 矛盾洞察');m.contradictions.forEach(x=>{const A=find(x.a),B=find(x.b);L.push('- '+(A?'【'+LBL[A.z]+'】'+A.c.text:'?')+' VS '+(B?'【'+LBL[B.z]+'】'+B.c.text:'?')+' → '+(x.insight||''))});L.push('')}
+ if(m.coreInsight)L.push('## 核心洞察',m.coreInsight,'');if(m.toVerify.length){L.push('## 待真人验证');m.toVerify.forEach(x=>L.push('- '+x))}return L.join('\n')}
+DT.boot({title:'移情图',en:'Empathy Map',subtitle:()=>persona().name||'',extra:[seg],render,md});
+})();
+</script>

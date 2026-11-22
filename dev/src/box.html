@@ -1,0 +1,107 @@
+<!-- title: 盒子原则 -->
+<style>
+.lay{display:grid;grid-template-columns:400px 1fr;gap:28px;align-items:start}
+.stage{height:420px;perspective:1100px;display:flex;align-items:center;justify-content:center;touch-action:none;cursor:grab;user-select:none;border-radius:12px;background:var(--soft);border:1px solid var(--border)}
+.stage:active{cursor:grabbing}
+.cube{position:relative;width:220px;height:300px;transform-style:preserve-3d;transition:transform .6s}
+.cube.drag{transition:none}
+.f{position:absolute;left:50%;top:50%;border-radius:4px;padding:14px;overflow:hidden;color:#fff;display:flex;flex-direction:column;gap:6px;backface-visibility:hidden;font-size:13px;line-height:1.45}
+.f h4{margin:0;font-size:12px;letter-spacing:.06em;opacity:.85;font-weight:600}
+.f ul{margin:0;padding-left:16px}.f li{margin:2px 0}
+.f.front{justify-content:center;align-items:center;text-align:center}
+.f.front .logo{font-size:56px;line-height:1}
+.f.front .nm{font-size:24px;font-weight:750;margin-top:6px}
+.f.front .sl{font-size:14px;opacity:.92}
+.f.front .tp{position:absolute;top:10px;left:12px;font-size:11.5px;background:rgba(255,255,255,.22);padding:1px 8px;border-radius:999px}
+.f.back{background:#fff!important;color:#2C2C2B;border:2px solid #2C2C2B}
+.f.back table{border-collapse:collapse;width:100%;font-size:12.5px}.f.back td{border-bottom:1px solid #2C2C2B;padding:3px 0}
+.f.back .ttl{font-size:17px;font-weight:800;border-bottom:6px solid #2C2C2B;padding-bottom:2px}
+.f.w5 dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 8px;font-size:12.5px}.f.w5 dt{font-weight:700}.f.w5 dd{margin:0}
+.ctl{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
+.ctl button{min-height:32px;padding:4px 10px;font-size:13px}
+.net{display:grid;grid-template-columns:repeat(4,auto);gap:4px;justify-content:center;overflow-x:auto}
+.net .f{position:relative;left:auto;top:auto;transform:none!important;backface-visibility:visible}
+.frm{display:flex;flex-direction:column;gap:14px}
+.row{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:start}
+.row>.lb{font-size:13.5px;color:var(--muted);padding-top:3px}
+.row .ed{border-bottom:1px dashed var(--border);padding:2px 0}
+.lst{display:flex;flex-direction:column;gap:6px}
+.sw{display:flex;gap:6px;flex-wrap:wrap}.sw button{width:28px;height:28px;min-height:28px;padding:0;border-radius:50%;border:2px solid transparent}
+.sw button[aria-pressed=true]{border-color:var(--text)}
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.opt{border:1px solid var(--border);border-radius:10px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:4px;min-height:110px;background:var(--bg)}
+.opt[aria-pressed=true]{border-color:var(--green);box-shadow:0 0 0 2px var(--green-s);background:var(--green-s)}
+.opt b{font-size:15px}.opt span{font-size:13px;color:var(--muted)}
+.fid{margin-top:8px}
+.fid input[type=range]{width:100%}
+.fid .lbs{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted)}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.rules label{display:flex;gap:8px;align-items:flex-start;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:13.5px;cursor:pointer}
+.rules input{min-height:0;margin-top:3px}
+@media (max-width:900px){.lay{grid-template-columns:1fr}.cards3,.rules{grid-template-columns:1fr}.net{grid-template-columns:repeat(2,auto)}}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed}=DT;
+const COL={blue:'#2783DE',green:'#46A171',orange:'#D5803B',red:'#E56458',purple:'#9A6BC0',teal:'#3A9DAE',pink:'#C9658F',gray:'#5F5E5B'};
+const TYPES=['问题盒子','解决方案盒子','项目盒子','流程盒子'];
+const W5=[['who','谁 Who','目标顾客是谁？'],['which','哪些 Which','要达成哪些目标？'],['when','何时 When','何时可用？'],['where','何地 Where','在哪里使用？'],['why','为什么 Why','用户为什么要用它？']];
+const KIND=[['physical','实体原型','纸、硬纸板、乐高、铝箔、橡皮泥等快速搭建'],['service','服务原型','角色扮演模拟服务流程与触点'],['digital','数字原型','视频、可点击演示、落地页、线框图']];
+const FID=[['低保真','初期阶段：草图、纸模型，验证方向'],['中保真','首个解决方案：可点击线框/简易实物，验证流程'],['高保真','接近最终方案：外观与交互接近真实，验证细节与意愿']];
+const RULES=['尽早制作，越简单越好','不要爱上你的原型','原型即迭代：迭代、迭代、再迭代'];
+let rx=-14,ry=-28,view='3d',dragging=null;
+const P=()=>{const p=DT.get('prototype',{});p.box=p.box||{};const b=p.box;b.benefits=b.benefits||[];b.features=b.features||[];p.plan=p.plan||{};p.plan.rules=p.plan.rules||[];return p};
+function faces(b){const c=COL[b.color]||COL.blue,li=a=>a.filter(x=>x.text).map(x=>'<li>'+esc(x.text)+'</li>').join('');
+ const F={
+  front:[220,300,'<span class="tp">'+esc(b.type||'解决方案盒子')+'</span><div class="logo">'+esc(b.logo||'📦')+'</div><div class="nm">'+esc(b.name||'产品名称')+'</div><div class="sl">'+esc(b.slogan||'一句话标语')+'</div>'],
+  right:[160,300,'<h4>核心益处</h4><ul>'+li(b.benefits)+'</ul>'],
+  back:[220,300,'<div class="ttl">产品成分</div><div style="font-size:11.5px">核心功能 / 产品属性</div><table>'+b.features.filter(x=>x.text).map(x=>'<tr><td>'+esc(x.text)+'</td></tr>').join('')+'</table>'],
+  left:[160,300,'<h4>5W</h4><dl>'+W5.map(w=>'<dt>'+w[1].split(' ')[0]+'</dt><dd>'+esc(b[w[0]]||'—')+'</dd>').join('')+'</dl>'],
+  top:[220,160,'<h4>价格 / 获取方式</h4><div style="font-size:15px;font-weight:650">'+esc(b.price||'—')+'</div>'],
+  bottom:[220,160,'<h4>企业 / 团队信息</h4><div>'+esc(b.company||'—')+'</div>']};
+ return {F,c}}
+function cubeHTML(b){const {F,c}=faces(b);const T={front:'translateZ(80px)',back:'rotateY(180deg) translateZ(80px)',right:'rotateY(90deg) translateZ(110px)',left:'rotateY(-90deg) translateZ(110px)',top:'rotateX(90deg) translateZ(150px)',bottom:'rotateX(-90deg) translateZ(150px)'};
+ return Object.keys(F).map(k=>{const [w,hh,html]=F[k];const bg=k==='front'?c:k==='back'?'#fff':'color-mix(in srgb,'+c+' 82%,#000)';
+  return '<div class="f '+k+(k==='left'?' w5':'')+'" style="width:'+w+'px;height:'+hh+'px;margin:-'+hh/2+'px 0 0 -'+w/2+'px;background:'+bg+';'+(view==='3d'?'transform:'+T[k]:'')+'">'+html+'</div>'}).join('')}
+function netHTML(b){const {F,c}=faces(b);const ord=['left','front','right','back'];const cell=(k)=>{const [w,hh,html]=F[k];const bg=k==='front'?c:k==='back'?'#fff':'color-mix(in srgb,'+c+' 82%,#000)';return '<div class="f '+k+(k==='left'?' w5':'')+'" style="width:'+w+'px;height:'+hh+'px;background:'+bg+'">'+html+'</div>'};
+ return '<div class="net">'+ord.map(cell).join('')+cell('top')+cell('bottom')+'</div>'}
+function setRot(cube){cube.style.transform='rotateX('+rx+'deg) rotateY('+ry+'deg)'}
+function render(){const app=document.getElementById('app');app.innerHTML='';const p=P(),b=p.box;
+ app.appendChild(h('p',{class:'secsub'},'把你的方案想象成货架上的一个产品包装盒：正面写名称、标志和标语，侧面写核心益处，背面像“营养成分表”一样列出功能与属性。盒子也可以是问题盒子、项目盒子或流程盒子。'));
+ const lay=h('div',{class:'lay'});const L=h('div');
+ const sg=h('div',{class:'seg',style:'margin-bottom:8px'});[['3d','立体盒子'],['net','展开图']].forEach(o=>{const x=h('button',{'aria-pressed':view===o[0]?'true':'false'},o[1]);x.onclick=()=>{view=o[0];render()};sg.appendChild(x)});L.appendChild(sg);
+ let cube;
+ if(view==='3d'){const stg=h('div',{class:'stage','aria-label':'可拖动旋转的产品盒子'});cube=h('div',{class:'cube'},cubeHTML(b));stg.appendChild(cube);setRot(cube);L.appendChild(stg);
+  stg.addEventListener('pointerdown',e=>{dragging={x:e.clientX,y:e.clientY,rx,ry};cube.classList.add('drag');stg.setPointerCapture(e.pointerId)});
+  stg.addEventListener('pointermove',e=>{if(!dragging)return;ry=dragging.ry+(e.clientX-dragging.x)*.5;rx=Math.max(-80,Math.min(80,dragging.rx-(e.clientY-dragging.y)*.5));setRot(cube)});
+  const up=()=>{dragging=null;cube.classList.remove('drag')};stg.addEventListener('pointerup',up);stg.addEventListener('pointercancel',up);
+  const ctl=h('div',{class:'ctl'});[['正面',-10,-20],['益处',-10,-90],['背面',-10,-180],['5W',-10,90],['顶部',-80,0],['底部',80,0]].forEach(v=>{const x=h('button',{},v[0]);x.onclick=()=>{rx=v[1];ry=v[2];setRot(cube)};ctl.appendChild(x)});L.appendChild(ctl);
+  L.appendChild(h('p',{class:'hint',style:'text-align:center'},'拖动盒子可旋转'))}
+ else L.appendChild(h('div',{style:'background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:12px'},netHTML(b)));
+ lay.appendChild(L);
+ const upd=()=>{if(view==='3d'&&cube){cube.innerHTML=cubeHTML(b)}else{const n=L.querySelector('.net');n&&(n.outerHTML=netHTML(b))}};
+ const F=h('div',{class:'frm'});
+ const row=(lb,el)=>{const r=h('div',{class:'row'});r.appendChild(h('div',{class:'lb'},lb));r.appendChild(el);F.appendChild(r);return r};
+ const tp=h('select',{'aria-label':'盒子类型'});TYPES.forEach(t=>{const o=h('option',{},t);if((b.type||'解决方案盒子')===t)o.selected=true;tp.appendChild(o)});tp.onchange=()=>{b.type=tp.value;save();upd()};row('盒子类型',tp);
+ row('标志',ed(h('div'),b,'logo','一个 emoji，例如 🍱',upd));row('产品名称',ed(h('div'),b,'name','起一个名字',upd));row('标语',ed(h('div'),b,'slogan','一句话说清价值',upd));
+ const sw=h('div',{class:'sw'});Object.keys(COL).forEach(k=>{const x=h('button',{style:'background:'+COL[k],'aria-label':k,'aria-pressed':(b.color||'blue')===k?'true':'false'});x.onclick=()=>{b.color=k;save();render()};sw.appendChild(x)});row('主色',sw);
+ const bl=h('div',{class:'lst'});DT.list(bl,b.benefits,'bn','核心益处（建议 3 条）',upd);row('核心益处',bl);
+ const fl=h('div',{class:'lst'});DT.list(fl,b.features,'ft','功能 / 属性',upd);row('产品成分',fl);
+ W5.forEach(w=>row(w[1],ed(h('div'),b,w[0],w[2],upd)));
+ row('价格 / 获取',ed(h('div'),b,'price','如何获得？多少钱？',upd));row('企业信息',ed(h('div'),b,'company','谁提供？',upd));
+ lay.appendChild(F);app.appendChild(lay);
+ // 原型规划
+ const pl=p.plan;
+ app.appendChild(h('div',{class:'sec'},'原型规划'));app.appendChild(h('p',{class:'secsub'},'选择原型类型与保真度，并写清这次原型要学习什么。'));
+ const ks=h('div',{class:'cards3'});KIND.forEach(k=>{const x=h('button',{class:'opt','aria-pressed':pl.kind===k[0]?'true':'false'},'<b>'+k[1]+'</b><span>'+k[2]+'</span>');x.onclick=()=>{pl.kind=pl.kind===k[0]?'':k[0];save();render()};ks.appendChild(x)});app.appendChild(ks);
+ const fd=h('div',{class:'fid box'});const fi=pl.fidelity==null?0:pl.fidelity;
+ fd.innerHTML='<b>保真度：<span id="fv">'+FID[fi][0]+'</span></b><div class="hint" id="fh">'+FID[fi][1]+'</div>';
+ const rg=h('input',{type:'range',min:'0',max:'2',step:'1','aria-label':'原型保真度'});rg.value=fi;rg.oninput=()=>{pl.fidelity=+rg.value;save();fd.querySelector('#fv').textContent=FID[rg.value][0];fd.querySelector('#fh').textContent=FID[rg.value][1]};
+ fd.appendChild(rg);fd.appendChild(h('div',{class:'lbs'},'<span>低</span><span>中</span><span>高</span>'));app.appendChild(fd);
+ const lr=h('div',{class:'box',style:'margin-top:10px'});lr.appendChild(h('div',{class:'hint'},'这个原型要验证的问题（以学习为目的）'));const le=ed(h('div',{style:'font-weight:550;margin-top:4px'}),pl,'learn','例如：用户是否愿意在柜机前多等 30 秒换取热食？');le.dataset.multi='1';lr.appendChild(le);
+ lr.appendChild(h('div',{class:'hint',style:'margin-top:8px'},'对用户来说最核心的功能是什么？'));lr.appendChild(ed(h('div',{style:'margin-top:4px'}),pl,'core','只做这个，其余先不做'));app.appendChild(lr);
+ const ru=h('div',{class:'rules',style:'margin-top:10px'});RULES.forEach((t,i)=>{const lab=h('label');const c=h('input',{type:'checkbox'});c.checked=!!pl.rules[i];c.onchange=()=>{pl.rules[i]=c.checked;save()};lab.appendChild(c);lab.appendChild(h('span',{},t));ru.appendChild(lab)});app.appendChild(ru)}
+function md(){const p=P(),b=p.box,pl=p.plan;const L=['# 盒子原则：'+(b.name||''),'','- 类型：'+(b.type||'解决方案盒子'),'- 标语：'+(b.slogan||''),'','## 核心益处',...b.benefits.map(x=>'- '+x.text),'','## 产品成分',...b.features.map(x=>'- '+x.text),'','## 5W',...W5.map(w=>'- '+w[1]+'：'+(b[w[0]]||'')),'','- 价格/获取：'+(b.price||''),'- 企业信息：'+(b.company||''),'','## 原型规划','- 类型：'+((KIND.find(k=>k[0]===pl.kind)||[0,''])[1]),'- 保真度：'+FID[pl.fidelity||0][0],'- 要学习：'+(pl.learn||''),'- 核心功能：'+(pl.core||'')];return L.join('\n')}
+DT.boot({title:'盒子原则',en:'Box Principle · Prototype',subtitle:()=>P().box.name||'',render,md});
+})();
+</script>

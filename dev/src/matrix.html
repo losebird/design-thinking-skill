@@ -1,0 +1,69 @@
+<!-- title: 丘吉尔矩阵 -->
+<style>
+.lay{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
+.plot{position:relative;aspect-ratio:1;max-width:620px;margin-left:28px;margin-bottom:28px;touch-action:none}
+.q{position:absolute;width:50%;height:50%;padding:10px 12px;font-size:13px;font-weight:650;border:1px solid var(--border)}
+.q span{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.q1{left:0;top:0;background:var(--blue-s);border-radius:12px 0 0 0}.q2{right:0;top:0;background:var(--green-s);text-align:right;border-radius:0 12px 0 0}
+.q3{left:0;bottom:0;background:var(--soft);border-radius:0 0 0 12px}.q4{right:0;bottom:0;background:var(--orange-s);text-align:right;border-radius:0 0 12px 0}
+.ax{position:absolute;font-size:13px;color:var(--muted);font-weight:600}
+.ay{left:-30px;top:50%;transform:translateY(-50%) rotate(-90deg);transform-origin:center;white-space:nowrap}
+.axx{bottom:-26px;left:50%;transform:translateX(-50%)}
+.chip{position:absolute;transform:translate(-50%,-50%);width:max-content;max-width:150px;background:var(--bg);border:1.5px solid var(--text);border-radius:8px;padding:4px 8px;font-size:12.5px;line-height:1.35;cursor:grab;user-select:none;box-shadow:0 1px 2px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.06);z-index:2}
+.chip:active{cursor:grabbing}
+.chip.edge{border-style:dashed;border-color:var(--orange)}
+.chip:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.chip .no{font-weight:700;color:var(--blue);margin-right:4px}
+.side .it{border:1px solid var(--border);border-radius:10px;padding:8px 10px;margin-bottom:8px}
+.side .it .top{display:flex;gap:6px;align-items:flex-start}
+.side .it .top .ed{flex:1;font-size:14px}
+.side .it .no{font-weight:700;color:var(--blue)}
+.sl{display:grid;grid-template-columns:52px 1fr 28px;gap:6px;align-items:center;font-size:12.5px;color:var(--muted);margin-top:4px}
+.sl input{min-height:auto;padding:0}
+.note{font-size:12.5px;color:var(--muted);margin-top:4px}
+.dec{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.dc{border-radius:12px;padding:12px 14px}
+.dc h4{margin:0 0 6px;font-size:14px}
+.dc ul{margin:0;padding-left:18px;font-size:13.5px}
+.dc1{background:var(--green-s)}.dc2{background:var(--blue-s)}.dc3{background:var(--soft);border:1px solid var(--border)}.dc4{background:var(--orange-s)}
+@media (max-width:900px){.lay{grid-template-columns:1fr}.dec{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.dec{grid-template-columns:1fr}.chip{max-width:110px;font-size:11.5px}}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed}=DT;
+const MODES={value:{y:'价值',x:'可行性（越右越容易）',q:[['战略项目','高价值 / 难实现：拆解里程碑'],['立即做 Quick Wins','高价值 / 易实现'],['果断放弃','低价值 / 难实现'],['小实验','低价值 / 易实现：谨慎尝试']]},
+ urgency:{y:'重要性',x:'紧急性',q:[['计划排期','重要 / 不紧急'],['马上执行','重要 / 紧急'],['搁置或淘汰','不重要 / 不紧急'],['有限投入','不重要 / 紧急：避免拖累核心']]}};
+const M=()=>{const m=DT.get('ideate.matrix',{});m.mode=m.mode||'value';m.items=m.items||[];return m};
+const cl=v=>Math.max(1,Math.min(5,Math.round(v*10)/10));
+const quad=it=>it.y>3?(it.x>3?1:0):(it.x>3?3:2);
+const edge=it=>Math.abs(it.x-3)<=.3||Math.abs(it.y-3)<=.3;
+const seg=h('div',{class:'seg',role:'group','aria-label':'维度'});const b1=h('button',{},'价值 × 可行性'),b2=h('button',{},'重要 × 紧急');seg.append(b1,b2);
+b1.onclick=()=>{M().mode='value';save();render()};b2.onclick=()=>{M().mode='urgency';save();render()};
+function render(){const app=document.getElementById('app');app.innerHTML='';const m=M(),md_=MODES[m.mode];b1.setAttribute('aria-pressed',m.mode==='value');b2.setAttribute('aria-pressed',m.mode==='urgency');
+ app.appendChild(h('p',{class:'secsub'},'拖动卡片或用右侧滑块打分（1–5）。虚线框 = 落在边界附近，需要补充信息再讨论。选中卡片后可用方向键微调。'));
+ const lay=h('div',{class:'lay'});const pw=h('div');const pl=h('div',{class:'plot',id:'plot'});
+ md_.q.forEach((q,i)=>pl.appendChild(h('div',{class:'q q'+(i+1)},esc(q[0])+'<span>'+esc(q[1])+'</span>')));
+ pl.appendChild(h('div',{class:'ax ay'},'↑ '+md_.y));pl.appendChild(h('div',{class:'ax axx'},md_.x+' →'));
+ m.items.forEach((it,i)=>{it.x=cl(+it.x||3);it.y=cl(+it.y||3);const c=h('div',{class:'chip'+(edge(it)?' edge':''),tabindex:'0','aria-label':(i+1)+'. '+it.text+'，'+md_.y+' '+it.y+'，'+md_.x+' '+it.x},'<span class="no">'+(i+1)+'</span>'+esc(it.text||'（未命名）'));
+  const pos=()=>{const fx=(it.x-1)/4,fy=(5-it.y)/4;c.style.left=(fx*100)+'%';c.style.top=(fy*100)+'%';c.style.transform='translate('+(-fx*100)+'%,'+(-fy*100)+'%)'};pos();
+  c.addEventListener('pointerdown',e=>{e.preventDefault();c.setPointerCapture(e.pointerId);const r=pl.getBoundingClientRect();
+   const mv=ev=>{it.x=cl(1+(ev.clientX-r.left)/r.width*4);it.y=cl(5-(ev.clientY-r.top)/r.height*4);pos()};
+   const up=()=>{c.removeEventListener('pointermove',mv);c.removeEventListener('pointerup',up);save();render();const n=document.querySelectorAll('.chip')[i];n&&n.focus()};
+   c.addEventListener('pointermove',mv);c.addEventListener('pointerup',up)});
+  c.addEventListener('keydown',e=>{const d={ArrowUp:[0,.5],ArrowDown:[0,-.5],ArrowLeft:[-.5,0],ArrowRight:[.5,0]}[e.key];if(!d)return;e.preventDefault();it.x=cl(it.x+d[0]);it.y=cl(it.y+d[1]);save();render();document.querySelectorAll('.chip')[i].focus()});
+  pl.appendChild(c)});
+ pw.appendChild(pl);lay.appendChild(pw);
+ const sd=h('div',{class:'side'});m.items.forEach((it,i)=>{const b=h('div',{class:'it'});const t=h('div',{class:'top'},'<span class="no">'+(i+1)+'</span>');t.appendChild(ed(h('div'),it,'text','点子 / 功能',()=>{}));
+  const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{m.items.splice(i,1);save();render()};t.appendChild(x);b.appendChild(t);
+  [['y',md_.y.replace(/（.*/,'')],['x',md_.x.replace(/（.*/,'')]].forEach(([k,l])=>{const r=h('label',{class:'sl'},'<span>'+l+'</span>');const s=h('input',{type:'range',min:'1',max:'5',step:'0.5',value:String(it[k]),'aria-label':l});const v=h('b',{},String(it[k]));s.oninput=()=>{it[k]=+s.value;v.textContent=s.value};s.onchange=()=>{save();render()};r.append(s,v);b.appendChild(r)});
+  const n=h('div',{class:'note'});ed(n,it,'note','评分依据 / 关键假设 / 待验证数据');b.appendChild(n);sd.appendChild(b)});
+ const a=h('button',{class:'ghost'},'+ 点子');a.onclick=()=>{m.items.push({id:DT.nid('m'),text:'',x:3,y:3});save();render()};sd.appendChild(a);lay.appendChild(sd);app.appendChild(lay);
+ app.appendChild(h('h3',{class:'sec'},'决策清单'));app.appendChild(h('p',{class:'secsub'},'按象限自动生成。边界项（⚠）建议补充信息后再评估。'));
+ const order=[[1,'立即行动（2 周内）','dc1'],[0,'近期规划（1–2 个迭代）','dc2'],[3,'探索预研','dc3'],[2,'淘汰','dc4']];
+ const dg=h('div',{class:'dec'});order.forEach(([q,t,c])=>{const its=m.items.map((it,i)=>[it,i]).filter(([it])=>quad(it)===q);dg.appendChild(h('div',{class:'dc '+c},'<h4>'+t+' · '+esc(md_.q[q][0])+'</h4>'+(its.length?'<ul>'+its.map(([it,i])=>'<li>'+(i+1)+'. '+esc(it.text)+(edge(it)?' ⚠':'')+'</li>').join('')+'</ul>':'<div class="hint">暂无</div>')))});app.appendChild(dg)}
+function md(){const m=M(),md_=MODES[m.mode];const order=[[1,'立即行动（2 周内）'],[0,'近期规划（1–2 个迭代）'],[3,'探索预研'],[2,'淘汰']];
+ return ['# 丘吉尔矩阵（'+md_.y+' × '+md_.x.replace(/（.*/,'')+'）','',...order.flatMap(([q,t])=>['## '+t+'：'+md_.q[q][0],...m.items.filter(it=>quad(it)===q).map(it=>'- '+it.text+'（'+md_.y+' '+it.y+' / '+md_.x.replace(/（.*/,'')+' '+it.x+'）'+(edge(it)?' ⚠ 边界项':'')+(it.note?'　依据：'+it.note:'')),''])].join('\n')}
+DT.boot({title:'丘吉尔矩阵',en:'Churchill Matrix · 收敛创意',subtitle:()=>M().items.length+' 个候选',extra:[seg],render,md});
+})();
+</script>

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>项目仪表盘 · 设计思维</title>
+<style>
+:root{--text:#2C2C2B;--muted:#7D7A75;--bg:#FFFFFF;--soft:#F9F8F7;--surface:#F0EFED;--border:#E6E5E3;
+--blue:#2783DE;--blue-s:#E5F2FC;--green:#46A171;--green-s:#E8F1EC;--orange:#D5803B;--orange-s:#FBEBDE;--red:#E56458;--red-s:#FCE9E7;--purple:#9A6BC0;--purple-s:#F3ECF8;--yellow:#C9A227;--yellow-s:#FBF3DB;--teal:#3A9DAE;--teal-s:#E3F3F5;--pink:#C9658F;--pink-s:#FAE8F0}
+@media (prefers-color-scheme:dark){:root{--text:#FFFFFF;--muted:rgba(255,255,255,.65);--bg:#191919;--soft:#202020;--surface:#383836;--border:rgba(255,255,255,.2);
+--blue:#5E9FE8;--blue-s:rgba(94,159,232,.12);--green:#72BC8F;--green-s:rgba(114,188,143,.12);--orange:#DE9255;--orange-s:rgba(222,146,85,.12);--red:#E97366;--red-s:rgba(233,115,102,.12);--purple:#BF8EDA;--purple-s:rgba(191,142,218,.12);--yellow:#EAC26B;--yellow-s:rgba(234,194,107,.12);--teal:#4FB9C9;--teal-s:rgba(79,185,201,.12);--pink:#DF84A8;--pink-s:rgba(223,132,168,.12)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:24px 32px 48px}
+/* 顶部导航栏（所有非仪表盘页面注入） */
+#dt-nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:0;background:var(--bg);border-bottom:1px solid var(--border);padding:0 24px;height:40px;font-size:13.5px}
+#dt-nav a{color:var(--muted);text-decoration:none;padding:0 10px;height:40px;display:flex;align-items:center;border-bottom:2px solid transparent}
+#dt-nav a:hover{color:var(--text);background:var(--soft)}
+#dt-nav .dt-nav-home{color:var(--blue);font-weight:600;padding-left:0}
+#dt-nav .dt-nav-home:hover{background:var(--blue-s)}
+#dt-nav .dt-nav-sep{flex:1}
+#dt-nav .dt-nav-proj{font-size:12.5px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body:has(#dt-nav) .wrap{padding-top:16px}
+.dt-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.dt-head h1{font-size:24px;margin:0;font-weight:650}
+.dt-head h1 small{font-size:14px;color:var(--muted);font-weight:400;margin-left:8px}
+.dt-head .sub{font-size:13.5px;color:var(--muted);margin-top:2px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;font-size:14px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer;min-height:36px}
+button:hover{background:var(--soft)}
+button:focus-visible,[contenteditable]:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+button.ghost{border-style:dashed;color:var(--muted);font-size:13px;min-height:32px;padding:4px 10px}
+button.icon{border:0;background:transparent;color:var(--muted);width:28px;height:28px;min-height:28px;padding:0;border-radius:6px;font-size:16px;line-height:1}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;border-radius:0}
+.seg button[aria-pressed=true]{background:var(--surface);font-weight:600}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:2px 10px;border-radius:999px;background:var(--orange-s);color:var(--orange);font-weight:550;white-space:nowrap}
+button.badge{border:0;min-height:0;cursor:pointer;font:inherit;font-size:12.5px;font-weight:550}button.badge:hover{filter:brightness(.96)}
+.badge.ok{background:var(--green-s);color:var(--green)}
+.badge.info{background:var(--blue-s);color:var(--blue)}
+.badge.mute{background:var(--surface);color:var(--muted)}
+.box{border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:var(--bg)}
+.box.soft{background:var(--soft)}
+.sec{font-size:17px;font-weight:650;margin:28px 0 4px}
+.secsub{font-size:13.5px;color:var(--muted);margin:0 0 12px}
+.hint{font-size:12.5px;color:var(--muted)}
+.card{position:relative;background:var(--soft);border:1px solid var(--border);border-radius:8px;padding:8px 32px 8px 10px}
+.card>.icon.del{position:absolute;top:4px;right:4px}
+.ed{outline:none;min-height:1.4em;word-break:break-word}
+.ed:empty:before{content:attr(data-ph);color:var(--muted)}
+.ev{font-size:12px;border:0;padding:1px 8px;min-height:22px;border-radius:999px;cursor:pointer}
+.ev.quote{background:var(--blue-s);color:var(--blue)}.ev.observed{background:var(--green-s);color:var(--green)}
+.ev.inferred{background:var(--purple-s);color:var(--purple)}.ev.assumed{background:var(--orange-s);color:var(--orange)}
+input,select,textarea{font:inherit;font-size:14px;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 8px;min-height:36px;max-width:100%}
+textarea{resize:vertical}
+.core{border-radius:12px;padding:16px 20px;background:var(--blue-s);border-left:4px solid var(--blue)}
+.core .lbl{font-size:13px;color:var(--blue);font-weight:650;margin-bottom:4px}
+.core .ed{font-size:16px;font-weight:550}
+.verify{border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-top:16px}
+.verify ul{margin:6px 0 0;padding-left:20px}.verify li{margin:4px 0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:8px 16px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+.toast.show{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:10;padding:16px}
+.modal.open{display:flex}
+.modal .panel{background:var(--bg);border-radius:12px;padding:20px;width:min(640px,100%);box-shadow:0 4px 24px rgba(0,0,0,.18)}
+.modal textarea{width:100%;min-height:220px;font-family:Menlo,Consolas,monospace;font-size:12.5px}
+.empty{color:var(--muted);font-size:14px;padding:12px;border:1px dashed var(--border);border-radius:8px;text-align:center}
+.foot{margin-top:40px;font-size:12.5px;color:var(--muted);text-align:center}
+.foot a{color:var(--muted)}
+@media (max-width:720px){.wrap{padding:16px}.dt-head h1{font-size:21px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ── 启动页专用样式 ── */
+.db-hero{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;padding:16px 20px;border:1px solid var(--border);border-radius:14px;background:var(--bg);margin-bottom:16px}
+.db-hero-title{font-size:22px;font-weight:750;line-height:1.2}
+.db-hero-title small{font-size:14px;font-weight:400;color:var(--muted);display:block;margin-top:4px}
+.db-hero-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+
+/* 进度条 */
+.db-progress{margin:12px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.db-ph{border-radius:8px;padding:8px 10px;border:2px solid transparent;cursor:default;background:var(--soft)}
+.db-ph.cur{border-color:var(--c);background:var(--bg);box-shadow:0 0 0 1px var(--c)}
+.db-ph-name{font-size:12.5px;font-weight:650;color:var(--c)}
+.db-ph-bar{height:4px;border-radius:2px;background:var(--border);margin:5px 0 3px;overflow:hidden}
+.db-ph-bar i{display:block;height:100%;border-radius:2px;background:var(--c)}
+.db-ph-cnt{font-size:11px;color:var(--muted)}
+
+/* 摘要数字 */
+.db-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.db-stat{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--bg)}
+.db-stat .v{font-size:24px;font-weight:750;line-height:1;font-variant-numeric:tabular-nums}
+.db-stat .l{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* ── 工具卡片网格 ── */
+.db-phase-sec{margin-bottom:18px}
+.db-phase-hd{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.db-phase-hd h3{margin:0;font-size:15px;font-weight:700;color:var(--c)}
+.db-phase-hd .ph-prog{font-size:12px;color:var(--muted)}
+.db-tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
+
+.db-tool{border:1px solid var(--border);border-radius:10px;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .15s}
+.db-tool:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.db-tool.has-data{border-left:3px solid var(--c)}
+.db-tool-hd{display:flex;align-items:center;gap:8px;padding:9px 10px 6px}
+.db-tool-name{font-size:13.5px;font-weight:650;flex:1}
+.db-tool-badge{font-size:11px;padding:1px 7px;border-radius:10px;white-space:nowrap}
+.has-data .db-tool-badge{background:var(--green-s);color:var(--green)}
+.db-tool:not(.has-data) .db-tool-badge{background:var(--surface);color:var(--muted)}
+.db-tool-preview{padding:0 10px 6px;font-size:12.5px;color:var(--muted);line-height:1.5;min-height:32px;flex:1}
+.db-tool-preview b{color:var(--text);font-weight:600}
+.db-tool-actions{display:flex;gap:6px;padding:6px 8px;border-top:1px solid var(--surface);flex-wrap:wrap}
+.db-tool-actions a,.db-tool-actions button{font-size:12.5px;padding:3px 10px;min-height:28px;border-radius:6px}
+.db-tool-actions a{color:var(--blue);border:1px solid var(--blue);text-decoration:none;display:inline-flex;align-items:center}
+.db-tool-actions a:hover{background:var(--blue-s)}
+
+/* ── 下一步 ── */
+.db-next{border:2px solid var(--blue);border-radius:12px;padding:14px 16px;margin-bottom:16px;background:var(--blue-s)}
+.db-next h3{margin:0 0 10px;font-size:15px;color:var(--blue)}
+.db-next-items{display:flex;flex-direction:column;gap:8px}
+.db-next-item{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;background:var(--bg);border-radius:8px;padding:8px 10px;border:1px solid var(--border)}
+.db-next-num{width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.db-next-txt .t{font-size:13.5px;font-weight:600}
+.db-next-txt .d{font-size:12.5px;color:var(--muted)}
+.db-next-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.db-next-actions button{font-size:12px;min-height:26px;padding:2px 8px}
+.db-next-actions a{font-size:12px;color:var(--blue);border:1px solid var(--blue);border-radius:6px;padding:2px 8px;text-decoration:none;display:inline-flex;align-items:center}
+
+/* ── 待验证清单 ── */
+.db-verify{margin-bottom:16px}
+.db-verify-item{display:flex;align-items:flex-start;gap:8px;padding:6px 10px;border-radius:7px;font-size:13px;border-bottom:1px solid var(--surface)}
+.db-verify-item:last-child{border:0}
+.db-verify-item input{flex-shrink:0;margin-top:3px}
+.db-verify-item.checked{opacity:.45;text-decoration:line-through}
+.db-verify-src{font-size:11px;color:var(--muted);white-space:nowrap;margin-left:auto;padding-left:8px}
+
+/* ── AI 工作流面板 ── */
+.db-aipanel{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px}
+.db-aipanel-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--soft);border-bottom:1px solid var(--border);cursor:pointer}
+.db-aipanel-hd h3{margin:0;font-size:14px}
+.db-aipanel-body{padding:12px 14px;display:none}
+.db-aipanel.open .db-aipanel-body{display:block}
+.db-aipanel.open .db-aipanel-toggle{transform:rotate(180deg)}
+.db-aipanel-toggle{transition:transform .2s;font-size:16px}
+.db-prompt-box{background:var(--surface);border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.7;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow-y:auto;margin-top:8px;color:var(--text)}
+.db-prompt-actions{display:flex;gap:8px;margin-top:8px}
+
+@media(max-width:720px){
+  .db-hero{grid-template-columns:1fr}.db-hero-actions{align-items:flex-start}
+  .db-stats{grid-template-columns:1fr 1fr}.db-progress{grid-template-columns:1fr 1fr}
+  .db-next-item{grid-template-columns:28px 1fr;gap:6px}.db-next-actions{grid-column:1/-1}
+}
+</style>
+</head>
+<body data-tpl="dashboard">
+<div class="wrap">
+<header class="dt-head" id="dt-head"></header>
+<main id="app"></main>
+<div class="foot">设计思维 Skill · 修改会自动保存在本浏览器 · 点「复制给 AI」把结果带回对话</div>
+</div>
+<script id="dt-data" type="application/json">/*DT_DATA*/</script>
+<script>
+const DT=(function(){
+ const raw=document.getElementById('dt-data').textContent.trim();
+ let init={};try{init=raw&&raw.indexOf('DT_DATA')<0?JSON.parse(raw):{}}catch(e){console.error('数据解析失败',e)}
+ const tpl=document.body.dataset.tpl||'page';
+ const clone=o=>JSON.parse(JSON.stringify(o));
+ const PRJ=(init.meta&&init.meta.project)||'default',SK='dt:shared:'+PRJ,OWN='dt:'+tpl+':'+PRJ+':'+(init._target||'');
+ const strip=o=>{const c=clone(o);delete c._target;delete c._rev;return c};
+ const HS=(function(t){let x=5381;for(let i=0;i<t.length;i++)x=((x<<5)+x+t.charCodeAt(i))|0;return String(x>>>0)})(JSON.stringify(strip(init)));
+ const REV=init._rev||'';
+ // 同一项目的所有页面共享一份数据（dt:shared:<项目>）；若本页比共享数据旧，则只在本页独立保存，避免覆盖。
+ let st,fresh=false,KEY=SK,older=false;
+ function readK(k){try{const s=localStorage.getItem(k);return s?JSON.parse(s):null}catch(e){return null}}
+ (function(){const o=readK(SK);
+  if(o&&o.__base===HS){st=o.st}
+  else if(o&&o.__rev&&REV&&REV<o.__rev){older=true;KEY=OWN;const m=readK(OWN);st=m&&m.__base===HS?m.st:strip(init)}
+  else{if(o){try{localStorage.setItem(SK+':prev',JSON.stringify(o))}catch(e){}fresh=true}st=strip(init);try{localStorage.setItem(SK,JSON.stringify({__base:HS,__rev:REV,st}))}catch(e){}}})();
+ st.meta=st.meta||{};
+ let opts={};
+ const $=id=>document.getElementById(id);
+ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ let seq=Date.now()%100000;const nid=p=>(p||'x')+(++seq).toString(36);
+ function get(path,def){if(!path)return st;let o=st;const ks=path.split('.');for(let i=0;i<ks.length;i++){if(o[ks[i]]==null){if(def===undefined)return undefined;o[ks[i]]=i===ks.length-1?def:{}}o=o[ks[i]]}return o}
+ function save(){st.meta.updatedAt=new Date().toISOString();try{localStorage.setItem(KEY,JSON.stringify({__base:HS,__rev:REV,st:strip(st)}))}catch(e){}}
+ function toast(t){let e=$('dt-toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1800)}
+ function ed(el,obj,key,ph,onChange){el.contentEditable='true';el.spellcheck=false;el.classList.add('ed');if(ph)el.dataset.ph=ph;el.textContent=obj[key]==null?'':obj[key];
+  el.addEventListener('input',()=>{obj[key]=el.textContent;save();onChange&&onChange()});
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&el.dataset.multi!=='1'){e.preventDefault();el.blur()}});return el}
+ function h(tag,attrs,html){const e=document.createElement(tag);if(attrs)for(const k in attrs){if(k==='class')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else e.setAttribute(k,attrs[k])}if(html!=null)e.innerHTML=html;return e}
+ function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+ async function copy(t,msg){try{await navigator.clipboard.writeText(t);toast(msg||'已复制')}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(msg||'已复制')}catch(_){toast('复制失败，请改用导出 JSON')}ta.remove()}}
+ const out=()=>strip(st);
+ function aiBadge(){const g=st.meta.generatedBy||'ai';const m={ai:['','AI 假设 · 待验证'],mixed:['info','调研 + AI 推断'],human:['ok','基于真实调研']}[g]||['','AI 假设 · 待验证'];return '<button class="badge '+m[0]+'" id="dt-src" title="数据来源（点击切换）：AI 假设 / 调研 + AI 推断 / 基于真实调研">'+m[1]+'</button>'}
+ const PATHS={persona:'personas, personaSteps','empathy-map':'empathyMap',journey:'journey',hook:'hook',pov:'define',scamper:'ideate.scamper, ideate.matrix',matrix:'ideate.matrix',box:'prototype','ab-test':'test.ab',storyboard:'storyboard','value-canvas':'valueCanvas',overview:'meta','research-plan':'researchPlan',dashboard:'全部'};
+ const PATH=()=>init._target||PATHS[tpl]||'全部';
+ function header(){const hd=$('dt-head');
+  hd.innerHTML='<div><h1>'+esc(opts.title)+'<small>'+esc(opts.en||'')+'</small></h1><div class="sub">'+esc(st.meta.project||'')+(opts.subtitle?' · '+esc(opts.subtitle()):'')+' '+aiBadge()+'</div></div><div class="tools" id="dt-tools"></div>';
+  $('dt-src').onclick=()=>{const o=['ai','mixed','human'];st.meta.generatedBy=o[(o.indexOf(st.meta.generatedBy||'ai')+1)%3];save();header()};const t=$('dt-tools');(opts.extra||[]).forEach(b=>t.appendChild(b));
+  const b=(txt,cls,fn,title)=>{const x=h('button',{class:cls||''},txt);if(title)x.title=title;x.onclick=fn;t.appendChild(x)};
+  b('复制给 AI','primary',()=>copy('以下是我在可视化页面中修改后的设计思维项目数据（当前页面「'+opts.title+'」，负责路径：'+PATH()+'）。'+(older?'注意：本页是旧版本，只合并本页负责的路径。':'各页面数据已同步，与 project.json 不同的部分都是我的修改。')+'请合并回 project.json，然后继续：\n```json\n'+JSON.stringify(out(),null,2)+'\n```','已复制，粘贴回对话即可继续'),'把修改后的完整数据复制到剪贴板');
+  if(opts.md)b('导出 Markdown','',()=>dl(tpl+'.md',opts.md(),'text/markdown'));
+  b('导出 JSON','',()=>dl((st.meta.project||'project')+'.json',JSON.stringify(out(),null,2),'application/json'));
+  b('导入','',openImport,'粘贴 JSON 数据替换当前页面');
+  b('重置','',()=>{if(!confirm('清除本项目所有页面的本地修改，恢复 agent 生成的初始数据？'))return;try{localStorage.removeItem(KEY)}catch(e){}st=strip(init);st.meta=st.meta||{};rerender();toast('已恢复初始数据')},'清除本地修改')}
+ function openImport(){const m=$('dt-modal');m.classList.add('open');const ta=$('dt-imp');ta.value='';ta.focus()}
+ function doImport(){let t=$('dt-imp').value.trim().replace(/^```(json)?/,'').replace(/```$/,'').trim();try{const o=JSON.parse(t);st=strip(o);st.meta=st.meta||{};save();$('dt-modal').classList.remove('open');rerender();toast('已导入')}catch(e){toast('JSON 格式不正确')}}
+ function rerender(){header();opts.render&&opts.render()}
+ function evBtn(obj){const EV=['quote','observed','inferred','assumed'],L={quote:'原话',observed:'观察',inferred:'推断',assumed:'假设'};obj.evidence=obj.evidence||'assumed';
+  const b=h('button',{class:'ev '+obj.evidence,title:'切换证据类型'},L[obj.evidence]);b.onclick=e=>{e.stopPropagation();obj.evidence=EV[(EV.indexOf(obj.evidence)+1)%4];b.className='ev '+obj.evidence;b.textContent=L[obj.evidence];save()};return b}
+ function list(container,arr,prefix,ph,onChange){container.innerHTML='';arr.forEach((it,i)=>{const c=h('div',{class:'card'});const t=h('div');ed(t,it,'text',ph,onChange);c.appendChild(t);
+   const d=h('button',{class:'icon del','aria-label':'删除',title:'删除'},'×');d.onclick=()=>{arr.splice(i,1);save();list(container,arr,prefix,ph,onChange);onChange&&onChange()};c.appendChild(d);container.appendChild(c)});
+  const a=h('button',{class:'ghost'},'+ 添加');a.onclick=()=>{arr.push({id:nid(prefix),text:''});save();list(container,arr,prefix,ph,onChange);const e=container.querySelectorAll('.card .ed');e.length&&e[e.length-1].focus()};container.appendChild(a)}
+ function boot(o){opts=o;
+  // 非仪表盘页面注入固定顶部导航栏
+  if(tpl!=='dashboard'){
+    const nb=document.createElement('nav');nb.id='dt-nav';nb.setAttribute('aria-label','项目导航');
+    nb.innerHTML='<a href="dashboard.html" class="dt-nav-home" title="返回项目仪表盘">⬡ 仪表盘</a><a href="overview.html" class="dt-nav-ov" title="查看全部工具">工具总览</a><span class="dt-nav-sep"></span><span class="dt-nav-proj" id="dt-nav-proj"></span>';
+    document.body.insertBefore(nb,document.body.firstChild);
+    // 更新项目名
+    setTimeout(()=>{const el=document.getElementById('dt-nav-proj');if(el)el.textContent=st.meta&&st.meta.name||st.meta&&st.meta.project||'';},50);
+  }
+  document.body.insertAdjacentHTML('beforeend','<div class="toast" id="dt-toast" role="status" aria-live="polite"></div><div class="modal" id="dt-modal" role="dialog" aria-label="导入 JSON"><div class="panel"><b>导入 JSON</b><p class="hint">粘贴 agent 给你的项目 JSON（可带 ```json 代码块）。将替换本页当前数据。</p><textarea id="dt-imp"></textarea><div class="tools" style="justify-content:flex-end;margin-top:12px"><button id="dt-imp-c">取消</button><button class="primary" id="dt-imp-ok">导入</button></div></div></div>');
+  $('dt-imp-c').onclick=()=>$('dt-modal').classList.remove('open');$('dt-imp-ok').onclick=doImport;
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')$('dt-modal').classList.remove('open')});
+  window.addEventListener('storage',e=>{if(e.key!==KEY||!e.newValue)return;try{const o=JSON.parse(e.newValue);if(o.__base===HS){st=o.st;st.meta=st.meta||{};rerender()}}catch(_){}});
+  rerender();if(fresh)setTimeout(()=>toast('已载入 agent 生成的新版本数据（旧的本地修改已备份）'),300);if(older)setTimeout(()=>toast('本页数据比其他已打开的页面旧，修改只保存在本页'),300)}
+ return {get st(){return st},get,save,toast,esc,ed,h,nid,dl,copy,boot,rerender,evBtn,list,target:init._target||''};
+})();
+
+(function(){
+const {h,esc,save,ed,nid}=DT;
+
+const PH=[
+ {k:'empathize',n:'共情',en:'Empathize',c:'var(--blue)'},
+ {k:'define',   n:'定义',en:'Define',   c:'var(--purple)'},
+ {k:'ideate',   n:'构思',en:'Ideate',   c:'var(--orange)'},
+ {k:'prototype',n:'原型',en:'Prototype',c:'var(--green)'},
+ {k:'test',     n:'测试',en:'Test',     c:'var(--teal)'},
+];
+
+const has=o=>{if(o==null)return false;if(Array.isArray(o))return o.length>0;if(typeof o==='object')return Object.keys(o).some(k=>k!=='id'&&has(o[k]));return String(o).trim()!==''&&o!==false&&o!==0};
+const B=k=>s=>{const b=(s.boards||{})[k];return b&&has(b.cards);};
+const T=k=>s=>{const tb=(s.tables||{})[k];return tb&&has(tb.rows||tb.questions||tb.items);};
+const R=k=>s=>{const r=(s.radials||{})[k];return r&&has(r.items||r.petals);};
+
+// 工具定义：[阶段, 中文名, 文件, 有数据?, 重要(1核心/2补充), 预览函数]
+const TOOLS=[
+ ['empathize','用户画像 Persona','persona.html',    s=>has(s.personas),1,
+  s=>{const p=(s.personas||[])[0];return p?`<b>${esc(p.name||'')}</b>，${esc(p.snapshot||p.bio||'').slice(0,40)}…`:'未填写'}],
+ ['empathize','移情图 Empathy Map','empathy-map.html',s=>has(s.empathyMap),1,
+  s=>{const em=s.empathyMap;if(!em)return '未填写';const ci=em.coreInsight||'';return ci?`<b>核心洞察：</b>${esc(ci).slice(0,50)}…`:`已有 ${(em.says||[]).length} 条 Says / ${(em.thinks||[]).length} 条 Thinks`}],
+ ['empathize','顾客旅程图','journey.html', s=>has(s.journey&&s.journey.stages),1,
+  s=>{const st=(s.journey&&s.journey.stages)||[];const low=st.filter(x=>x.emotion<0);return st.length?`${st.length} 个阶段，${low.length} 个低谷`:'未填写'}],
+ ['empathize','Hook 上瘾模型','hook.html',  s=>has(s.hook),1,
+  s=>{const hk=s.hook;if(!hk)return '未填写';const tr=typeof hk.trigger==='string'?hk.trigger:Object.values(hk.trigger||{}).filter(Boolean)[0]||'';const rw=typeof hk.reward==='string'?hk.reward:Object.values(hk.reward||{}).filter(Boolean)[0]||'';return `触发：${esc(hk.triggerDesc||tr)||'？'}　奖赏：${esc(hk.rewardDesc||rw)||'？'}`}],
+ ['empathize','AEIOU 观察','board-aeiou.html',B('aeiou'),2,
+  s=>{const b=s.boards&&s.boards.aeiou;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'}],
+ ['empathize','访谈提纲','table-interview.html',T('interview'),2,
+  s=>{const r=(s.tables&&s.tables.interview&&(s.tables.interview.rows||s.tables.interview.questions))||[];return r.length?`${r.length} 条问题`:'未填写'}],
+ ['empathize','AEIOU 问卷','table-survey.html',T('survey'),2,
+  s=>{const r=(s.tables&&s.tables.survey&&(s.tables.survey.questions||s.tables.survey.rows))||[];return r.length?`${r.length} 题`:'未填写'}],
+ ['empathize','利益相关者地图','radial-stakeholders.html',R('stakeholders'),2,
+  s=>{const r=s.radials&&s.radials.stakeholders;const p=(r&&(r.petals||r.items))||[];return p.length?p.map(x=>esc(x.label||x.text||'')).filter(Boolean).join('、').slice(0,50):'未填写'}],
+ ['empathize','极端 / 未来用户','table-extremes.html',T('extremes'),2,
+  s=>{const r=(s.tables&&s.tables.extremes&&(s.tables.extremes.rows||s.tables.extremes.questions))||[];return r.length?`${r.length} 位极端用户`:'未填写'}],
+ ['empathize','故事板 Storyboard','storyboard.html',s=>has(s.storyboard&&s.storyboard.frames),2,
+  s=>{const fr=(s.storyboard&&s.storyboard.frames)||[];return fr.length?`${fr.length} 格：${esc((fr[0]&&fr[0].title)||'')}→${esc((fr[fr.length-1]&&fr[fr.length-1].title)||'')}`:'未填写'}],
+ ['empathize','竞品分析','table-competitors.html',T('competitors'),2,
+  s=>{const r=(s.tables&&s.tables.competitors&&(s.tables.competitors.rows||s.tables.competitors.questions))||[];return r.length?`${r.length} 个竞品`:'未填写'}],
+ ['define','JTBD → PoV → HMW','pov.html', s=>has(s.define),1,
+  s=>{const p=s.define&&s.define.pov;if(!p||!p.user)return '未填写';return `<b>${esc(p.user)}</b> 需要 ${esc(p.need||'…')}`}],
+ ['define','价值主张画布','value-canvas.html',s=>has(s.valueCanvas),1,
+  s=>{const vc=s.valueCanvas;if(!vc)return '未填写';const pains=(vc.pains||[]).length,gains=(vc.gains||[]).length;return `痛点 ${pains} 个 · 收益 ${gains} 个`}],
+ ['define','洞察聚类','board-insights.html',B('insights'),2,
+  s=>{const b=s.boards&&s.boards.insights;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'}],
+ ['define','360 度视角','radial-view360.html',R('view360'),2,
+  s=>{const r=s.radials&&s.radials.view360;const p=(r&&(r.petals||r.items))||[];return p.length?p.map(x=>esc(x.label||x.text||'')).filter(Boolean).join('、').slice(0,50):'未填写'}],
+ ['define','九宫格','board-ninegrid.html',B('ninegrid'),2,
+  s=>{const b=s.boards&&s.boards.ninegrid;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'}],
+ ['define','雏菊图','radial-daisy.html',  R('daisy'),2,
+  s=>{const r=s.radials&&s.radials.daisy;const p=(r&&(r.petals||r.items))||[];return p.length?`${p.length} 个花瓣`:'未填写'}],
+ ['define','关键假设清单','table-assumptions.html',T('assumptions'),2,
+  s=>{const r=(s.tables&&s.tables.assumptions&&(s.tables.assumptions.rows||s.tables.assumptions.questions))||[];return r.length?`${r.length} 条假设`:'未填写'}],
+ ['ideate','丘吉尔矩阵','matrix.html',     s=>has(s.ideate&&s.ideate.matrix&&(s.ideate.matrix.items||Object.values(s.ideate.matrix).find(v=>Array.isArray(v)))),1,
+  s=>{const mx=s.ideate&&s.ideate.matrix;if(!mx)return '未填写';const it=mx.items||(Object.values(mx).find(v=>Array.isArray(v)))||[];const qw=it.filter(x=>(x.y||x.impact||0)>=3&&(x.x||6-(x.effort||3))>=3).length;return it.length?`${it.length} 个点子，${qw} 个 Quick Win`:'已填写'}],
+ ['ideate','SCAMPER 奔驰法','scamper.html',s=>has(s.ideate&&s.ideate.scamper),1,
+  s=>{const sc=s.ideate&&s.ideate.scamper;if(!sc)return '未填写';const filled=Object.values(sc).filter(v=>Array.isArray(v)?v.length:v).length;return `${filled}/7 个维度已填写`}],
+ ['ideate','Crazy 8s','board-crazy8.html',  B('crazy8'),2,
+  s=>{const b=s.boards&&s.boards.crazy8;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 个草图方案`:'未填写'}],
+ ['ideate','头脑风暴墙','board-brainstorm.html',B('brainstorm'),2,
+  s=>{const b=s.boards&&s.boards.brainstorm;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'}],
+ ['ideate','问题反转','table-reversal.html',T('reversal'),2,
+  s=>{const r=(s.tables&&s.tables.reversal&&(s.tables.reversal.rows||s.tables.reversal.questions))||[];return r.length?`${r.length} 条反转`:'未填写'}],
+ ['ideate','跨行业对标','table-analogy.html',T('analogy'),2,
+  s=>{const r=(s.tables&&s.tables.analogy&&(s.tables.analogy.rows||s.tables.analogy.questions))||[];return r.length?`${r.length} 个对标`:'未填写'}],
+ ['ideate','点子沟通表','table-ideas.html',T('ideas'),2,
+  s=>{const r=(s.tables&&s.tables.ideas&&(s.tables.ideas.rows||s.tables.ideas.questions))||[];return r.length?`${r.length} 个点子`:'未填写'}],
+ ['prototype','盒子原则 + 保真度','box.html',s=>has(s.prototype),1,
+  s=>{const pt=s.prototype;if(!pt)return '未填写';const bx=pt.box||pt;const name=bx.name||bx.solution||'';const slogan=bx.slogan||'';return name?`<b>${esc(name)}</b>${slogan?' · '+esc(slogan.slice(0,30)):''}`:slogan?esc(slogan.slice(0,50)):'已填写'}],
+ ['prototype','架子原则','board-shelf.html',B('shelf'),2,
+  s=>{const b=s.boards&&s.boards.shelf;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 个方案`:'未填写'}],
+ ['prototype','原型工作坊','board-workshop.html',B('workshop'),2,
+  s=>{const b=s.boards&&s.boards.workshop;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'}],
+ ['prototype','MVP 画布','board-mvp.html',  B('mvp'),1,
+  s=>{const b=s.boards&&s.boards.mvp;return b&&b.hypothesis?`<b>假设：</b>${esc(b.hypothesis).slice(0,50)}…`:'未填写'}],
+ ['prototype','服务蓝图','table-blueprint.html',T('blueprint'),2,
+  s=>{const r=(s.tables&&s.tables.blueprint&&(s.tables.blueprint.rows||s.tables.blueprint.questions))||[];return r.length?`${r.length} 个触点`:'未填写'}],
+ ['test','用户研究计划','research-plan.html',s=>has(s.researchPlan&&s.researchPlan.hypotheses),1,
+  s=>{const rp=s.researchPlan;if(!rp)return '未填写';const h=(rp.hypotheses||[]).filter(x=>x.selected).length,q=(rp.script&&((rp.script.warmup||[]).concat(rp.script.main||[]).concat(rp.script.wrap||[]))||[]).length;return `${h} 条假设 · ${q} 题提纲`}],
+ ['test','A/B 测试','ab-test.html',         s=>has(s.test&&s.test.ab&&s.test.ab.a),1,
+  s=>{const ab=s.test&&s.test.ab;if(!ab||!ab.a)return '未填写';return ab.a.n?`A: ${ab.a.n} 人 · B: ${(ab.b&&ab.b.n)||0} 人`:'已建立但无数据'}],
+ ['test','测试计划','table-testplan.html',  T('testplan'),2,
+  s=>{const r=(s.tables&&s.tables.testplan&&(s.tables.testplan.rows||s.tables.testplan.questions))||[];return r.length?`${r.length} 个测试场景`:'未填写'}],
+ ['test','反馈收集表','board-feedback.html',B('feedback'),2,
+  s=>{const b=s.boards&&s.boards.feedback;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 条反馈`:'未填写'}],
+ ['test','试验表','table-experiments.html',T('experiments'),2,
+  s=>{const r=(s.tables&&s.tables.experiments&&(s.tables.experiments.rows||s.tables.experiments.questions))||[];return r.length?`${r.length} 条试验`:'未填写'}],
+ ['reflect','回溯板','board-retro.html',    B('retro'),2,
+  s=>{const b=s.boards&&s.boards.retro;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 条复盘`:'未填写'}],
+];
+
+function collectVerify(s){
+  const out=[];
+  (function wk(o,p){if(!o||typeof o!=='object')return;for(const k in o){
+    if(k==='toVerify'&&Array.isArray(o[k]))o[k].forEach(v=>out.push({t:typeof v==='string'?v:(v.text||''),src:p.split('.')[0]}));
+    else wk(o[k],p?p+'.'+k:k);
+  }})(s,'');
+  return out.filter(x=>x.t);
+}
+
+function nextSteps(s){
+  const steps=[];
+  const hasPersona=has(s.personas);
+  const hasPOV=has(s.define);
+  const mx=s.ideate&&s.ideate.matrix;const hasMatrix=mx&&has(mx.items||Object.values(mx).find(v=>Array.isArray(v)));
+  const hasProto=has(s.prototype)||B('mvp')(s);
+  const hasResearch=has(s.researchPlan&&s.researchPlan.hypotheses);
+  const hasVC=has(s.valueCanvas);
+  if(!hasPersona) steps.push({t:'建立用户画像',d:'用 AI 生成第一个画像，作为后续所有工具的基础',f:'persona.html',ok:false});
+  if(hasPersona&&!hasPOV) steps.push({t:'写出 POV 洞察句',d:'把访谈/观察收敛成清晰的问题陈述',f:'pov.html',ok:false});
+  if(hasPOV&&!hasMatrix) steps.push({t:'用丘吉尔矩阵筛选方案',d:'选出最值得原型化的方向',f:'matrix.html',ok:false});
+  if(hasMatrix&&!hasVC) steps.push({t:'检验价值主张画布',d:'验证方案是否真正对准用户痛点',f:'value-canvas.html',ok:false});
+  if(hasMatrix&&!hasProto) steps.push({t:'制作 MVP 画布',d:'定义最小实验与成功标准',f:'board-mvp.html',ok:false});
+  if(hasProto&&!hasResearch) steps.push({t:'制定用户研究计划',d:'在真实用户面前测试前，整理假设与访谈提纲',f:'research-plan.html',ok:false});
+  if(!steps.length) steps.push({t:'继续迭代',d:'所有核心工具已有内容，查看工具总览或修改任意页面',f:'overview.html',ok:true});
+  return steps.slice(0,3);
+}
+
+function genPrompt(tool){
+  const s=DT.st;
+  const pname=s.meta&&(s.meta.name||s.meta.project)||'';
+  const ok=tool[3](s);
+  if(ok){
+    return `请帮我继续完善「${tool[1]}」页面。\n项目：${pname}\n文件：${tool[2]}\n数据路径：${tool[6]||tool[2].replace('.html','')}\n\n当前摘要：${tool[5](s)}\n\n请在现有数据基础上补充或优化，输出更新后的完整 project.json 片段。`;
+  }
+  return `请用设计思维 Skill 为当前项目生成「${tool[1]}」。\n项目：${pname}\n输出文件：${tool[2]}\n\n请根据项目背景生成完整数据，并输出 project.json 更新片段。`;
+}
+
+let aiOpen=false;
+
+function render(){
+  const app=document.getElementById('app');app.innerHTML='';
+  const s=DT.st;
+
+  // ── Hero：项目信息 + 进度 ──
+  const hero=h('div',{class:'db-hero'});
+  const hl=h('div');
+  const pname=s.meta&&(s.meta.name||s.meta.project)||'未命名项目';
+  hl.appendChild(h('div',{class:'db-hero-title'},pname+'<small>'+(s.meta&&s.meta.challenge||'点击「编辑」填写设计挑战')+'</small>'));
+  // 进度条
+  const prog=h('div',{class:'db-progress'});
+  PH.forEach(p=>{
+    const ts=TOOLS.filter(t=>t[0]===p.k),done=ts.filter(t=>t[3](s)).length;
+    const pd=h('div',{class:'db-ph'+(s.meta.phase===p.k?' cur':''),style:'--c:'+p.c});
+    pd.innerHTML=`<div class="db-ph-name">${p.n}</div><div class="db-ph-bar"><i style="width:${ts.length?done/ts.length*100:0}%"></i></div><div class="db-ph-cnt">${done}/${ts.length}</div>`;
+    prog.appendChild(pd);
+  });
+  hl.appendChild(prog);
+  hero.appendChild(hl);
+  const hr=h('div',{class:'db-hero-actions'});
+  const editBtn=h('button',{},'编辑项目信息');
+  editBtn.onclick=()=>window.open('overview.html','_self');
+  hr.appendChild(editBtn);
+  const impBtn=h('button',{},'导入 JSON');
+  impBtn.onclick=()=>document.getElementById('dt-modal').classList.add('open');
+  hr.appendChild(impBtn);
+  hero.appendChild(hr);
+  app.appendChild(hero);
+
+  // ── 摘要数字 ──
+  const totalT=TOOLS.length,doneT=TOOLS.filter(t=>t[3](s)).length;
+  const coreT=TOOLS.filter(t=>t[4]===1),coreDoneT=coreT.filter(t=>t[3](s)).length;
+  const vl=collectVerify(s);
+  const checked=(s.meta._vchecked||[]);
+  const pendV=vl.filter(x=>!checked.includes(x.t)).length;
+  const stat=h('div',{class:'db-stats'});
+  [[doneT+' / '+totalT,'工具已填写','var(--blue)'],[coreDoneT+' / '+coreT.length,'核心工具','var(--green)'],[pendV,'待验证项','var(--orange)'],[(PH.find(p=>p.k===s.meta.phase)||PH[0]).n,'当前阶段','var(--purple)']].forEach(([v,l,c])=>{
+    const cell=h('div',{class:'db-stat'});
+    cell.appendChild(h('div',{class:'v',style:'color:'+c},String(v)));
+    cell.appendChild(h('div',{class:'l'},l));
+    stat.appendChild(cell);
+  });
+  app.appendChild(stat);
+
+  // ── 下一步建议 ──
+  const nexts=nextSteps(s);
+  const nb=h('div',{class:'db-next'});
+  nb.appendChild(h('h3',{},'💡 下一步建议'));
+  const ni=h('div',{class:'db-next-items'});
+  nexts.forEach((n,i)=>{
+    const row=h('div',{class:'db-next-item'});
+    row.appendChild(h('div',{class:'db-next-num'},String(i+1)));
+    const nc=h('div',{class:'db-next-txt'});
+    nc.appendChild(h('div',{class:'t'},n.t));
+    nc.appendChild(h('div',{class:'d'},n.d));
+    row.appendChild(nc);
+    const na=h('div',{class:'db-next-actions'});
+    if(!n.ok){
+      const tool=TOOLS.find(t=>t[2]===n.f);
+      if(tool){
+        const cp=h('button',{},'复制生成指令');
+        cp.onclick=()=>{const p=genPrompt(tool);navigator.clipboard&&navigator.clipboard.writeText(p).then(()=>DT.toast('已复制，粘贴给 AI 即可'));};
+        na.appendChild(cp);
+      }
+    }
+    const link=h('a',{href:n.f},n.ok?'查看':'打开');
+    na.appendChild(link);
+    row.appendChild(na);
+    ni.appendChild(row);
+  });
+  nb.appendChild(ni);
+  app.appendChild(nb);
+
+  // ── 各阶段工具卡片 ──
+  app.appendChild(h('h3',{class:'sec'},'所有工具'));
+  PH.forEach(p=>{
+    const ts=TOOLS.filter(t=>t[0]===p.k);
+    const done=ts.filter(t=>t[3](s)).length;
+    const sec=h('div',{class:'db-phase-sec'});
+    const hd=h('div',{class:'db-phase-hd',style:'--c:'+p.c});
+    hd.appendChild(h('h3',{},p.n+' · '+p.en));
+    hd.appendChild(h('span',{class:'ph-prog'},done+' / '+ts.length+' 已完成'));
+    sec.appendChild(hd);
+    const grid=h('div',{class:'db-tools'});
+    ts.forEach(tool=>{
+      const ok=tool[3](s);
+      const card=h('div',{class:'db-tool'+(ok?' has-data':''),style:'--c:'+p.c});
+      const thd=h('div',{class:'db-tool-hd'});
+      thd.appendChild(h('span',{class:'db-tool-name'},tool[1]+(tool[4]===2?' ·':'')));
+      thd.appendChild(h('span',{class:'db-tool-badge'},ok?'有内容':'未开始'));
+      card.appendChild(thd);
+      const prev=h('div',{class:'db-tool-preview'});
+      prev.innerHTML=tool[5](s);
+      card.appendChild(prev);
+      const acts=h('div',{class:'db-tool-actions'});
+      if(ok) acts.appendChild(h('a',{href:tool[2]},'打开 →'));
+      const cp=h('button',{},ok?'继续优化':'复制生成指令');
+      cp.onclick=()=>{
+        const p=genPrompt(tool);
+        navigator.clipboard&&navigator.clipboard.writeText(p).then(()=>DT.toast('已复制，粘贴给 AI'));
+        // 展开 AI 面板
+        const panel=document.getElementById('db-ai-panel');
+        if(panel){panel.classList.add('open');document.getElementById('db-ai-prompt').textContent=p;}
+      };
+      acts.appendChild(cp);
+      card.appendChild(acts);
+      grid.appendChild(card);
+    });
+    sec.appendChild(grid);
+    app.appendChild(sec);
+  });
+
+  // ── 待验证清单 ──
+  if(vl.length){
+    app.appendChild(h('h3',{class:'sec'},'⚠️ 待真人验证（'+vl.length+' 条）'));
+    app.appendChild(h('p',{class:'secsub'},'以下来自各工具的 AI 假设，务必通过真实用户验证。勾选表示已验证。'));
+    const vbox=h('div',{class:'db-verify'});
+    vl.forEach(item=>{
+      const isChecked=checked.includes(item.t);
+      const row=h('div',{class:'db-verify-item'+(isChecked?' checked':'')});
+      const cb=h('input',{type:'checkbox','aria-label':'标记为已验证'});cb.checked=isChecked;
+      cb.onchange=()=>{
+        const vc=s.meta._vchecked=s.meta._vchecked||[];
+        if(cb.checked&&!vc.includes(item.t)) vc.push(item.t);
+        else{const i=vc.indexOf(item.t);if(i>=0)vc.splice(i,1);}
+        save();render();
+      };
+      row.appendChild(cb);
+      row.appendChild(h('span',{style:'flex:1'},item.t));
+      row.appendChild(h('span',{class:'db-verify-src'},item.src));
+      vbox.appendChild(row);
+    });
+    app.appendChild(vbox);
+  }
+
+  // ── AI 工作流面板（可折叠） ──
+  const aip=h('div',{class:'db-aipanel'+(aiOpen?' open':''),id:'db-ai-panel'});
+  const aiphd=h('div',{class:'db-aipanel-hd'});
+  aiphd.appendChild(h('h3',{},'🤖 AI 工作流 · Prompt 预览'));
+  aiphd.appendChild(h('span',{class:'db-aipanel-toggle'},'▾'));
+  aiphd.onclick=()=>{aip.classList.toggle('open');aiOpen=aip.classList.contains('open')};
+  aip.appendChild(aiphd);
+  const aibody=h('div',{class:'db-aipanel-body'});
+  aibody.appendChild(h('p',{style:'font-size:13px;color:var(--muted);margin:0 0 8px'},'点击任意工具卡片的「复制生成指令」后，prompt 会出现在这里。粘贴到 Claude / GPT / DeepSeek，AI 返回 JSON 后点「导入」更新数据。'));
+  const promptPre=h('div',{class:'db-prompt-box',id:'db-ai-prompt'},'（点击工具卡片的「复制生成指令」后，prompt 会出现在这里）');
+  aibody.appendChild(promptPre);
+  const pa=h('div',{class:'db-prompt-actions'});
+  const cpAll=h('button',{class:'primary'},'复制');cpAll.onclick=()=>{const t=document.getElementById('db-ai-prompt').textContent;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>DT.toast('已复制'))};
+  const impAll=h('button',{},'导入 AI 返回的 JSON');impAll.onclick=()=>document.getElementById('dt-modal').classList.add('open');
+  pa.append(cpAll,impAll);
+  aibody.appendChild(pa);
+  aip.appendChild(aibody);
+  app.appendChild(aip);
+}
+
+function md(){
+  const s=DT.st;
+  const lines=['# '+(s.meta&&(s.meta.name||s.meta.project)||'项目')+' — 仪表盘',''];
+  PH.forEach(p=>{
+    lines.push('## '+p.n);
+    TOOLS.filter(t=>t[0]===p.k).forEach(t=>lines.push('- ['+(t[3](s)?'x':' ')+'] '+t[1]+' ('+t[2]+') — '+t[5](s).replace(/<[^>]+>/g,'')));
+    lines.push('');
+  });
+  const vl=collectVerify(s);
+  if(vl.length){lines.push('## 待验证');vl.forEach(v=>lines.push('- [ ] '+v.t+' ('+v.src+')'));}
+  return lines.join('\n');
+}
+
+DT.boot({title:'项目仪表盘',en:'Dashboard',subtitle:()=>{
+  const s=DT.st;return TOOLS.filter(t=>t[3](s)).length+'/'+TOOLS.length+' 个工具有内容';
+},render,md});
+})();
+</script>
+</body>
+</html>

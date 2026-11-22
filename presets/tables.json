@@ -1,0 +1,588 @@
+{
+ "interview": {
+  "title": "访谈提纲",
+  "en": "Interview Guide",
+  "phase": "empathize",
+  "intro": "开放式提问，不引导、不假设；多问“为什么”，要具体事例，探寻例外。记录原话、情绪与肢体语言。",
+  "rowLabel": "问题",
+  "columns": [
+   {
+    "key": "stage",
+    "label": "环节",
+    "type": "select",
+    "options": [
+     "开场",
+     "背景",
+     "具体经历",
+     "深挖",
+     "例外",
+     "收尾"
+    ],
+    "colors": {
+     "开场": "gray",
+     "背景": "blue",
+     "具体经历": "green",
+     "深挖": "purple",
+     "例外": "orange",
+     "收尾": "gray"
+    },
+    "width": 110
+   },
+   {
+    "key": "q",
+    "label": "问题",
+    "type": "long",
+    "placeholder": "开放式问题"
+   },
+   {
+    "key": "probe",
+    "label": "追问",
+    "type": "long",
+    "placeholder": "为什么？能举个例子吗？"
+   },
+   {
+    "key": "goal",
+    "label": "想了解什么",
+    "type": "long"
+   },
+   {
+    "key": "answer",
+    "label": "记录（原话/观察）",
+    "type": "long"
+   }
+  ],
+  "rows": []
+ },
+ "extremes": {
+  "title": "极端用户与未来用户",
+  "en": "Extreme & Future Users",
+  "phase": "empathize",
+  "intro": "极端用户在某方面需求特别强或行为特别突出，常常提前暴露主流用户的隐性需求；未来用户（领先用户）已经在用明天的方式生活。",
+  "rowLabel": "用户",
+  "columns": [
+   {
+    "key": "who",
+    "label": "用户",
+    "type": "text",
+    "width": 140
+   },
+   {
+    "key": "type",
+    "label": "类型",
+    "type": "select",
+    "options": [
+     "极端用户",
+     "未来用户",
+     "非用户"
+    ],
+    "colors": {
+     "极端用户": "orange",
+     "未来用户": "purple",
+     "非用户": "gray"
+    },
+    "width": 110
+   },
+   {
+    "key": "extreme",
+    "label": "特别之处",
+    "type": "long"
+   },
+   {
+    "key": "need",
+    "label": "揭示的隐性需求",
+    "type": "long"
+   },
+   {
+    "key": "mainstream",
+    "label": "对主流用户的启示",
+    "type": "long"
+   },
+   {
+    "key": "verified",
+    "label": "已访谈",
+    "type": "check",
+    "width": 70
+   }
+  ],
+  "rows": []
+ },
+ "competitors": {
+  "title": "竞品分析",
+  "en": "Competitor Analysis",
+  "phase": "empathize",
+  "intro": "包括直接竞品、间接替代方案以及“什么都不做”。重点看用户为什么选择或放弃它们。",
+  "rowLabel": "竞品",
+  "columns": [
+   {
+    "key": "name",
+    "label": "竞品 / 替代方案",
+    "type": "text",
+    "width": 150
+   },
+   {
+    "key": "type",
+    "label": "类型",
+    "type": "select",
+    "options": [
+     "直接竞品",
+     "间接替代",
+     "不作为"
+    ],
+    "colors": {
+     "直接竞品": "red",
+     "间接替代": "orange",
+     "不作为": "gray"
+    },
+    "width": 110
+   },
+   {
+    "key": "job",
+    "label": "满足的任务",
+    "type": "long"
+   },
+   {
+    "key": "strength",
+    "label": "优势",
+    "type": "long"
+   },
+   {
+    "key": "weakness",
+    "label": "不足",
+    "type": "long"
+   },
+   {
+    "key": "gap",
+    "label": "机会空白",
+    "type": "long"
+   }
+  ],
+  "rows": []
+ },
+ "assumptions": {
+  "title": "关键假设清单",
+  "en": "Critical Assumptions",
+  "phase": "define",
+  "intro": "把“我们以为”的事情都列出来，按风险排序，优先验证“一旦错了项目就失败”的假设。",
+  "rowLabel": "假设",
+  "columns": [
+   {
+    "key": "text",
+    "label": "我们相信……",
+    "type": "long"
+   },
+   {
+    "key": "kind",
+    "label": "类别",
+    "type": "select",
+    "options": [
+     "用户需求",
+     "价值",
+     "可行性",
+     "商业"
+    ],
+    "colors": {
+     "用户需求": "blue",
+     "价值": "green",
+     "可行性": "orange",
+     "商业": "purple"
+    },
+    "width": 100
+   },
+   {
+    "key": "risk",
+    "label": "风险",
+    "type": "select",
+    "options": [
+     "高",
+     "中",
+     "低"
+    ],
+    "colors": {
+     "高": "red",
+     "中": "orange",
+     "低": "green"
+    },
+    "width": 70
+   },
+   {
+    "key": "evidence",
+    "label": "现有证据",
+    "type": "select",
+    "options": [
+     "原话",
+     "观察",
+     "推断",
+     "假设"
+    ],
+    "colors": {
+     "原话": "blue",
+     "观察": "green",
+     "推断": "purple",
+     "假设": "orange"
+    },
+    "width": 80
+   },
+   {
+    "key": "how",
+    "label": "如何验证",
+    "type": "long"
+   },
+   {
+    "key": "status",
+    "label": "状态",
+    "type": "select",
+    "options": [
+     "待验证",
+     "验证中",
+     "成立",
+     "不成立"
+    ],
+    "colors": {
+     "待验证": "gray",
+     "验证中": "blue",
+     "成立": "green",
+     "不成立": "red"
+    },
+    "width": 90
+   }
+  ],
+  "rows": []
+ },
+ "reversal": {
+  "title": "问题反转",
+  "en": "Reverse Brainstorming",
+  "phase": "ideate",
+  "intro": "先问“我们怎样才能让问题变得更糟？”，尽情列出坏主意，再把每条反转成可行的点子。",
+  "rowLabel": "坏主意",
+  "columns": [
+   {
+    "key": "bad",
+    "label": "怎样让它更糟？",
+    "type": "long"
+   },
+   {
+    "key": "reverse",
+    "label": "反转过来",
+    "type": "long"
+   },
+   {
+    "key": "idea",
+    "label": "可落地的点子",
+    "type": "long"
+   },
+   {
+    "key": "pick",
+    "label": "入选",
+    "type": "check",
+    "width": 60
+   }
+  ],
+  "rows": []
+ },
+ "analogy": {
+  "title": "跨行业对标",
+  "en": "Analogies & Benchmarking",
+  "phase": "ideate",
+  "intro": "找出问题的本质（如“排队等待”“信任陌生人”），再看其他行业如何解决同类问题，借鉴并迁移。",
+  "rowLabel": "对标",
+  "columns": [
+   {
+    "key": "essence",
+    "label": "问题本质",
+    "type": "text",
+    "width": 140
+   },
+   {
+    "key": "industry",
+    "label": "其他行业 / 场景",
+    "type": "text",
+    "width": 150
+   },
+   {
+    "key": "how",
+    "label": "他们怎么做",
+    "type": "long"
+   },
+   {
+    "key": "transfer",
+    "label": "迁移到我们的点子",
+    "type": "long"
+   },
+   {
+    "key": "pick",
+    "label": "入选",
+    "type": "check",
+    "width": 60
+   }
+  ],
+  "rows": []
+ },
+ "ideas": {
+  "title": "点子沟通表",
+  "en": "Idea Communication Sheet",
+  "phase": "ideate",
+  "intro": "把每个入选点子讲清楚，便于团队讨论与用户沟通。",
+  "rowLabel": "点子",
+  "columns": [
+   {
+    "key": "name",
+    "label": "点子名称",
+    "type": "text",
+    "width": 130
+   },
+   {
+    "key": "for",
+    "label": "目标用户",
+    "type": "text",
+    "width": 120
+   },
+   {
+    "key": "desc",
+    "label": "一句话描述",
+    "type": "long"
+   },
+   {
+    "key": "value",
+    "label": "用户价值",
+    "type": "long"
+   },
+   {
+    "key": "how",
+    "label": "如何实现",
+    "type": "long"
+   },
+   {
+    "key": "risk",
+    "label": "最大风险/疑问",
+    "type": "long"
+   },
+   {
+    "key": "next",
+    "label": "下一步",
+    "type": "text"
+   }
+  ],
+  "rows": []
+ },
+ "blueprint": {
+  "title": "服务蓝图",
+  "en": "Service Blueprint",
+  "phase": "prototype",
+  "intro": "按服务步骤拆解：用户行为、前台（可见）、后台（不可见）、支持系统，以及证据与痛点。适合服务原型与角色扮演前的准备。",
+  "rowLabel": "步骤",
+  "columns": [
+   {
+    "key": "step",
+    "label": "步骤",
+    "type": "text",
+    "width": 110
+   },
+   {
+    "key": "user",
+    "label": "用户行为",
+    "type": "long"
+   },
+   {
+    "key": "front",
+    "label": "前台触点",
+    "type": "long"
+   },
+   {
+    "key": "back",
+    "label": "后台活动",
+    "type": "long"
+   },
+   {
+    "key": "support",
+    "label": "支持系统",
+    "type": "long"
+   },
+   {
+    "key": "evidence",
+    "label": "有形证据",
+    "type": "text"
+   },
+   {
+    "key": "pain",
+    "label": "失败点 / 痛点",
+    "type": "long"
+   }
+  ],
+  "rows": []
+ },
+ "testplan": {
+  "title": "测试计划",
+  "en": "Test Plan",
+  "phase": "test",
+  "intro": "每轮测试先写清目标与假设、问题地图、测试场景，并安排主持人、演员、观察者；正式测试前先做一次预测试。",
+  "rowLabel": "测试项",
+  "columns": [
+   {
+    "key": "goal",
+    "label": "要学习 / 验证什么",
+    "type": "long"
+   },
+   {
+    "key": "scenario",
+    "label": "测试场景",
+    "type": "long"
+   },
+   {
+    "key": "questions",
+    "label": "问题地图（开放式）",
+    "type": "long"
+   },
+   {
+    "key": "host",
+    "label": "主持人",
+    "type": "text",
+    "width": 90
+   },
+   {
+    "key": "actor",
+    "label": "演员",
+    "type": "text",
+    "width": 90
+   },
+   {
+    "key": "observer",
+    "label": "观察者",
+    "type": "text",
+    "width": 90
+   },
+   {
+    "key": "pilot",
+    "label": "已预测试",
+    "type": "check",
+    "width": 70
+   },
+   {
+    "key": "date",
+    "label": "日期",
+    "type": "date",
+    "width": 130
+   }
+  ],
+  "rows": []
+ },
+ "experiments": {
+  "title": "试验表",
+  "en": "Experiment Table",
+  "phase": "test",
+  "intro": "用更少的时间与资源学习：每次试验写清假设、做法、指标、成功标准，结束后记录学习与结论。",
+  "rowLabel": "试验",
+  "columns": [
+   {
+    "key": "hypothesis",
+    "label": "我们相信（假设）",
+    "type": "long"
+   },
+   {
+    "key": "test",
+    "label": "为验证它，我们将……",
+    "type": "long"
+   },
+   {
+    "key": "metric",
+    "label": "度量什么 / 收集哪些数据",
+    "type": "long"
+   },
+   {
+    "key": "criteria",
+    "label": "成功标准",
+    "type": "long"
+   },
+   {
+    "key": "learned",
+    "label": "我们观察到 / 学到",
+    "type": "long"
+   },
+   {
+    "key": "decision",
+    "label": "结论",
+    "type": "select",
+    "options": [
+     "喜欢它·保留",
+     "改变它·迭代",
+     "放弃它",
+     "需要更多数据"
+    ],
+    "colors": {
+     "喜欢它·保留": "green",
+     "改变它·迭代": "orange",
+     "放弃它": "red",
+     "需要更多数据": "gray"
+    },
+    "width": 150
+   }
+  ],
+  "rows": []
+ },
+ "survey": {
+  "title": "AEIOU 问卷设计",
+  "en": "AEIOU Survey",
+  "phase": "empathize",
+  "intro": "用 AEIOU 五个维度设计问卷，确保覆盖活动、环境、互动、物体和用户本身。先访谈再问卷：问卷用来验证访谈中发现的模式有多普遍，而不是代替访谈。每题只问一件事，避免诱导。",
+  "rowLabel": "题目",
+  "columns": [
+   {
+    "key": "dim",
+    "label": "维度",
+    "type": "select",
+    "options": [
+     "A 活动",
+     "E 环境",
+     "I 互动",
+     "O 物体",
+     "U 用户"
+    ],
+    "colors": {
+     "A 活动": "blue",
+     "E 环境": "green",
+     "I 互动": "orange",
+     "O 物体": "purple",
+     "U 用户": "red"
+    },
+    "width": 90
+   },
+   {
+    "key": "q",
+    "label": "题目",
+    "type": "long",
+    "hint": "中性措辞，一题一问",
+    "width": 220
+   },
+   {
+    "key": "type",
+    "label": "题型",
+    "type": "select",
+    "options": [
+     "单选",
+     "多选",
+     "量表",
+     "开放"
+    ],
+    "colors": {
+     "单选": "blue",
+     "多选": "purple",
+     "量表": "green",
+     "开放": "orange"
+    },
+    "width": 80
+   },
+   {
+    "key": "options",
+    "label": "选项 / 量表锚点",
+    "type": "long",
+    "hint": "用 / 分隔；量表写两端含义"
+   },
+   {
+    "key": "purpose",
+    "label": "想验证什么",
+    "type": "long",
+    "hint": "对应哪个假设或访谈发现"
+   }
+  ],
+  "rows": []
+ }
+}

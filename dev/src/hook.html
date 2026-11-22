@@ -1,0 +1,59 @@
+<!-- title: 上瘾模型 -->
+<style>
+.lay{display:grid;grid-template-columns:400px 1fr;gap:24px;align-items:start}
+.loop{width:100%;max-width:400px;aspect-ratio:1}
+.loop .st{cursor:pointer}.loop .st:focus{outline:none}.loop .st:focus-visible path{stroke:var(--text);stroke-width:3}
+.pn h2{margin:0;font-size:22px;display:flex;gap:10px;align-items:baseline}
+.pn .q{color:var(--muted);font-size:14px;margin:6px 0 14px}
+.fd{margin-bottom:12px}
+.fd label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+.fd label span{font-weight:400;color:var(--muted)}
+.fd .ed{border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:var(--bg);min-height:2.6em}
+.bmat{display:grid;grid-template-columns:100px 1fr 30px;gap:8px;align-items:center;font-size:13.5px;margin-top:6px}
+.bmat input{min-height:auto;padding:0}
+.meter{height:10px;border-radius:999px;background:var(--surface);overflow:hidden;margin-top:6px}
+.meter i{display:block;height:100%;background:var(--blue)}
+.eth{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.qq{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.mx{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mx div{border-radius:10px;padding:10px;font-size:13px;border:1px solid var(--border);color:var(--muted)}
+.mx div.on{border:2px solid var(--text);color:var(--text);font-weight:600}
+.mx b{display:block;font-size:14px}
+@media (max-width:860px){.lay{grid-template-columns:1fr}.loop{max-width:320px;margin:0 auto;display:block}.eth{grid-template-columns:1fr}}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed}=DT;
+const ST=[['trigger','触发','Trigger','#5E9FE8','什么促使用户开始行动？内部触发（情绪）比外部触发（推送、红点）更持久。',[['external','外部触发','推送、红点、朋友的链接……'],['internal','内部触发','用户在什么情绪下会想到你？无聊、焦虑、饥饿……']]],
+['action','行动','Action','#72BC8F','期待酬赏的最小行为。降低操作门槛往往比激发动机更有效。',[['behavior','最小行为','用户只需要做哪一个动作？'],['ability','如何降低门槛','少一步、少一次输入、少一秒等待……']]],
+['reward','多变的酬赏','Variable Reward','#EAC26B','满足需求并保留不确定性，三类酬赏至少命中一类。',[['tribe','社交酬赏','被认可、被接纳：点赞、评论……'],['hunt','猎物酬赏','资源、信息、优惠的“狩猎”感'],['self','自我酬赏','掌控感、完成感、连胜……']]],
+['investment','投入','Investment','#DE9255','用户投入时间、数据、社交资本后，产品变得更好用，并为下一次触发埋下伏笔。',[['what','用户投入了什么','偏好、历史、好友、内容……'],['next','如何让下一轮更好','更懂你的推荐、触发下一次通知……']]]];
+let cur=0;
+const H=()=>{const o=DT.get('hook',{});ST.forEach(s=>o[s[0]]=o[s[0]]||{});o.bmat=o.bmat||{m:3,a:3,t:3};o.ethics=o.ethics||{};return o};
+function loop(){const cx=200,cy=200,R=160,r=96;let g='';
+ ST.forEach((s,i)=>{const a0=(-90+i*90+3)*Math.PI/180,a1=(-90+(i+1)*90-3)*Math.PI/180,on=i===cur,RR=on?R+8:R;const p=(a,rd)=>[cx+rd*Math.cos(a),cy+rd*Math.sin(a)];
+  const [x0,y0]=p(a0,RR),[x1,y1]=p(a1,RR),[x2,y2]=p(a1,r),[x3,y3]=p(a0,r);const am=(a0+a1)/2,[tx,ty]=p(am,(RR+r)/2);
+  g+='<g class="st" data-i="'+i+'" tabindex="0" role="button" aria-label="'+s[1]+'"><path d="M'+x0+' '+y0+' A'+RR+' '+RR+' 0 0 1 '+x1+' '+y1+' L'+x2+' '+y2+' A'+r+' '+r+' 0 0 0 '+x3+' '+y3+'Z" fill="'+s[3]+'" opacity="'+(on?1:.6)+'" stroke="var(--bg)" stroke-width="2"/><text x="'+tx+'" y="'+(ty-2)+'" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">'+(i+1)+' '+(s[1].length>4?s[1].slice(-2):s[1])+'</text><text x="'+tx+'" y="'+(ty+16)+'" text-anchor="middle" font-size="11" fill="#fff">'+s[2].split(' ').pop()+'</text></g>';
+  const [ax,ay]=p((-90+(i+1)*90)*Math.PI/180,(R+r)/2);const ta=(-90+(i+1)*90+90)*Math.PI/180,ux=Math.cos(ta),uy=Math.sin(ta),nx=-uy,ny=ux;g+='<path d="M'+(ax+ux*7)+' '+(ay+uy*7)+' L'+(ax-ux*5+nx*6)+' '+(ay-uy*5+ny*6)+' L'+(ax-ux*5-nx*6)+' '+(ay-uy*5-ny*6)+'Z" fill="var(--muted)"/>'});
+ g+='<text x="200" y="196" text-anchor="middle" font-size="15" font-weight="700" fill="var(--text)">'+esc(H().product||'产品')+'</text><text x="200" y="216" text-anchor="middle" font-size="12" fill="var(--muted)">习惯养成循环</text>';
+ return '<svg class="loop" viewBox="0 0 400 400" role="group" aria-label="上瘾模型循环">'+g+'</svg>'}
+function render(){const app=document.getElementById('app');app.innerHTML='';const o=H();
+ const pr=h('p',{class:'secsub'},'产品 / 场景：');pr.appendChild(ed(h('span',{style:'font-weight:650;color:var(--text);border-bottom:1px dashed var(--border)'}),o,'product','填写产品',()=>{document.getElementById('lp').innerHTML=loop();bind()}));app.appendChild(pr);
+ const lay=h('div',{class:'lay'});const lp=h('div',{id:'lp'},loop());lay.appendChild(lp);
+ const s=ST[cur],d=o[s[0]];const pn=h('div',{class:'pn'},'<h2><span style="color:'+s[3]+'">'+(cur+1)+'</span>'+s[1]+'<span class="hint">'+s[2]+'</span></h2><div class="q">'+s[4]+'</div>');
+ s[5].forEach(([k,l,ph])=>{const f=h('div',{class:'fd'},'<label>'+l+' <span>'+ph+'</span></label>');const e=ed(h('div'),d,k,'');e.dataset.multi='1';f.appendChild(e);pn.appendChild(f)});
+ if(s[0]==='action'){const b=o.bmat;const box=h('div',{class:'box soft'},'<b>B = M × A × T</b> <span class="hint">行为 = 动机 × 能力 × 触发（1–5 分）</span>');
+  [['m','动机 Motivation'],['a','能力 Ability'],['t','触发 Trigger']].forEach(([k,l])=>{const r=h('label',{class:'bmat'},'<span>'+l+'</span>');const i=h('input',{type:'range',min:'1',max:'5',step:'1',value:String(b[k]),'aria-label':l});const v=h('b',{},String(b[k]));i.oninput=()=>{b[k]=+i.value;v.textContent=i.value;mt()};i.onchange=save;r.append(i,v);box.appendChild(r)});
+  const m=h('div',{class:'meter'},'<i id="mi"></i>');const tip=h('div',{class:'hint',id:'mt',style:'margin-top:6px'});box.append(m,tip);pn.appendChild(box);setTimeout(mt)}
+ lay.appendChild(pn);app.appendChild(lay);bind();
+ app.appendChild(h('h3',{class:'sec'},'伦理检查'));app.appendChild(h('p',{class:'secsub'},'上瘾模型力量很大。目标是帮用户养成他们自己想要的习惯，而不是榨取注意力。'));
+ const E=o.ethics;const eth=h('div',{class:'eth'});const qq=h('div',{class:'qq'});
+ [['improves','这个产品能实质性地改善用户的生活吗？'],['selfUse','你自己会长期使用、也愿意让家人使用吗？']].forEach(([k,q])=>{const r=h('div',{},'<div>'+q+'</div>');const sg=h('div',{class:'seg',style:'margin-top:4px'});[['yes','是'],['no','否']].forEach(([v,l])=>{const b=h('button',{'aria-pressed':String(E[k]===v)},l);b.onclick=()=>{E[k]=v;save();render()};sg.appendChild(b)});r.appendChild(sg);qq.appendChild(r)});eth.appendChild(qq);
+ const Q=[['赋能者','改善生活 · 自己也用','yes','yes'],['娱乐者','不改善生活 · 自己也用','no','yes'],['推销者','改善生活 · 自己不用','yes','no'],['操纵者','不改善生活 · 自己不用（避免）','no','no']];
+ eth.appendChild(h('div',{class:'mx'},Q.map(q=>'<div class="'+(E.improves===q[2]&&E.selfUse===q[3]?'on':'')+'"><b>'+q[0]+'</b>'+q[1]+'</div>').join('')));app.appendChild(eth)}
+function mt(){const b=H().bmat,v=b.m*b.a*b.t,e=document.getElementById('mi');if(!e)return;e.style.width=(v/125*100)+'%';const low=Object.entries({动机:b.m,能力:b.a,触发:b.t}).sort((x,y)=>x[1]-y[1])[0];document.getElementById('mt').textContent='行为强度 '+v+' / 125。短板是「'+low[0]+'」'+(low[0]==='能力'?'：先把操作变简单。':'。')}
+function bind(){document.querySelectorAll('.st').forEach(e=>{const go=()=>{cur=+e.dataset.i;render();document.querySelector('.st[data-i="'+cur+'"]').focus()};e.onclick=go;e.onkeydown=ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go()}}})}
+function md(){const o=H();return ['# 上瘾模型：'+(o.product||''),'',...ST.flatMap(s=>['## '+s[1]+'（'+s[2]+'）',...s[5].map(([k,l])=>'- '+l+'：'+(o[s[0]][k]||'')),'']),'B=M×A×T：'+o.bmat.m+'×'+o.bmat.a+'×'+o.bmat.t].join('\n')}
+DT.boot({title:'上瘾模型',en:'Hook Model',render,md});
+})();
+</script>

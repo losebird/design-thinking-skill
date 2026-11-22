@@ -1,0 +1,84 @@
+<!-- title: 定义视角 -->
+<style>
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
+.fs{border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--muted);position:relative;background:var(--bg)}
+.fs b{display:block;color:var(--text);font-size:14px}
+.fs.on{border-color:var(--blue);background:var(--blue-s)}
+.fs:not(:last-child):after{content:"→";position:absolute;right:-8px;top:50%;transform:translate(50%,-50%);color:var(--muted);font-weight:700;z-index:1}
+.ins{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:var(--bg)}
+.ins.sel{border-color:var(--blue);background:var(--blue-s)}
+.vote{display:flex;align-items:center;gap:4px}
+.vote b{min-width:22px;text-align:center;font-size:15px}
+.vote button,.ins .icon{width:30px;height:30px;min-height:30px;padding:0}
+.star{font-size:17px;color:var(--muted);border:0;background:transparent;width:32px;height:32px;min-height:32px;padding:0}
+.star.on{color:var(--yellow)}
+.fill{display:grid;grid-template-columns:96px 1fr;gap:8px 12px;align-items:center}
+.fill label{font-size:13.5px;color:var(--muted);text-align:right}
+.fill .ed{border:1px solid var(--border);border-radius:8px;padding:6px 10px;background:var(--bg)}
+.sent{margin-top:12px;font-size:17px;line-height:1.8;padding:14px 18px;border-radius:12px;background:var(--soft)}
+.sent .slot{padding:1px 6px;border-radius:6px;font-weight:600}
+.s1{background:var(--blue-s);color:var(--blue)}.s2{background:var(--green-s);color:var(--green)}.s3{background:var(--orange-s);color:var(--orange)}.s0{background:var(--surface);color:var(--muted);font-weight:400!important}
+.dims{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.dim{border-radius:10px;padding:10px 12px}
+.dim b{font-size:13px;display:block;margin-bottom:4px}
+.d1{background:var(--blue-s)}.d1 b{color:var(--blue)}.d2{background:var(--orange-s)}.d2 b{color:var(--orange)}.d3{background:var(--purple-s)}.d3 b{color:var(--purple)}
+.warn{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.w{font-size:13.5px;border-radius:8px;padding:6px 10px}
+.w.bad{background:var(--red-s);color:var(--red)}.w.good{background:var(--green-s);color:var(--green)}
+.hmwl{display:flex;flex-direction:column;gap:6px}
+.hm{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:6px 8px}
+.hm .pre{font-weight:650;color:var(--blue);white-space:nowrap}
+@media (max-width:720px){.flow{grid-template-columns:1fr 1fr}.fs:after{display:none}.dims{grid-template-columns:1fr}.fill{grid-template-columns:1fr}.fill label{text-align:left}}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed}=DT;
+const SOL=/(App|APP|app|应用|小程序|平台|系统|功能|按钮|界面|页面|网站|设备|机器|柜|台灯|灯具|推送|通知|算法|插件|软件|硬件|二维码|优惠券|会员卡|机器人|AI|传感器|屏幕)/;
+const FM={standard:'标准 PoV',story:'用户故事',storyPain:'用户故事（痛点）',hmw:'我们可以如何'};
+const D=()=>{const d=DT.get('define',{});d.insights=d.insights||[];d.jtbd=d.jtbd||{};d.pov=d.pov||{format:'standard'};d.hmw=d.hmw||[];return d};
+const slot=(v,c,ph)=>v&&String(v).trim()?'<span class="slot '+c+'">'+esc(v)+'</span>':'<span class="slot s0">'+ph+'</span>';
+function render(){const app=document.getElementById('app');app.innerHTML='';const d=D();
+ const sel=d.insights.filter(i=>i.selected).length;
+ const fl=h('div',{class:'flow'});[['① 洞察','整理、投票、选主题',d.insights.length],['② JTBD','挖动机与情境',d.jtbd.situation],['③ PoV','重构问题',d.pov.need],['④ HMW','导出头脑风暴问题',d.hmw.length]].forEach(([a,b,on])=>fl.appendChild(h('div',{class:'fs'+(on?' on':'')},'<b>'+a+'</b>'+b)));app.appendChild(fl);
+ // 1 insights
+ app.appendChild(h('h3',{class:'sec'},'① 洞察筛选'));app.appendChild(h('p',{class:'secsub'},'总结最重要的洞察（约 10 条）→ 投票 → 用 ☆ 选出 3 个主题。已选 '+sel+' / 3'));
+ const il=h('div');[...d.insights].sort((a,b)=>(b.votes||0)-(a.votes||0)).forEach(it=>{const r=h('div',{class:'ins'+(it.selected?' sel':'')});
+  const v=h('div',{class:'vote'});const m=h('button',{'aria-label':'减票'},'−'),p=h('button',{'aria-label':'加票'},'+');const n=h('b',{},String(it.votes||0));m.onclick=()=>{it.votes=Math.max(0,(it.votes||0)-1);save();render()};p.onclick=()=>{it.votes=(it.votes||0)+1;save();render()};v.append(m,n,p);r.appendChild(v);
+  r.appendChild(ed(h('div'),it,'text','一条洞察'));
+  const tw=h('div',{style:'display:flex'});const s=h('button',{class:'star'+(it.selected?' on':''),'aria-label':'选为主题','aria-pressed':String(!!it.selected)},it.selected?'★':'☆');s.onclick=()=>{it.selected=!it.selected;save();render()};
+  const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{d.insights.splice(d.insights.indexOf(it),1);save();render()};tw.append(s,x);r.appendChild(tw);il.appendChild(r)});
+ const ai=h('button',{class:'ghost'},'+ 洞察');ai.onclick=()=>{d.insights.push({id:DT.nid('i'),text:'',votes:0});save();render()};il.appendChild(ai);app.appendChild(il);
+ // 2 jtbd
+ app.appendChild(h('h3',{class:'sec'},'② 待完成任务 JTBD'));app.appendChild(h('p',{class:'secsub'},'不问“用户要什么产品”，而问“用户雇佣产品完成什么任务”。'));
+ const jb=h('div',{class:'box'});const f=h('div',{class:'fill'});const J=d.jtbd;
+ [['situation','当……时','特定的场景 / 情境'],['motivation','我想要……','做某事 / 动机'],['outcome','这样我就能……','预期的结果 / 情感']].forEach(([k,l,ph])=>{f.appendChild(h('label',{},l));f.appendChild(ed(h('div'),J,k,ph,upd))});jb.appendChild(f);
+ const js=h('div',{class:'sent',id:'jsent'});jb.appendChild(js);
+ const dm=h('div',{class:'dims'});[['functional','功能性任务','d1','我需要……'],['emotional','情感性任务','d2','我希望感到……'],['social','社会性任务','d3','我希望别人觉得我……']].forEach(([k,l,c,ph])=>{const e=h('div',{class:'dim '+c},'<b>'+l+'</b>');e.appendChild(ed(h('div'),J,k,ph));dm.appendChild(e)});jb.appendChild(dm);app.appendChild(jb);
+ // 3 pov
+ app.appendChild(h('h3',{class:'sec'},'③ 视角陈述 PoV'));app.appendChild(h('p',{class:'secsub'},'JTBD 的“任务”就是 PoV 的需求；JTBD 的“情感 / 社会任务”就是 PoV 的洞察。'));
+ const pb=h('div',{class:'box'});const P=d.pov;const sg=h('div',{class:'seg',style:'margin-bottom:12px'});Object.keys(FM).forEach(k=>{const b=h('button',{'aria-pressed':String(P.format===k)},FM[k]);b.onclick=()=>{P.format=k;save();render()};sg.appendChild(b)});
+ const fj=h('button',{style:'margin-left:8px;margin-bottom:12px'},'从 JTBD 填入');fj.onclick=()=>{const ps=DT.st.personas||[];P.user=P.user||(ps[0]&&ps[0].name)||'';P.need=J.motivation||P.need;P.insight=[J.emotional,J.social].filter(Boolean).join('；')||P.insight;P.benefit=J.outcome||P.benefit;save();render()};
+ pb.append(sg,fj);const pf=h('div',{class:'fill'});
+ const F={standard:[['user','用户','特定的用户'],['need','需要','一个待完成的任务（不是产品）'],['insight','因为','令人惊讶的洞察 / 深层原因']],story:[['user','作为一名','用户角色'],['need','我想要','行动、目的、期望'],['benefit','以便于','获得的益处']],storyPain:[['user','作为一名','用户角色'],['need','我希望','用户需求'],['pain','但','用户痛点']],hmw:[['user','帮助','用户或顾客'],['need','达成','某个目标']]}[P.format||'standard'];
+ F.forEach(([k,l,ph])=>{pf.appendChild(h('label',{},l));pf.appendChild(ed(h('div'),P,k,ph,upd))});pb.appendChild(pf);
+ pb.appendChild(h('div',{class:'sent',id:'psent'}));pb.appendChild(h('div',{class:'warn',id:'pwarn'}));app.appendChild(pb);
+ // 4 hmw
+ app.appendChild(h('h3',{class:'sec'},'④ 我们可以如何（HMW）'));app.appendChild(h('p',{class:'secsub'},'从 PoV 导出 3 条以上的头脑风暴问题，用 ★ 标出要带入构思阶段的问题。'));
+ const hl=h('div',{class:'hmwl'});d.hmw.forEach((it,i)=>{const r=h('div',{class:'hm'},'<span class="pre">我们可以如何</span>');r.appendChild(ed(h('div'),it,'text','……？'));const tw=h('div',{style:'display:flex'});
+  const s=h('button',{class:'star'+(it.star?' on':''),'aria-label':'标记','aria-pressed':String(!!it.star)},it.star?'★':'☆');s.onclick=()=>{it.star=!it.star;save();render()};const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{d.hmw.splice(i,1);save();render()};tw.append(s,x);r.appendChild(tw);hl.appendChild(r)});
+ const ah=h('button',{class:'ghost'},'+ HMW');ah.onclick=()=>{d.hmw.push({id:DT.nid('h'),text:''});save();render()};hl.appendChild(ah);app.appendChild(hl);
+ upd()}
+function upd(){const d=D(),J=d.jtbd,P=d.pov;const js=document.getElementById('jsent');if(!js)return;
+ js.innerHTML='当 '+slot(J.situation,'s1','情境')+' 时，我想要 '+slot(J.motivation,'s2','动机')+'，这样我就能 '+slot(J.outcome,'s3','结果')+'。';
+ const f=P.format||'standard';const ps=document.getElementById('psent');
+ ps.innerHTML=f==='standard'?slot(P.user,'s1','用户')+' 需要 '+slot(P.need,'s2','需求')+'，因为 '+slot(P.insight,'s3','洞察')+'。':f==='story'?'作为一名 '+slot(P.user,'s1','角色')+'，我想要 '+slot(P.need,'s2','行动/期望')+'，以便于 '+slot(P.benefit,'s3','益处')+'。':f==='storyPain'?'作为一名 '+slot(P.user,'s1','角色')+'，我希望 '+slot(P.need,'s2','需求')+'，但 '+slot(P.pain,'s3','痛点')+'。':'我们可以如何帮助 '+slot(P.user,'s1','用户')+' 达成 '+slot(P.need,'s2','目标')+'？';
+ const W=[];const m=(P.need||'').match(SOL);if(m)W.push(['bad','“需求”里出现了「'+m[1]+'」，这可能是解决方案而不是需求。改写成用户要完成的任务。']);
+ if(f==='standard'&&P.insight&&P.insight.trim().length<12)W.push(['bad','洞察太短，可能只是现象描述。试着写出情感或社会层面的深层原因。']);
+ const req=f==='standard'?['user','need','insight']:f==='story'?['user','need','benefit']:f==='storyPain'?['user','need','pain']:['user','need'];
+ const miss=req.filter(k=>!(P[k]||'').trim());if(miss.length)W.push(['bad','还有 '+miss.length+' 个空位未填写。']);
+ if(!W.length)W.push(['good','✓ 结构完整，需求里没有出现方案词。可以导出 HMW 了。']);
+ document.getElementById('pwarn').innerHTML=W.map(([c,t])=>'<div class="w '+c+'">'+esc(t)+'</div>').join('')}
+function md(){const d=D(),J=d.jtbd,P=d.pov;const ps=document.getElementById('psent');return ['# 定义视角','','## 洞察（按票数）',...[...d.insights].sort((a,b)=>(b.votes||0)-(a.votes||0)).map(i=>'- '+(i.selected?'★ ':'')+i.text+'（'+(i.votes||0)+' 票）'),'','## JTBD','当'+(J.situation||'')+'时，我想要'+(J.motivation||'')+'，这样我就能'+(J.outcome||'')+'。','- 功能性：'+(J.functional||''),'- 情感性：'+(J.emotional||''),'- 社会性：'+(J.social||''),'','## PoV（'+FM[P.format||'standard']+'）',ps?ps.textContent:'','','## HMW',...d.hmw.map(x=>'- '+(x.star?'★ ':'')+'我们可以如何'+x.text)].join('\n')}
+DT.boot({title:'定义视角',en:'JTBD → PoV → HMW',render,md});
+})();
+</script>
