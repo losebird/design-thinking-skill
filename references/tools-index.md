@@ -41,6 +41,11 @@
 | 构思 | Crazy 8s 快速草图 | board / board-crazy8.html | `boards.crazy8` | ideate.md §3 |
 | 原型 | MVP 画布 | board / board-mvp.html | `boards.mvp` | prototype.md §4 |
 | 测试 | 用户研究计划 | research-plan / research-plan.html | `researchPlan` | test.md §1 |
+| 共情 | 研究问题拆解（桌面研究） | research-query / research-query.html | `deskResearch.query` | desk-research.md §2.1 |
+| 共情 | 来源管理板（桌面研究） | source-board / source-board.html | `deskResearch.sources` | desk-research.md §2.2 |
+| 定义 | 综合矩阵（桌面研究） | synthesis / synthesis.html | `deskResearch.synthesis` | desk-research.md §2.3 |
+| 定义 | 研究空白（桌面研究） | gap-analysis / gap-analysis.html | `deskResearch.gaps` | desk-research.md §2.4 |
+| 定义 | 研究报告（桌面研究） | research-report / research-report.html | `deskResearch.report` | desk-research.md §2.5 |
 
 只有方法、没有专门页面的：发言棒、正念、WH 问题（并入访谈提纲）、草图、理想原型、MVP。需要时可自建 `boards.<新key>` / `tables.<新key>`（自带 `title`、`columns`），通用模板同样能渲染。
 

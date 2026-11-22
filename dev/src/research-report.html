@@ -1,0 +1,52 @@
+<!-- title: 研究报告 -->
+<style>
+.rr-sec{border:1px solid var(--border);border-left:4px solid var(--c);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--bg)}
+.rr-sec h2{font-size:15.5px;margin:0 0 2px;color:var(--c)}
+.rr-sec .hint{margin-bottom:8px}
+.rr-bg{min-height:3.2em;border:1px dashed var(--border);border-radius:8px;padding:8px 10px;white-space:pre-wrap}
+.ri{position:relative;display:grid;grid-template-columns:24px 1fr;gap:6px;background:var(--soft);border:1px solid var(--border);border-radius:9px;padding:8px 30px 8px 8px;margin-bottom:6px}
+.ri .n{width:22px;height:22px;border-radius:50%;background:var(--c);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.ri>.icon{position:absolute;top:4px;right:4px}
+.ri .own{font-size:12.5px;color:var(--muted);margin-top:4px}
+.rr-top{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.rr-flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:12px}
+.rr-flow b{color:var(--text)}
+.rr-pv{white-space:pre-wrap;background:var(--soft);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.7;max-height:360px;overflow:auto}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed,nid}=DT;
+const SEC=[['findings','发现','Findings','var(--blue)','基于来源的事实与综合结论，每条关联来源','例：21 点后外卖晚餐订单占比持续上升'],['implications','含义','Implications','var(--purple)','这些发现对我们的用户 / 问题定义意味着什么','例：“等待”是比价格更大的放弃理由'],['actions','行动建议','Actions','var(--green)','接下来做什么：进入哪个设计思维工具、验证什么','例：用访谈验证加班族对 300 米步行的容忍度']];
+const D=()=>{const r=DT.get('deskResearch.report',{});r.background=r.background||'';SEC.forEach(s=>r[s[0]]=r[s[0]]||[]);return r};
+const dr=()=>DT.st.deskResearch||{};
+function mdText(){const r=D(),d=dr(),q=d.query||{},src=d.sources||[];const used=new Set();r.findings.forEach(f=>(f.sources||[]).forEach(x=>used.add(x)));
+ const L=['# 桌面研究报告：'+((DT.st.meta||{}).project||''),'','> 二手研究（Desk Research）结果，结论需结合一手研究验证。',''];
+ L.push('## 1. 背景','',(q.question?'**研究问题：**'+q.question+'\n\n':'')+(r.background||'（未填写）'),'');
+ L.push('## 2. 发现','');r.findings.forEach((f,i)=>L.push((i+1)+'. '+f.text+((f.sources||[]).length?' ['+f.sources.join(', ')+']':'')));
+ L.push('','## 3. 含义','');r.implications.forEach((f,i)=>L.push((i+1)+'. '+f.text));
+ L.push('','## 4. 行动建议','');r.actions.forEach((f,i)=>L.push((i+1)+'. '+f.text+(f.owner?'（负责人：'+f.owner+'）':'')));
+ const gaps=d.gaps||{};if((gaps.unknown||[]).length||(gaps.toVerify||[]).length){L.push('','## 5. 局限与待验证','');(gaps.unknown||[]).forEach(x=>L.push('- 未知：'+x.text));(gaps.toVerify||[]).forEach(x=>L.push('- 需验证：'+x.text))}
+ const refs=src.filter(s=>used.has(s.id));if(refs.length){L.push('','## 参考来源','');refs.forEach(s=>L.push('- ['+s.id+'] '+(s.title||'')+(s.date?'，'+s.date:'')+(s.url?' — '+s.url:'')+'（可信度 '+(s.credibility||3)+'/5）'))}
+ return L.join('\n')}
+function pull(){const r=D(),d=dr(),sy=d.synthesis||{},g=d.gaps||{};let n=0;
+ if(!r.findings.length){(sy.consensus||[]).concat(sy.divergence||[]).forEach(x=>{r.findings.push({id:nid('f'),text:x.text,sources:(x.sources||[]).slice()});n++})}
+ if(!r.actions.length){(g.actions||[]).forEach(x=>{r.actions.push({id:nid('ac'),text:x.text,owner:x.owner||''});n++})}
+ save();render();DT.toast(n?'已从综合矩阵 / 研究空白带入 '+n+' 条':'发现与行动已有内容，未覆盖（清空后可再次带入）')}
+function render(){const app=document.getElementById('app');app.innerHTML='';const r=D(),d=dr();
+ app.appendChild(h('div',{class:'rr-flow'},'<b>背景</b> → <b>发现</b> → <b>含义</b> → <b>行动建议</b><span>· 把桌面研究浓缩成一页，可一键复制给团队或贴回对话</span>'));
+ const top=h('div',{class:'rr-top'});const cp=h('button',{class:'primary'},'📋 一键复制报告');cp.onclick=()=>DT.copy(mdText(),'报告已复制（Markdown）');
+ const pl=h('button',{},'从综合矩阵 / 研究空白带入');pl.title='发现 ← 共识 + 分歧；行动 ← 研究空白的下一步行动（仅在为空时带入）';pl.onclick=pull;top.append(cp,pl);app.appendChild(top);
+ const bg=h('section',{class:'rr-sec',style:'--c:var(--text)'});bg.appendChild(h('h2',{},'背景 Background'));bg.appendChild(h('div',{class:'hint'},'为什么做这次研究、研究问题、范围与方法（检索了哪些类型的资料、多少条来源）'+((d.query||{}).question?' · 研究问题：'+esc(d.query.question):'')));
+ const be=ed(h('div',{class:'rr-bg'}),r,'background','背景与研究范围……');be.dataset.multi='1';bg.appendChild(be);app.appendChild(bg);
+ SEC.forEach(([k,t,en,c,hint,ph])=>{const s=h('section',{class:'rr-sec',style:'--c:'+c});s.appendChild(h('h2',{},esc(t)+' '+en+' · '+r[k].length));s.appendChild(h('div',{class:'hint'},esc(hint)));
+  r[k].forEach((it,i)=>{const row=h('div',{class:'ri'});row.appendChild(h('span',{class:'n'},String(i+1)));const c2=h('div');c2.appendChild(ed(h('div'),it,'text',ph));
+   if(k==='findings'){c2.appendChild(DT.srcPick(it,'sources'));}if(k==='actions')c2.appendChild(ed(h('div',{class:'own'}),it,'owner','负责人 / 对应工具'));row.appendChild(c2);
+   const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{r[k].splice(i,1);save();render()};row.appendChild(x);s.appendChild(row)});
+  const a=h('button',{class:'ghost'},'+ '+t);a.onclick=()=>{const it={id:nid(k.slice(0,2)),text:''};if(k==='findings')it.sources=[];if(k==='actions')it.owner='';r[k].push(it);save();render()};s.appendChild(a);app.appendChild(s)});
+ app.appendChild(h('h3',{class:'sec'},'报告预览'));app.appendChild(h('p',{class:'secsub'},'自动附上「局限与待验证」（来自研究空白）和被引用的参考来源。'));app.appendChild(h('div',{class:'rr-pv'},esc(mdText())));
+ app.appendChild(DT.aiPanel([{label:'让 AI 填充',kind:'fill',build:fillPrompt},{label:'质量审查',kind:'review',build:reviewPrompt}]))}
+function fillPrompt(){const d=dr();return `请把下面的桌面研究整理成一页研究报告（背景 → 发现 → 含义 → 行动建议）。\n${DT.ctx()}\n\n要求：\n1. background：2–4 句，说明研究动机、研究问题、范围与方法（来源数量与类型）。\n2. findings：4–6 条，只来自综合矩阵与已知项，每条写数字和口径，并在 sources 中写来源 id；分歧要如实写出“来源不一致”。\n3. implications：3–4 条，说明发现对目标用户 / 问题定义意味着什么；明确这是推断。\n4. actions：3–5 条，具体到下一步用哪个设计思维工具（如移情图、用户研究计划、关键假设清单）验证或推进什么；owner 写负责人或对应工具。\n5. 不新增来源中没有的事实，不混入一手研究原话，不直接跳到具体产品方案。\n\n只输出 JSON，写入 deskResearch.report：\n{"background":"","findings":[{"id":"f1","text":"","sources":["S1"]}],"implications":[{"id":"im1","text":""}],"actions":[{"id":"ac1","text":"","owner":""}]}\n\n研究问题：${(d.query||{}).question||''}\n综合矩阵：${JSON.stringify(d.synthesis||{})}\n研究空白：${JSON.stringify(d.gaps||{})}\n来源：${JSON.stringify((d.sources||[]).map(s=>({id:s.id,title:s.title,credibility:s.credibility})))}`}
+function reviewPrompt(){return `请以研究总监的标准审查这份桌面研究报告：\n${DT.ctx()}\n\n检查：\n- 每条发现是否有来源支撑？引用的来源可信度是否足够（≥3）？是否存在无来源的断言？\n- 发现 → 含义 → 行动是否环环相扣，有没有跳跃（发现里没有的东西出现在含义里）？\n- 是否把相关当因果、把单一来源当共识、把旧数据当现状？\n- 含义是否混入了团队偏好或预设方案？行动是否具体、可执行、指明验证方式？\n- 局限与待验证是否诚实交代？哪些结论在一手研究前不应拿去做决策？\n\n输出：总体评分（1–5）+ 问题清单 + 修正后的 deskResearch.report JSON。\n\n报告：\n${mdText()}`}
+DT.boot({title:'研究报告',en:'Research Report',subtitle:()=>D().findings.length+' 条发现 · '+D().actions.length+' 条行动',render,md:mdText});
+})();
+</script>

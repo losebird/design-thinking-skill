@@ -1830,5 +1830,398 @@
       "sessions": [],
       "status": "plan"
     }
+  },
+  "deskResearch": {
+    "query": {
+      "question": "一二线城市晚下班 / 早出门的上班族，在公司或小区附近吃一顿热饭的需求有多大、现在被什么方式满足、卡在哪里？",
+      "subQuestions": [
+        {
+          "id": "sq1",
+          "text": "21 点后和 8 点前的上班族餐饮需求规模与增长趋势如何？",
+          "why": "判断目标时段是否值得单独服务",
+          "angle": "market"
+        },
+        {
+          "id": "sq2",
+          "text": "这群人目前靠哪些方式解决这两餐，各自的满意度与放弃原因是什么？",
+          "why": "找到真正的替代方案与断点",
+          "angle": "user"
+        },
+        {
+          "id": "sq3",
+          "text": "已有的取餐柜 / 自提点 / 无人零售在热食场景的经营表现与失败原因？",
+          "why": "避免重复已被验证失败的路径",
+          "angle": "competitor"
+        },
+        {
+          "id": "sq4",
+          "text": "热食保温、食品安全与末端配送有哪些法规与技术约束？",
+          "why": "识别不可逾越的边界条件",
+          "angle": "policy"
+        },
+        {
+          "id": "sq5",
+          "text": "上班族对“健康”“热”“价格”的权衡在公开调研中如何体现？",
+          "why": "校验 PoV 中“愿花钱不愿花时间”的洞察",
+          "angle": "trend"
+        }
+      ],
+      "keywords": [
+        {
+          "id": "kw1",
+          "subId": "sq1",
+          "zh": "夜间餐饮, 夜宵外卖, 早餐市场规模, 加班族餐饮",
+          "en": "late-night food delivery, breakfast market China",
+          "where": "统计局 / 行业研究机构 / 平台年报"
+        },
+        {
+          "id": "kw2",
+          "subId": "sq2",
+          "zh": "上班族晚餐, 加班吃饭, 外卖替代, 便利店热食",
+          "en": "office worker dinner habits, convenience store hot food",
+          "where": "消费者调研报告 / 社区讨论"
+        },
+        {
+          "id": "kw3",
+          "subId": "sq3",
+          "zh": "智能取餐柜, 外卖柜, 无人餐厅, 自提柜 倒闭",
+          "en": "smart food locker, automated restaurant China",
+          "where": "科技媒体 / 企业公告 / 案例研究"
+        },
+        {
+          "id": "kw4",
+          "subId": "sq4",
+          "zh": "热链配送, 外卖食品安全 规定, 餐饮保温 标准",
+          "en": "hot food holding temperature regulation",
+          "where": "市场监管部门 / 国家标准平台 / 论文库"
+        },
+        {
+          "id": "kw5",
+          "subId": "sq5",
+          "zh": "健康饮食 时间成本, 上班族 饮食 调研, 轻食 消费",
+          "en": "healthy eating time cost, convenience vs health trade-off",
+          "where": "学术论文 / 消费趋势报告"
+        }
+      ]
+    },
+    "sources": [
+      {
+        "id": "S1",
+        "url": "https://www.stats.gov.cn/",
+        "title": "国家统计局 · 餐饮收入月度数据（示例数据）",
+        "summary": "示例：餐饮收入整体恢复增长，但官方口径不细分时段，无法直接得出夜间需求规模。",
+        "credibility": 5,
+        "relevance": 3,
+        "tags": [
+          "市场规模"
+        ],
+        "type": "gov",
+        "status": "keep",
+        "date": "示例"
+      },
+      {
+        "id": "S2",
+        "url": "https://www.iresearch.com.cn/",
+        "title": "某行业研究机构 · 中国即时配送行业研究报告（示例数据）",
+        "summary": "示例：夜间时段订单占比逐年上升，“夜宵 + 加班晚餐”是主要增长来源之一。",
+        "credibility": 4,
+        "relevance": 5,
+        "tags": [
+          "市场规模",
+          "夜间"
+        ],
+        "type": "report",
+        "status": "keep",
+        "date": "示例"
+      },
+      {
+        "id": "S3",
+        "url": "https://about.meituan.com/",
+        "title": "外卖平台年度报告 · 夜间消费章节（示例数据）",
+        "summary": "示例：平台披露 21 点后订单增长快于全天平均，写字楼周边集中；数据由企业自行发布。",
+        "credibility": 3,
+        "relevance": 5,
+        "tags": [
+          "夜间",
+          "写字楼"
+        ],
+        "type": "company",
+        "status": "keep",
+        "date": "示例"
+      },
+      {
+        "id": "S4",
+        "url": "https://www.36kr.com/",
+        "title": "科技媒体 · 智能取餐柜创业公司复盘（示例数据）",
+        "summary": "示例：多家取餐柜项目因点位成本高、热食保温难、补货不及时而收缩。",
+        "credibility": 3,
+        "relevance": 5,
+        "tags": [
+          "竞品",
+          "失败原因"
+        ],
+        "type": "news",
+        "status": "keep",
+        "date": "示例"
+      },
+      {
+        "id": "S5",
+        "url": "https://www.cnki.net/",
+        "title": "学术论文 · 城市青年就餐时间压力与健康饮食选择（示例数据）",
+        "summary": "示例：时间压力显著降低健康饮食选择；收入对健康饮食的影响小于时间。",
+        "credibility": 4,
+        "relevance": 4,
+        "tags": [
+          "健康",
+          "时间成本"
+        ],
+        "type": "academic",
+        "status": "keep",
+        "date": "示例"
+      },
+      {
+        "id": "S6",
+        "url": "https://www.xiaohongshu.com/",
+        "title": "社区笔记 · “加班到十点吃什么”话题合集（示例数据）",
+        "summary": "示例：高频抱怨“外卖到得慢、到了就凉”“便利店只剩冷便当”；样本自选、无法量化。",
+        "credibility": 2,
+        "relevance": 4,
+        "tags": [
+          "用户行为",
+          "UGC"
+        ],
+        "type": "ugc",
+        "status": "maybe",
+        "date": "示例"
+      },
+      {
+        "id": "S7",
+        "url": "https://www.samr.gov.cn/",
+        "title": "市场监管部门 · 网络餐饮服务食品安全监督管理规定（示例数据）",
+        "summary": "示例：对外卖食品的包装、温度和配送过程有要求，热食需保持安全温度区间。",
+        "credibility": 5,
+        "relevance": 3,
+        "tags": [
+          "法规",
+          "保温"
+        ],
+        "type": "gov",
+        "status": "keep",
+        "date": "示例"
+      },
+      {
+        "id": "S8",
+        "url": "",
+        "title": "自媒体 · “取餐柜是伪需求”评论文章（示例数据）",
+        "summary": "示例：作者观点为主，未提供数据，且与某竞品存在利益关联。",
+        "credibility": 1,
+        "relevance": 3,
+        "tags": [
+          "竞品"
+        ],
+        "type": "ugc",
+        "status": "drop",
+        "date": "示例"
+      }
+    ],
+    "synthesis": {
+      "consensus": [
+        {
+          "id": "con1",
+          "text": "夜间（21 点后）餐饮订单增速高于全天平均，写字楼周边集中",
+          "sources": [
+            "S2",
+            "S3"
+          ],
+          "note": "示例数据；两者口径均为平台订单，不代表堂食"
+        },
+        {
+          "id": "con2",
+          "text": "时间压力而非收入，是上班族放弃健康饮食的主要原因",
+          "sources": [
+            "S5",
+            "S6"
+          ],
+          "note": "S6 为 UGC 旁证，主要依据是 S5"
+        },
+        {
+          "id": "con3",
+          "text": "热食取餐柜的主要难点在保温与补货运营，而非用户接受度",
+          "sources": [
+            "S4",
+            "S7"
+          ],
+          "note": ""
+        }
+      ],
+      "divergence": [
+        {
+          "id": "div1",
+          "text": "取餐柜是否有真实需求：媒体复盘认为是运营问题，评论文章认为是伪需求",
+          "sources": [
+            "S4",
+            "S8"
+          ],
+          "note": "S8 可信度低且有利益关联；分歧源于对“需求”与“经营”的混淆"
+        }
+      ],
+      "uncertain": [
+        {
+          "id": "unc1",
+          "text": "早 8 点前上班族的早餐热食需求规模",
+          "sources": [
+            "S1"
+          ],
+          "note": "官方数据不分时段，缺少直接来源"
+        },
+        {
+          "id": "unc2",
+          "text": "用户愿意为“确定能拿到热饭”多付多少钱",
+          "sources": [],
+          "note": "未找到公开数据"
+        }
+      ]
+    },
+    "gaps": {
+      "known": [
+        {
+          "id": "kn1",
+          "text": "夜间餐饮需求在增长，且集中在写字楼周边",
+          "sources": [
+            "S2",
+            "S3"
+          ]
+        },
+        {
+          "id": "kn2",
+          "text": "热食外卖需满足食品安全温度要求，保温是硬约束",
+          "sources": [
+            "S7"
+          ]
+        }
+      ],
+      "unknown": [
+        {
+          "id": "un1",
+          "text": "目标人群对“预约 + 准时热餐”的付费意愿与价格区间",
+          "priority": "H"
+        },
+        {
+          "id": "un2",
+          "text": "早班人群（如护士）早餐时段的真实规模",
+          "priority": "M"
+        }
+      ],
+      "toVerify": [
+        {
+          "id": "tv1",
+          "text": "加班族是否愿意多走 300 米到取餐点换取“确定热、不用等”",
+          "method": "interview"
+        },
+        {
+          "id": "tv2",
+          "text": "“等待与不确定”比价格更让人放弃健康饮食——在 5 位加班族中复核",
+          "method": "interview"
+        },
+        {
+          "id": "tv3",
+          "text": "写字楼 21 点后的取餐高峰是否集中在 30 分钟内",
+          "method": "observe"
+        }
+      ],
+      "actions": [
+        {
+          "id": "ga1",
+          "text": "在用户研究计划中加入付费意愿与步行距离两组问题",
+          "type": "primary",
+          "owner": "研究负责人",
+          "due": "",
+          "done": false
+        },
+        {
+          "id": "ga2",
+          "text": "检索连锁便利店热食业务的公开财报 / 访谈，补充早餐时段数据",
+          "type": "desk",
+          "owner": "",
+          "due": "",
+          "done": false
+        },
+        {
+          "id": "ga3",
+          "text": "选 2 栋写字楼做 21–23 点取餐行为观察",
+          "type": "primary",
+          "owner": "",
+          "due": "",
+          "done": false
+        }
+      ]
+    },
+    "report": {
+      "background": "为验证“让晚下班、早出门的上班族随时取到热饭”这一挑战，团队用桌面研究梳理市场、用户、竞品与法规四个方面。共检索 8 条公开来源（示例数据），采纳 6 条、存疑 1 条、排除 1 条。",
+      "findings": [
+        {
+          "id": "f1",
+          "text": "夜间餐饮订单增速高于全天平均，写字楼周边集中（示例数据）",
+          "sources": [
+            "S2",
+            "S3"
+          ]
+        },
+        {
+          "id": "f2",
+          "text": "时间压力比收入更影响健康饮食选择",
+          "sources": [
+            "S5"
+          ]
+        },
+        {
+          "id": "f3",
+          "text": "已有取餐柜项目多因保温与补货运营失败，而非用户不接受",
+          "sources": [
+            "S4",
+            "S7"
+          ]
+        },
+        {
+          "id": "f4",
+          "text": "用户付费意愿与早餐时段规模缺乏公开数据，来源之间对“是否伪需求”存在分歧",
+          "sources": [
+            "S4",
+            "S8"
+          ]
+        }
+      ],
+      "implications": [
+        {
+          "id": "im1",
+          "text": "“确定性”（准时、确定是热的）可能比“便宜”更打动目标用户，这与 PoV 洞察一致，但仍是推断"
+        },
+        {
+          "id": "im2",
+          "text": "方案的成败更可能取决于运营与保温能力，原型阶段需要尽早验证履约而不只是界面"
+        },
+        {
+          "id": "im3",
+          "text": "早班人群的需求证据不足，暂不宜作为首批目标用户"
+        }
+      ],
+      "actions": [
+        {
+          "id": "ac1",
+          "text": "把付费意愿、步行距离写进用户研究计划的核心假设",
+          "owner": "用户研究计划"
+        },
+        {
+          "id": "ac2",
+          "text": "在关键假设清单中加入“保温 + 补货可在 30 分钟高峰内完成”",
+          "owner": "关键假设清单"
+        },
+        {
+          "id": "ac3",
+          "text": "对 2 栋写字楼做夜间取餐观察，补充 AEIOU 观察记录",
+          "owner": "AEIOU 观察"
+        }
+      ]
+    }
   }
 }

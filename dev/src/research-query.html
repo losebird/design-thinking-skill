@@ -1,0 +1,53 @@
+<!-- title: 研究问题拆解 -->
+<style>
+.rq-core .ed{font-size:17px;font-weight:600}
+.rq-tip{font-size:13px;color:var(--muted);margin-top:6px}
+.sq{display:grid;grid-template-columns:30px 1fr 120px auto;gap:8px;align-items:start;border:1px solid var(--border);border-radius:10px;padding:8px 10px;margin-bottom:6px;background:var(--bg)}
+.sq-n{width:26px;height:26px;border-radius:50%;background:var(--blue-s);color:var(--blue);font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.sq select{min-height:30px;padding:2px 6px;font-size:13px}
+.sq .why{font-size:12.5px;color:var(--muted);margin-top:2px}
+.km{width:100%;border-collapse:collapse;font-size:13.5px}
+.km th{text-align:left;font-size:12.5px;color:var(--muted);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--border)}
+.km td{border-bottom:1px solid var(--border);padding:7px 8px;vertical-align:top}
+.km td.q{width:26%;color:var(--muted)}
+.km td .ed{min-width:80px}
+.km td.op{width:96px}
+.km td.op button{font-size:12px;min-height:28px;padding:2px 8px}
+.kmw{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
+@media (max-width:720px){.sq{grid-template-columns:30px 1fr auto}.sq select{grid-column:2}.km{min-width:640px}}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed,nid}=DT;
+const ANG={market:'市场规模',user:'用户行为',competitor:'竞品/替代',trend:'趋势/技术',policy:'政策/标准',other:'其他'};
+const D=()=>{const q=DT.get('deskResearch.query',{});q.question=q.question||'';q.subQuestions=q.subQuestions||[];q.keywords=q.keywords||[];return q};
+const kwOf=(q,sid)=>q.keywords.find(k=>k.subId===sid);
+const searchStr=k=>{const sp=t=>String(t||'').split(/[,，、;；]/).map(x=>x.trim()).filter(Boolean);const zh=sp(k.zh),en=sp(k.en);const f=a=>a.map(x=>/\s/.test(x)?'"'+x+'"':x).join(' OR ');return [zh.length?'('+f(zh)+')':'',en.length?'('+f(en)+')':''].filter(Boolean).join('\n')};
+function render(){const app=document.getElementById('app');app.innerHTML='';const q=D();
+ app.appendChild(h('p',{class:'secsub'},'桌面研究（二手研究）的起点：把一个模糊的大问题拆成可以靠公开资料回答的子问题，再为每个子问题准备中英文关键词。一手研究（访谈、观察）请用「用户研究计划」。'));
+ const core=h('div',{class:'core rq-core'});core.appendChild(h('div',{class:'lbl'},'核心研究问题'));core.appendChild(ed(h('div'),q,'question','我们想通过公开资料弄清楚什么？'));
+ core.appendChild(h('div',{class:'rq-tip'},'好问题 = 对象 + 范围 + 想知道什么。例：「一线城市上班族的晚餐外卖需求有多大、主要被什么替代？」'));app.appendChild(core);
+ // 子问题
+ app.appendChild(h('h3',{class:'sec'},'子问题拆解（'+q.subQuestions.length+'）'));app.appendChild(h('p',{class:'secsub'},'建议 4–6 个、互不重叠（MECE），每个都能通过报告、数据、新闻或论文回答。'));
+ const box=h('div');q.subQuestions.forEach((s,i)=>{const r=h('div',{class:'sq'});r.appendChild(h('span',{class:'sq-n'},String(i+1)));
+  const c=h('div');c.appendChild(ed(h('div'),s,'text','子问题'));const w=ed(h('div',{class:'why'}),s,'why','为什么要回答它 / 回答后能做什么决定');c.appendChild(w);r.appendChild(c);
+  const sel=h('select',{'aria-label':'研究角度'});Object.entries(ANG).forEach(([k,v])=>{const o=h('option',{value:k},v);if((s.angle||'other')===k)o.selected=true;sel.appendChild(o)});sel.onchange=()=>{s.angle=sel.value;save()};r.appendChild(sel);
+  const x=h('button',{class:'icon','aria-label':'删除子问题',title:'删除'},'×');x.onclick=()=>{q.subQuestions.splice(i,1);q.keywords=q.keywords.filter(k=>k.subId!==s.id);save();render()};r.appendChild(x);box.appendChild(r)});
+ const add=h('button',{class:'ghost'},'+ 子问题');add.onclick=()=>{q.subQuestions.push({id:nid('sq'),text:'',why:'',angle:'other'});save();render();const e=box.querySelectorAll('.sq .ed');e.length&&e[e.length-2].focus()};box.appendChild(add);app.appendChild(box);
+ // 关键词矩阵
+ app.appendChild(h('h3',{class:'sec'},'搜索关键词矩阵'));app.appendChild(h('p',{class:'secsub'},'每格用逗号分隔多个词：同义词、行业术语、英文说法都写上。「复制搜索式」会生成 OR 组合，可直接粘到搜索引擎或数据库。'));
+ if(!q.subQuestions.length){app.appendChild(h('div',{class:'empty'},'先添加子问题，矩阵会按子问题生成行'))}else{
+  const w=h('div',{class:'kmw'}),t=h('table',{class:'km'});t.innerHTML='<thead><tr><th>子问题</th><th>中文关键词</th><th>英文关键词</th><th>去哪儿找</th><th></th></tr></thead>';const tb=h('tbody');
+  q.subQuestions.forEach((s,i)=>{let k=kwOf(q,s.id);if(!k){k={id:nid('kw'),subId:s.id,zh:'',en:'',where:''};q.keywords.push(k)}
+   const tr=h('tr');tr.appendChild(h('td',{class:'q'},(i+1)+'. '+esc(s.text||'（未填写）')));
+   [['zh','智能取餐柜, 外卖柜'],['en','smart food locker'],['where','行业报告 / 统计局 / 论文库']].forEach(([f,ph])=>{const td=h('td');td.appendChild(ed(h('div'),k,f,ph));tr.appendChild(td)});
+   const op=h('td',{class:'op'}),cb=h('button',{},'复制搜索式');cb.onclick=()=>{const t=searchStr(k);t?DT.copy(t,'搜索式已复制'):DT.toast('先填写关键词')};op.appendChild(cb);tr.appendChild(op);tb.appendChild(tr)});
+  t.appendChild(tb);w.appendChild(t);app.appendChild(w)}
+ app.appendChild(DT.aiPanel([{label:'让 AI 填充',kind:'fill',build:fillPrompt},{label:'质量审查',kind:'review',build:reviewPrompt}]))}
+function fillPrompt(){const q=D();return `你是资深桌面研究（二手研究）分析师。请为下面的设计思维项目拆解研究问题。\n${DT.ctx()}\n核心研究问题：${q.question||'（未填写，请先根据设计挑战提出一个）'}\n\n要求：\n1. 拆成 4–6 个互不重叠（MECE）的子问题，每个都必须能通过公开资料（行业报告、官方统计、学术论文、新闻、社区讨论）回答；不要写需要访谈才能回答的问题。\n2. 每个子问题写 why（回答后能支持什么决策），angle 取 market/user/competitor/trend/policy/other 之一。\n3. 为每个子问题生成关键词：zh（3–5 个中文同义词/行业术语，逗号分隔）、en（2–4 个英文说法）、where（推荐信息源类型或具体机构）。\n4. 子问题中不要出现我们自己的解决方案。\n\n只输出 JSON，合并到 project.json 的 deskResearch.query：\n{"question":"","subQuestions":[{"id":"sq1","text":"","why":"","angle":"market"}],"keywords":[{"id":"kw1","subId":"sq1","zh":"","en":"","where":""}]}\n\n当前数据：\n${JSON.stringify(q,null,1)}`}
+function reviewPrompt(){return `请审查以下桌面研究问题拆解的质量，逐条指出问题并给出改写：\n${DT.ctx()}\n\n检查清单：\n- 核心问题是否具体（对象 + 范围 + 想知道什么），还是“正确的废话”？\n- 子问题是否 MECE：有无重叠、有无明显遗漏（市场 / 用户 / 竞品 / 趋势 / 政策）？\n- 每个子问题能否靠二手资料回答？需要一手访谈的请标出并建议移到用户研究计划。\n- 子问题是否夹带了预设方案或结论（引导性问题）？\n- 关键词是否覆盖同义词、行业术语、英文表述？是否过宽（噪音大）或过窄（搜不到）？\n- 推荐来源是否包含权威一手数据源（官方统计、上市公司财报、同行评审论文）？\n\n输出：问题列表（严重 / 一般）+ 修改后的 deskResearch.query JSON。\n\n${JSON.stringify(D(),null,1)}`}
+function md(){const q=D();const L=['# 研究问题拆解','','**核心问题：**'+q.question,'','## 子问题'];q.subQuestions.forEach((s,i)=>L.push((i+1)+'. ['+(ANG[s.angle]||'其他')+'] '+s.text+(s.why?' —— '+s.why:'')));
+ L.push('','## 关键词矩阵','','| 子问题 | 中文 | 英文 | 来源 |','|---|---|---|---|');q.subQuestions.forEach(s=>{const k=kwOf(q,s.id)||{};L.push('| '+[s.text,k.zh,k.en,k.where].map(x=>String(x||'').replace(/\|/g,'\\|')).join(' | ')+' |')});return L.join('\n')}
+DT.boot({title:'研究问题拆解',en:'Research Query',subtitle:()=>D().subQuestions.length+' 个子问题 · 桌面研究',render,md});
+})();
+</script>

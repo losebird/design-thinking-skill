@@ -1,0 +1,57 @@
+<!-- title: 研究空白 -->
+<style>
+.ga{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ga-c{border:1px solid var(--border);border-radius:12px;padding:10px;background:var(--bg2);display:flex;flex-direction:column;gap:8px}
+.ga-c h2{font-size:15px;margin:0;color:var(--c)}
+.ga-c .hint{margin-top:-4px}
+.gi{position:relative;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:8px 30px 8px 10px}
+.gi>.icon{position:absolute;top:4px;right:4px}
+.gi .sub{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px;font-size:12px;color:var(--muted)}
+.gi select{font-size:12px;min-height:24px;padding:0 4px}
+.pri{font-size:11.5px;border-radius:999px;padding:0 8px;min-height:22px;border:0}
+.pri.H{background:var(--red-s);color:var(--red)}.pri.M{background:var(--orange-s);color:var(--orange)}.pri.L{background:var(--green-s);color:var(--green)}
+.acts .ar{display:grid;grid-template-columns:auto 1fr 110px 120px 140px auto;gap:8px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:6px 8px;margin-bottom:6px}
+.acts .ar.done .ed{text-decoration:line-through;color:var(--muted)}
+.acts input[type=checkbox]{width:20px;height:20px;min-height:auto}
+.acts input[type=date],.acts select{min-height:32px;padding:2px 6px;font-size:13px}
+.acts .own{border:1px solid var(--border);border-radius:8px;padding:4px 8px;font-size:13px}
+.ga-link{font-size:13px;margin-top:8px}.ga-link a{color:var(--blue)}
+@media (max-width:820px){.ga{grid-template-columns:1fr}.acts .ar{grid-template-columns:auto 1fr auto}.acts .ar>select,.acts .own,.acts input[type=date]{grid-column:2}}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed,nid}=DT;
+const CELLS=[['known','已知','有可靠二手证据支撑的事实（可关联来源）','var(--green)','var(--green-s)'],['unknown','未知','公开资料找不到答案的问题','var(--red)','var(--red-s)'],['toVerify','需验证','有线索但证据不足，需要一手研究或更多数据确认','var(--orange)','var(--orange-s)']];
+const PRI={H:'高',M:'中',L:'低'},MET={interview:'访谈',survey:'问卷',observe:'现场观察',data:'数据分析',desk:'继续检索',test:'原型测试'};
+const D=()=>{const g=DT.get('deskResearch.gaps',{});CELLS.forEach(c=>g[c[0]]=g[c[0]]||[]);g.actions=g.actions||[];return g};
+function sel(obj,key,opts,def,label){const s=h('select',{'aria-label':label});Object.entries(opts).forEach(([k,v])=>{const o=h('option',{value:k},v);if((obj[key]||def)===k)o.selected=true;s.appendChild(o)});s.onchange=()=>{obj[key]=s.value;save();render()};return s}
+function render(){const app=document.getElementById('app');app.innerHTML='';const g=D();
+ app.appendChild(h('p',{class:'secsub'},'桌面研究的终点不是“全知道了”，而是清楚地知道还缺什么。把综合矩阵的结论分成三格，再为未知和需验证的项定好下一步行动（继续检索，或交给一手研究）。'));
+ const grid=h('div',{class:'ga'});
+ CELLS.forEach(([k,title,hint,c,bg])=>{const cell=h('section',{class:'ga-c',style:'--c:'+c+';--bg2:'+bg,'aria-label':title});cell.appendChild(h('h2',{},esc(title)+' · '+g[k].length));cell.appendChild(h('div',{class:'hint'},esc(hint)));
+  g[k].forEach((it,i)=>{const d=h('div',{class:'gi'});d.appendChild(ed(h('div'),it,'text',k==='known'?'例：一线城市外卖晚餐订单 21 点后占比约 X%':k==='unknown'?'例：用户对“预约热餐”的付费意愿':'例：加班族是否愿意多走 300 米取餐'));
+   const sub=h('div',{class:'sub'});
+   if(k==='known')d.appendChild(DT.srcPick(it,'sources'));
+   if(k==='unknown'){const p=h('button',{class:'pri '+(it.priority||'M'),title:'切换优先级'},'优先级 '+PRI[it.priority||'M']);p.onclick=()=>{it.priority={H:'M',M:'L',L:'H'}[it.priority||'M'];save();render()};sub.appendChild(p)}
+   if(k==='toVerify'){sub.appendChild(document.createTextNode('验证方式'));sub.appendChild(sel(it,'method',MET,'interview','验证方式'))}
+   if(k!=='known'){const tr=h('button',{class:'ghost',style:'min-height:24px;font-size:12px;padding:0 8px'},'→ 生成行动');tr.onclick=()=>{g.actions.push({id:nid('ga'),text:(k==='unknown'?'查找：':'验证：')+(it.text||''),type:k==='toVerify'&&['desk','data'].indexOf(it.method)<0?'primary':'desk',owner:'',due:'',done:false});save();render();DT.toast('已加入下一步行动')};sub.appendChild(tr)}
+   if(sub.children.length)d.appendChild(sub);
+   const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{g[k].splice(i,1);save();render()};d.appendChild(x);cell.appendChild(d)});
+  const a=h('button',{class:'ghost',style:'align-self:flex-start'},'+ 添加');a.onclick=()=>{const it={id:nid(k.slice(0,2)),text:''};if(k==='known')it.sources=[];if(k==='unknown')it.priority='M';if(k==='toVerify')it.method='interview';g[k].push(it);save();render()};cell.appendChild(a);grid.appendChild(cell)});
+ app.appendChild(grid);
+ // 下一步行动
+ app.appendChild(h('h3',{class:'sec'},'下一步行动（'+g.actions.filter(a=>!a.done).length+' 项待办）'));app.appendChild(h('p',{class:'secsub'},'每项写清是继续桌面检索，还是交给一手研究；并指定负责人与截止日期。'));
+ const ac=h('div',{class:'acts'});g.actions.forEach((it,i)=>{const r=h('div',{class:'ar'+(it.done?' done':'')});const cb=h('input',{type:'checkbox','aria-label':'完成'});cb.checked=!!it.done;cb.onchange=()=>{it.done=cb.checked;save();render()};
+  r.appendChild(cb);r.appendChild(ed(h('div'),it,'text','具体行动'));r.appendChild(sel(it,'type',{desk:'桌面研究',primary:'一手研究'},'desk','行动类型'));r.appendChild(ed(h('div',{class:'own'}),it,'owner','负责人'));
+  const dt=h('input',{type:'date','aria-label':'截止日期'});dt.value=it.due||'';dt.onchange=()=>{it.due=dt.value;save()};r.appendChild(dt);
+  const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{g.actions.splice(i,1);save();render()};r.appendChild(x);ac.appendChild(r)});
+ const aa=h('button',{class:'ghost'},'+ 行动项');aa.onclick=()=>{g.actions.push({id:nid('ga'),text:'',type:'desk',owner:'',due:'',done:false});save();render()};ac.appendChild(aa);app.appendChild(ac);
+ if(g.actions.some(a=>a.type==='primary'))app.appendChild(h('div',{class:'ga-link'},'需要一手研究的行动，可以在 <a href="research-plan.html">用户研究计划</a> 中设计假设与访谈提纲；需验证项也会汇总到仪表盘的「待真人验证」清单。'));
+ app.appendChild(DT.aiPanel([{label:'让 AI 填充',kind:'fill',build:fillPrompt},{label:'质量审查',kind:'review',build:reviewPrompt}]))}
+function fillPrompt(){const dr=DT.st.deskResearch||{};return `请基于桌面研究的综合结果做研究空白分析。\n${DT.ctx()}\n核心问题：${(dr.query||{}).question||''}\n子问题：${((dr.query||{}).subQuestions||[]).map(s=>s.text).join('；')}\n\n要求：\n1. known：有 ≥1 条高可信来源（credibility ≥ 4）或共识支撑的事实，sources 写来源 id。\n2. unknown：逐个检查子问题，公开资料回答不了的写在这里，priority 取 H/M/L（对设计决策影响越大越高）。\n3. toVerify：有线索但证据不足、或必须问真实用户才能确认的判断；method 取 interview/survey/observe/data/desk/test。写成可执行的验证动作（问谁、问什么、测什么）。\n4. actions：为 H/M 优先级的未知项和全部需验证项生成下一步行动，type 为 desk（继续检索）或 primary（一手研究），owner 和 due 留空给用户填。\n5. 不要把 AI 推测写成 known。\n\n只输出 JSON，写入 deskResearch.gaps：\n{"known":[{"id":"kn1","text":"","sources":["S1"]}],"unknown":[{"id":"un1","text":"","priority":"H"}],"toVerify":[{"id":"tv1","text":"","method":"interview"}],"actions":[{"id":"ga1","text":"","type":"primary","owner":"","due":"","done":false}]}\n\n综合矩阵：\n${JSON.stringify(dr.synthesis||{},null,1)}\n\n来源（id / 标题 / 可信度）：\n${(dr.sources||[]).map(s=>s.id+' / '+s.title+' / '+s.credibility).join('\n')}\n\n当前研究空白：\n${JSON.stringify(D(),null,1)}`}
+function reviewPrompt(){return `请审查以下研究空白分析：\n${DT.ctx()}\n\n检查：\n- 「已知」里是否混入了只有单一低可信来源、或纯属 AI 推测的说法？逐条标出并建议移到「需验证」。\n- 每个研究子问题是否都被覆盖（已知 / 未知 / 需验证至少落在一格）？列出遗漏。\n- 「未知」的优先级是否合理：哪个不知道会让设计方向完全不同？\n- 「需验证」是否写成了可执行的动作（对象、问题、方法），而不是模糊的“再调研一下”？\n- 下一步行动是否区分了桌面研究和一手研究，是否都有负责人和时间？\n\n输出：问题清单 + 修正后的 deskResearch.gaps JSON。\n\n${JSON.stringify(D(),null,1)}\n\n研究子问题：${(((DT.st.deskResearch||{}).query||{}).subQuestions||[]).map(s=>s.text).join('；')}`}
+function md(){const g=D();const L=['# 研究空白',''];CELLS.forEach(([k,t])=>{L.push('## '+t);g[k].forEach(it=>L.push('- '+it.text+(it.sources&&it.sources.length?' ['+it.sources.join(', ')+']':'')+(it.priority?'（优先级 '+PRI[it.priority]+'）':'')+(it.method?'（'+MET[it.method]+'）':'')));L.push('')});
+ L.push('## 下一步行动');g.actions.forEach(a=>L.push('- ['+(a.done?'x':' ')+'] '+a.text+' · '+(a.type==='primary'?'一手研究':'桌面研究')+(a.owner?' · 负责人：'+a.owner:'')+(a.due?' · 截止：'+a.due:'')));return L.join('\n')}
+DT.boot({title:'研究空白',en:'Gap Analysis',subtitle:()=>{const g=D();return '已知 '+g.known.length+' · 未知 '+g.unknown.length+' · 需验证 '+g.toVerify.length},render,md});
+})();
+</script>

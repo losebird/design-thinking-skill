@@ -21,7 +21,7 @@ def check(d):
     # 顶层结构检查
     KNOWN_TOP = {'meta','personas','personaSteps','empathyMap','journey','hook','define',
                  'ideate','prototype','test','boards','tables','radials',
-                 'storyboard','valueCanvas','researchPlan','project','name','_target','_rev'}
+                 'storyboard','valueCanvas','researchPlan','deskResearch','project','name','_target','_rev'}
     SHOULD_NEST = {'pov':'define.pov','scamper':'ideate.scamper','matrix':'ideate.matrix',
                    'box':'prototype.box','plan':'prototype.plan','ab':'test.ab'}
     for k in d:
@@ -230,6 +230,14 @@ def check(d):
         if gb == "ai" and (ab.get("a") or {}).get("n") and "示例" not in json.dumps(ab, ensure_ascii=False):
             warn("A/B 数据在 generatedBy=ai 下出现：如果是示例数字，请在 name 或 desc 中注明“示例数据”")
 
+    # 桌面研究（二手研究）
+    dr = d.get("deskResearch")
+    if dr is not None:
+        if not isinstance(dr, dict):
+            err("deskResearch 应为对象")
+        else:
+            check_desk(dr, err, warn)
+
     # 通用看板 / 表格 / 环形图
     pre = {}
     root = pathlib.Path(__file__).resolve().parent.parent / "presets"
@@ -260,6 +268,95 @@ def check(d):
         if len(r.get("items") or []) > 8:
             warn(f"radials.{key} 超过 8 项，建议保持聚焦")
     return E, W
+
+
+def check_desk(dr, err, warn):
+    """deskResearch：研究问题 → 来源 → 综合 → 空白 → 报告。"""
+    def ids(path, arr):
+        if not isinstance(arr, list):
+            err(f"{path} 应为数组"); return []
+        seen = set()
+        for i, x in enumerate(arr):
+            if not isinstance(x, dict):
+                err(f"{path}[{i}] 应为对象（含 id 与 text）"); continue
+            if not x.get("id"):
+                err(f"{path}[{i}] 缺少 id")
+            elif x["id"] in seen:
+                err(f"{path} 中 id 重复：{x['id']}")
+            seen.add(x.get("id"))
+        return [x for x in arr if isinstance(x, dict)]
+    nonempty = lambda o: isinstance(o, dict) and any(o.get(k) for k in o)
+
+    q = dr.get("query") or {}
+    subs = ids("deskResearch.query.subQuestions", q.get("subQuestions") or [])
+    sub_ids = {s.get("id") for s in subs}
+    for k in ids("deskResearch.query.keywords", q.get("keywords") or []):
+        if k.get("subId") and k["subId"] not in sub_ids:
+            err(f"deskResearch.query.keywords（{k.get('id')}）的 subId 不存在：{k['subId']}")
+    if subs and not q.get("question"):
+        warn("deskResearch.query 有子问题但 question 为空")
+    if q.get("question") and not 3 <= len(subs) <= 7:
+        warn(f"deskResearch.query 有 {len(subs)} 个子问题，建议 4–6 个且互不重叠")
+    for s in subs:
+        if s.get("angle") != "competitor" and SOL.search(s.get("text", "")):
+            warn(f"研究子问题含方案词（{SOL.search(s['text']).group(1)}），可能预设了答案：{s.get('text')}")
+
+    srcs = ids("deskResearch.sources", dr.get("sources") or [])
+    src_ids = {s.get("id") for s in srcs}
+    for s in srcs:
+        nm = s.get("title") or s.get("id")
+        for k in ("credibility", "relevance"):
+            v = s.get(k, 3)
+            if not isinstance(v, (int, float)) or not 1 <= v <= 5:
+                err(f"deskResearch.sources（{nm}）的 {k} 应为 1–5 的数字")
+        if s.get("status") not in (None, "inbox", "keep", "maybe", "drop"):
+            err(f"deskResearch.sources（{nm}）status 只能是 inbox/keep/maybe/drop")
+        if s.get("type") not in (None, "report", "gov", "academic", "news", "company", "ugc"):
+            err(f"deskResearch.sources（{nm}）type 只能是 report/gov/academic/news/company/ugc")
+        if not s.get("title"):
+            warn(f"deskResearch.sources（{s.get('id')}）缺少 title")
+        if s.get("url") and not re.match(r"^https?://", s["url"]):
+            warn(f"deskResearch.sources（{nm}）url 不是 http(s) 链接：{s['url']}")
+        if not s.get("url") and s.get("status") == "keep":
+            warn(f"deskResearch.sources（{nm}）已采纳但没有 url：无法追溯原始出处")
+    if srcs and all((s.get("credibility") or 3) <= 2 for s in srcs):
+        warn("deskResearch.sources 全部可信度 ≤ 2：结论缺乏可靠依据，请补充官方统计 / 行业报告 / 论文")
+
+    sy = dr.get("synthesis") or {}
+    for k in ("consensus", "divergence", "uncertain"):
+        for x in ids(f"deskResearch.synthesis.{k}", sy.get(k) or []):
+            bad = [i for i in x.get("sources") or [] if i not in src_ids]
+            if bad:
+                err(f"deskResearch.synthesis.{k}（{x.get('text', '')[:20]}）引用了不存在的来源：{', '.join(bad)}")
+            if k == "consensus" and len(set(x.get("sources") or [])) < 2:
+                warn(f"综合矩阵「共识」只有 {len(set(x.get('sources') or []))} 个来源，至少需要 2 个独立来源：{x.get('text', '')[:30]}")
+            if x.get("evidence") in ("quote", "observed"):
+                warn(f"deskResearch.synthesis.{k} 混入了一手研究证据（{x['evidence']}）：访谈原话 / 观察请放到移情图或洞察聚类")
+    if srcs and not nonempty(sy):
+        warn("deskResearch.sources 已有来源但 synthesis 为空：请用综合矩阵整理共识 / 分歧 / 不确定")
+
+    gp = dr.get("gaps") or {}
+    for k in ("known", "unknown", "toVerify", "actions"):
+        arr = ids(f"deskResearch.gaps.{k}", gp.get(k) or [])
+        for x in arr:
+            bad = [i for i in x.get("sources") or [] if i not in src_ids]
+            if bad:
+                err(f"deskResearch.gaps.{k}（{x.get('text', '')[:20]}）引用了不存在的来源：{', '.join(bad)}")
+            if k == "unknown" and x.get("priority") not in (None, "H", "M", "L"):
+                err(f"deskResearch.gaps.unknown（{x.get('text', '')[:20]}）priority 只能是 H/M/L")
+            if k == "actions" and x.get("type") not in (None, "desk", "primary"):
+                err(f"deskResearch.gaps.actions（{x.get('text', '')[:20]}）type 只能是 desk/primary")
+
+    rp = dr.get("report") or {}
+    for k in ("findings", "implications", "actions"):
+        for x in ids(f"deskResearch.report.{k}", rp.get(k) or []):
+            bad = [i for i in x.get("sources") or [] if i not in src_ids]
+            if bad:
+                err(f"deskResearch.report.{k}（{x.get('text', '')[:20]}）引用了不存在的来源：{', '.join(bad)}")
+            if k == "findings" and not x.get("sources"):
+                warn(f"研究报告的发现没有关联来源：{x.get('text', '')[:30]}")
+    if nonempty(rp) and not any(gp.get(k) for k in ("known", "unknown", "toVerify")):
+        warn("deskResearch.report 已填写但 gaps 为空：报告前请先用「研究空白」说明已知 / 未知 / 需验证")
 
 
 def main(a):

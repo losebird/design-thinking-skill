@@ -68,6 +68,17 @@ textarea{resize:vertical}
 .empty{color:var(--muted);font-size:14px;padding:12px;border:1px dashed var(--border);border-radius:8px;text-align:center}
 .foot{margin-top:40px;font-size:12.5px;color:var(--muted);text-align:center}
 .foot a{color:var(--muted)}
+/* AI 辅助面板（desk research 等页面） */
+.aip{border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin:20px 0 0;background:var(--soft)}
+.aip-hd{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;margin-bottom:8px}
+.aip-btns{display:flex;flex-wrap:wrap;gap:8px}
+.aip-rv{border-color:var(--orange);color:var(--orange)}
+.aip-box{display:none;margin:10px 0 0;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font:13px/1.7 inherit;font-family:inherit;white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto}
+.aip-box.open{display:block}
+.srcs{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:6px}
+.src-chip{font-size:11.5px;min-height:22px;padding:0 8px;border-radius:999px;border:0;background:var(--blue-s);color:var(--blue)}
+.src-chip.miss{background:var(--red-s);color:var(--red)}
+.src-add{font-size:12px;min-height:24px;padding:0 4px;max-width:180px;color:var(--muted)}
 @media (max-width:720px){.wrap{padding:16px}.dt-head h1{font-size:21px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
@@ -188,7 +199,7 @@ const DT=(function(){
  async function copy(t,msg){try{await navigator.clipboard.writeText(t);toast(msg||'已复制')}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(msg||'已复制')}catch(_){toast('复制失败，请改用导出 JSON')}ta.remove()}}
  const out=()=>strip(st);
  function aiBadge(){const g=st.meta.generatedBy||'ai';const m={ai:['','AI 假设 · 待验证'],mixed:['info','调研 + AI 推断'],human:['ok','基于真实调研']}[g]||['','AI 假设 · 待验证'];return '<button class="badge '+m[0]+'" id="dt-src" title="数据来源（点击切换）：AI 假设 / 调研 + AI 推断 / 基于真实调研">'+m[1]+'</button>'}
- const PATHS={persona:'personas, personaSteps','empathy-map':'empathyMap',journey:'journey',hook:'hook',pov:'define',scamper:'ideate.scamper, ideate.matrix',matrix:'ideate.matrix',box:'prototype','ab-test':'test.ab',storyboard:'storyboard','value-canvas':'valueCanvas',overview:'meta','research-plan':'researchPlan',dashboard:'全部'};
+ const PATHS={persona:'personas, personaSteps','empathy-map':'empathyMap',journey:'journey',hook:'hook',pov:'define',scamper:'ideate.scamper, ideate.matrix',matrix:'ideate.matrix',box:'prototype','ab-test':'test.ab',storyboard:'storyboard','value-canvas':'valueCanvas',overview:'meta','research-plan':'researchPlan','research-query':'deskResearch.query','source-board':'deskResearch.sources',synthesis:'deskResearch.synthesis','gap-analysis':'deskResearch.gaps','research-report':'deskResearch.report',dashboard:'全部'};
  const PATH=()=>init._target||PATHS[tpl]||'全部';
  function header(){const hd=$('dt-head');
   hd.innerHTML='<div><h1>'+esc(opts.title)+'<small>'+esc(opts.en||'')+'</small></h1><div class="sub">'+esc(st.meta.project||'')+(opts.subtitle?' · '+esc(opts.subtitle()):'')+' '+aiBadge()+'</div></div><div class="tools" id="dt-tools"></div>';
@@ -207,6 +218,17 @@ const DT=(function(){
  function list(container,arr,prefix,ph,onChange){container.innerHTML='';arr.forEach((it,i)=>{const c=h('div',{class:'card'});const t=h('div');ed(t,it,'text',ph,onChange);c.appendChild(t);
    const d=h('button',{class:'icon del','aria-label':'删除',title:'删除'},'×');d.onclick=()=>{arr.splice(i,1);save();list(container,arr,prefix,ph,onChange);onChange&&onChange()};c.appendChild(d);container.appendChild(c)});
   const a=h('button',{class:'ghost'},'+ 添加');a.onclick=()=>{arr.push({id:nid(prefix),text:''});save();list(container,arr,prefix,ph,onChange);const e=container.querySelectorAll('.card .ed');e.length&&e[e.length-1].focus()};container.appendChild(a)}
+ // AI 辅助面板：btns=[{label,kind:'fill'|'review',build:()=>prompt}]，点击复制并预览 prompt
+ function aiPanel(btns,note){const w=h('section',{class:'aip','aria-label':'AI 辅助'});
+  w.appendChild(h('div',{class:'aip-hd'},'<b>🤖 AI 辅助</b><span class="hint">'+esc(note||'点击按钮复制 prompt 粘贴给 agent；agent 返回 JSON 后点右上角「导入」或直接让它更新 project.json')+'</span>'));
+  const row=h('div',{class:'aip-btns'}),box=h('pre',{class:'aip-box'});
+  btns.forEach(b=>{const x=h('button',{class:b.kind==='review'?'aip-rv':'primary'},(b.kind==='review'?'🔍 ':'✨ ')+esc(b.label));x.onclick=()=>{const t=b.build();box.textContent=t;box.classList.add('open');copy(t,'「'+b.label+'」prompt 已复制')};row.appendChild(x)});
+  w.append(row,box);return w}
+ function ctx(){const m=st.meta||{};return '项目：'+(m.project||'')+'\n设计挑战：'+(m.challenge||'（未填写）')}
+ // 来源标签：在条目上显示/编辑关联的 deskResearch.sources id（obj[key] 为 id 数组）
+ function srcPick(obj,key,onChange){key=key||'sources';obj[key]=obj[key]||[];const srcs=(st.deskResearch&&st.deskResearch.sources)||[];const w=h('div',{class:'srcs'});
+  const draw=()=>{w.innerHTML='';obj[key].forEach((id,i)=>{const s=srcs.find(x=>x.id===id);const c=h('button',{class:'src-chip'+(s?'':' miss'),title:s?(s.title||'')+(s.url?'\n'+s.url:''):'来源不存在：'+id+'（点击移除）'},esc(id)+' ×');c.onclick=()=>{obj[key].splice(i,1);save();draw();onChange&&onChange()};w.appendChild(c)});
+   const left=srcs.filter(s=>obj[key].indexOf(s.id)<0);if(left.length){const sel=h('select',{class:'src-add','aria-label':'关联来源'});sel.appendChild(h('option',{value:''},'+ 来源'));left.forEach(s=>sel.appendChild(h('option',{value:s.id},esc(s.id+' · '+(s.title||'').slice(0,24)))));sel.onchange=()=>{if(sel.value){obj[key].push(sel.value);save();draw();onChange&&onChange()}};w.appendChild(sel)}};draw();return w}
  function boot(o){opts=o;
   // 非仪表盘页面注入固定顶部导航栏
   if(tpl!=='dashboard'){
@@ -221,7 +243,7 @@ const DT=(function(){
   document.addEventListener('keydown',e=>{if(e.key==='Escape')$('dt-modal').classList.remove('open')});
   window.addEventListener('storage',e=>{if(e.key!==KEY||!e.newValue)return;try{const o=JSON.parse(e.newValue);if(o.__base===HS){st=o.st;st.meta=st.meta||{};rerender()}}catch(_){}});
   rerender();if(fresh)setTimeout(()=>toast('已载入 agent 生成的新版本数据（旧的本地修改已备份）'),300);if(older)setTimeout(()=>toast('本页数据比其他已打开的页面旧，修改只保存在本页'),300)}
- return {get st(){return st},get,save,toast,esc,ed,h,nid,dl,copy,boot,rerender,evBtn,list,target:init._target||''};
+ return {get st(){return st},get,save,toast,esc,ed,h,nid,dl,copy,boot,rerender,evBtn,list,aiPanel,ctx,srcPick,target:init._target||''};
 })();
 
 (function(){

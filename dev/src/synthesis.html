@@ -1,0 +1,44 @@
+<!-- title: 综合矩阵 -->
+<style>
+.sy{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.sy-col{border:1px solid var(--border);border-top:4px solid var(--c);border-radius:12px;padding:10px;background:var(--bg);display:flex;flex-direction:column;gap:8px}
+.sy-col h2{font-size:15px;margin:0;color:var(--c)}
+.sy-col .hint{margin-top:-4px}
+.si{position:relative;background:var(--soft);border:1px solid var(--border);border-radius:9px;padding:8px 30px 8px 10px}
+.si.weak{border-color:var(--orange)}
+.si .t{font-size:14px}
+.si .nt{font-size:12.5px;color:var(--muted);margin-top:4px}
+.si .warn{font-size:11.5px;color:var(--orange);margin-top:4px}
+.si>.icon{position:absolute;top:4px;right:4px}
+.cov{margin-top:14px;font-size:13px;color:var(--muted)}
+.cov b{color:var(--text)}
+.cov .src-chip{cursor:default;margin:2px}
+@media (max-width:820px){.sy{grid-template-columns:1fr}}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed,nid}=DT;
+const COLS=[['consensus','共识','多个独立、可信来源一致支持的观点','var(--green)','两个以上独立来源一致的结论'],['divergence','分歧','来源之间相互矛盾或口径不同','var(--orange)','A 说……而 B 说……，原因可能是……'],['uncertain','不确定','证据不足、过时或只有单一来源','var(--muted)','只有一个来源 / 数据过旧 / 无法核实']];
+const D=()=>{const s=DT.get('deskResearch.synthesis',{});COLS.forEach(c=>s[c[0]]=s[c[0]]||[]);return s};
+const srcs=()=>(DT.st.deskResearch&&DT.st.deskResearch.sources)||[];
+function render(){const app=document.getElementById('app');app.innerHTML='';const s=D();
+ app.appendChild(h('p',{class:'secsub'},'把来源管理板里「采纳 / 存疑」的资料横向对比：每条观点都关联它的来源编号。只综合二手资料——访谈原话、观察记录等一手研究数据请放在移情图 / 洞察聚类中。'));
+ const g=h('div',{class:'sy'});
+ COLS.forEach(([k,title,hint,c,ph])=>{const col=h('section',{class:'sy-col',style:'--c:'+c,'aria-label':title});col.appendChild(h('h2',{},esc(title)+' · '+s[k].length));col.appendChild(h('div',{class:'hint'},esc(hint)));
+  s[k].forEach((it,i)=>{const n=(it.sources||[]).length;const weak=k==='consensus'&&n<2;const d=h('div',{class:'si'+(weak?' weak':'')});
+   d.appendChild(ed(h('div',{class:'t'}),it,'text',ph));const nt=ed(h('div',{class:'nt'}),it,'note',k==='divergence'?'分歧原因 / 口径差异':'备注（适用范围、条件）');d.appendChild(nt);
+   d.appendChild(DT.srcPick(it,'sources',render));if(weak)d.appendChild(h('div',{class:'warn'},'⚠ 共识至少需要 2 个独立来源，否则请移到「不确定」'));
+   const mv=h('select',{'aria-label':'移动到',style:'font-size:12px;min-height:24px;padding:0 4px;margin-top:6px'});mv.appendChild(h('option',{value:''},'移到…'));COLS.filter(x=>x[0]!==k).forEach(x=>mv.appendChild(h('option',{value:x[0]},x[1])));mv.onchange=()=>{if(!mv.value)return;s[k].splice(i,1);s[mv.value].push(it);save();render()};d.appendChild(mv);
+   const x=h('button',{class:'icon','aria-label':'删除'},'×');x.onclick=()=>{s[k].splice(i,1);save();render()};d.appendChild(x);col.appendChild(d)});
+  const a=h('button',{class:'ghost',style:'align-self:flex-start'},'+ 观点');a.onclick=()=>{s[k].push({id:nid(k.slice(0,3)),text:'',sources:[],note:''});save();render()};col.appendChild(a);g.appendChild(col)});
+ app.appendChild(g);
+ // 来源覆盖
+ const used=new Set();COLS.forEach(c=>s[c[0]].forEach(it=>(it.sources||[]).forEach(x=>used.add(x))));const pool=srcs().filter(x=>x.status!=='drop'),unused=pool.filter(x=>!used.has(x.id));
+ const cv=h('div',{class:'cov'});cv.innerHTML='<b>来源覆盖：</b>已引用 '+pool.filter(x=>used.has(x.id)).length+' / '+pool.length+' 条有效来源'+(unused.length?'。未引用：'+unused.map(x=>'<span class="src-chip" title="'+esc(x.title||'')+'">'+esc(x.id)+'</span>').join(''):'')+(pool.length?'':'（来源管理板还没有资料）');app.appendChild(cv);
+ app.appendChild(DT.aiPanel([{label:'让 AI 填充',kind:'fill',build:fillPrompt},{label:'质量审查',kind:'review',build:reviewPrompt}]))}
+function fillPrompt(){const q=DT.get('deskResearch.query')||{};const pool=srcs().filter(x=>x.status!=='drop');return `请基于以下二手来源做跨来源综合分析。\n${DT.ctx()}\n核心问题：${q.question||''}\n\n规则：\n1. 只使用下面列出的来源，不引入新事实；每条观点在 sources 中写明来源 id。\n2. consensus：至少 2 个独立来源一致支持（同一数据被多家转载算 1 个来源）。\n3. divergence：来源之间矛盾或口径不同，note 中解释可能原因（时间、地区、样本、立场）。\n4. uncertain：只有单一来源、数据过旧、可信度 ≤ 2 或无法核实的说法。\n5. 不要混入访谈原话、观察等一手研究数据，也不要写我们的解决方案。\n6. 每列 2–5 条，观点写成完整、可被证伪的陈述（含数字和口径）。\n\n只输出 JSON，写入 deskResearch.synthesis：\n{"consensus":[{"id":"con1","text":"","sources":["S1","S2"],"note":""}],"divergence":[],"uncertain":[]}\n\n来源：\n${JSON.stringify(pool.map(x=>({id:x.id,title:x.title,summary:x.summary,credibility:x.credibility,type:x.type,date:x.date})),null,1)}\n\n当前综合：\n${JSON.stringify(D(),null,1)}`}
+function reviewPrompt(){return `请审查以下综合矩阵的论证质量：\n${DT.ctx()}\n\n逐条检查并指出问题：\n- 「共识」是否真的有 ≥2 个独立来源？是否只是同一原始数据被多次转载？\n- 观点是否忠实于来源摘要，有没有过度概括、偷换口径（全国→一线城市、2019→现在）？\n- 「分歧」是否解释了原因？是否有本该归为分歧却被写成共识的？\n- 低可信来源（credibility ≤ 2）是否被用来支撑共识？\n- 是否混入了一手研究数据（访谈原话、观察）或团队主观判断 / 解决方案？\n- 是否引用了不存在的来源 id？有无重要来源被忽略？\n\n输出：问题清单 + 建议移动 / 改写的条目 + 修正后的 deskResearch.synthesis JSON。\n\n综合矩阵：\n${JSON.stringify(D(),null,1)}\n\n来源：\n${JSON.stringify(srcs().map(x=>({id:x.id,title:x.title,summary:x.summary,credibility:x.credibility})),null,1)}`}
+function md(){const s=D();const L=['# 综合矩阵',''];COLS.forEach(([k,t])=>{L.push('## '+t);s[k].forEach(it=>L.push('- '+it.text+((it.sources||[]).length?' ['+it.sources.join(', ')+']':'')+(it.note?'（'+it.note+'）':'')));L.push('')});return L.join('\n')}
+DT.boot({title:'综合矩阵',en:'Synthesis Matrix',subtitle:()=>{const s=D();return '共识 '+s.consensus.length+' · 分歧 '+s.divergence.length+' · 不确定 '+s.uncertain.length},render,md});
+})();
+</script>

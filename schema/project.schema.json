@@ -1489,6 +1489,454 @@
           "type": "object"
         }
       }
+    },
+    "deskResearch": {
+      "type": "object",
+      "description": "AI 辅助桌面研究（二手研究）：研究问题拆解 → 来源管理 → 综合矩阵 → 研究空白 → 研究报告。与一手研究（researchPlan）互补，不要混入访谈原话或观察数据。",
+      "properties": {
+        "query": {
+          "type": "object",
+          "description": "研究问题拆解（research-query.html）",
+          "properties": {
+            "question": {
+              "type": "string",
+              "description": "核心研究问题：对象 + 范围 + 想知道什么"
+            },
+            "subQuestions": {
+              "type": "array",
+              "description": "4–6 个 MECE 子问题，均可通过公开资料回答",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "why": {
+                    "type": "string",
+                    "description": "回答后能支持什么决策"
+                  },
+                  "angle": {
+                    "type": "string",
+                    "enum": [
+                      "market",
+                      "user",
+                      "competitor",
+                      "trend",
+                      "policy",
+                      "other"
+                    ]
+                  }
+                }
+              }
+            },
+            "keywords": {
+              "type": "array",
+              "description": "搜索关键词矩阵：每个子问题一行",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "subId"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "subId": {
+                    "type": "string",
+                    "description": "对应 subQuestions[].id"
+                  },
+                  "zh": {
+                    "type": "string",
+                    "description": "中文关键词，逗号分隔"
+                  },
+                  "en": {
+                    "type": "string",
+                    "description": "英文关键词，逗号分隔"
+                  },
+                  "where": {
+                    "type": "string",
+                    "description": "推荐信息源"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "sources": {
+          "type": "array",
+          "description": "来源管理板（source-board.html）",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "title"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "如 S1、S2"
+              },
+              "url": {
+                "type": "string",
+                "description": "原始出处链接，不可编造；未检索到时留空"
+              },
+              "title": {
+                "type": "string"
+              },
+              "summary": {
+                "type": "string",
+                "description": "1–2 句摘要，含关键数据与口径"
+              },
+              "credibility": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5,
+                "default": 3,
+                "description": "可信度：权威性 / 时效 / 方法透明 / 立场"
+              },
+              "relevance": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5,
+                "default": 3,
+                "description": "与研究子问题的相关性"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "report",
+                  "gov",
+                  "academic",
+                  "news",
+                  "company",
+                  "ugc"
+                ],
+                "description": "行业报告 / 官方数据 / 学术论文 / 媒体报道 / 企业资料 / 社区 UGC"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "inbox",
+                  "keep",
+                  "maybe",
+                  "drop"
+                ],
+                "default": "inbox",
+                "description": "待筛选 / 采纳 / 存疑 / 排除"
+              },
+              "date": {
+                "type": "string",
+                "description": "发布时间"
+              }
+            }
+          }
+        },
+        "synthesis": {
+          "type": "object",
+          "description": "综合矩阵（synthesis.html）",
+          "properties": {
+            "consensus": {
+              "type": "array",
+              "description": "共识：≥2 个独立来源一致",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "sources": {
+                    "type": "array",
+                    "description": "关联的 deskResearch.sources id",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "divergence": {
+              "type": "array",
+              "description": "分歧：来源矛盾或口径不同，note 写原因",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "sources": {
+                    "type": "array",
+                    "description": "关联的 deskResearch.sources id",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "uncertain": {
+              "type": "array",
+              "description": "不确定：单一来源 / 过旧 / 无法核实",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "sources": {
+                    "type": "array",
+                    "description": "关联的 deskResearch.sources id",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "gaps": {
+          "type": "object",
+          "description": "研究空白（gap-analysis.html）",
+          "properties": {
+            "known": {
+              "type": "array",
+              "description": "已知：有可靠证据的事实",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "sources": {
+                    "type": "array",
+                    "description": "关联的 deskResearch.sources id",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "unknown": {
+              "type": "array",
+              "description": "未知：公开资料无法回答",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "priority": {
+                    "type": "string",
+                    "enum": [
+                      "H",
+                      "M",
+                      "L"
+                    ]
+                  }
+                }
+              }
+            },
+            "toVerify": {
+              "type": "array",
+              "description": "需验证：会汇总进仪表盘「待真人验证」",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "interview",
+                      "survey",
+                      "observe",
+                      "data",
+                      "desk",
+                      "test"
+                    ]
+                  }
+                }
+              }
+            },
+            "actions": {
+              "type": "array",
+              "description": "下一步行动",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "desk",
+                      "primary"
+                    ],
+                    "description": "桌面研究 / 一手研究"
+                  },
+                  "owner": {
+                    "type": "string"
+                  },
+                  "due": {
+                    "type": "string"
+                  },
+                  "done": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "report": {
+          "type": "object",
+          "description": "研究报告（research-report.html）",
+          "properties": {
+            "background": {
+              "type": "string"
+            },
+            "findings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "sources": {
+                    "type": "array",
+                    "description": "关联的 deskResearch.sources id",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "implications": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "actions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "text"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  },
+                  "owner": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

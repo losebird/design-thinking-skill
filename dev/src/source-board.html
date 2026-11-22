@@ -1,0 +1,73 @@
+<!-- title: 来源管理板 -->
+<style>
+.sb-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.sb-stats{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.sb-bd{display:grid;gap:10px}
+.sb-col{border:1px solid var(--border);border-top:4px solid var(--c);border-radius:12px;padding:10px;background:var(--bg);min-height:140px;display:flex;flex-direction:column;gap:8px}
+.sb-col.over{outline:2px dashed var(--blue);outline-offset:-4px}
+.sb-col h2{font-size:14.5px;margin:0;display:flex;justify-content:space-between}
+.sb-col h2 span{color:var(--muted);font-weight:400;font-size:12.5px}
+.sc{background:var(--soft);border:1px solid var(--border);border-radius:9px;padding:8px 10px;display:flex;flex-direction:column;gap:4px;cursor:grab}
+.sc.low{border-color:var(--red);box-shadow:0 0 0 2px var(--red-s)}
+.sc-top{display:flex;gap:6px;align-items:baseline}
+.sc-id{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-s);border-radius:5px;padding:0 5px}
+.sc-t{font-weight:600;font-size:14px;flex:1}
+.sc-u{font-size:12px;color:var(--muted);display:flex;gap:4px;align-items:baseline;min-width:0}
+.sc-u .ed{flex:1;overflow-wrap:anywhere}
+.sc-u a{color:var(--blue);text-decoration:none;flex:none}
+.sc-s{font-size:13px}
+.sc-meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:12px;color:var(--muted)}
+.rate{display:inline-flex;gap:1px;align-items:center}
+.rate button{border:0;background:none;padding:0 1px;min-height:20px;font-size:14px;color:var(--border);line-height:1}
+.rate button.on{color:var(--c2)}
+.sc-tags .ed{font-size:12px;color:var(--purple)}
+.sc-ft{display:flex;gap:4px;align-items:center}
+.sc-ft select{font-size:12px;min-height:26px;padding:0 4px}
+.sc-ft .sp{flex:1}
+.sc .icon{width:24px;height:24px;min-height:24px;font-size:14px}
+@media (max-width:820px){.sb-bd{grid-template-columns:1fr 1fr!important}}
+@media (max-width:520px){.sb-bd{grid-template-columns:1fr!important}}
+</style>
+<script>
+(function(){
+const {h,esc,save,ed,nid}=DT;
+const STATUS=[['inbox','待筛选','var(--muted)'],['keep','采纳','var(--green)'],['maybe','存疑','var(--orange)'],['drop','排除','var(--red)']];
+const TYPE=[['report','行业报告','var(--blue)'],['gov','官方数据','var(--teal)'],['academic','学术论文','var(--purple)'],['news','媒体报道','var(--orange)'],['company','企业资料','var(--pink)'],['ugc','社区 / UGC','var(--yellow)']];
+let mode='status',drag=null;
+const S=()=>{const d=DT.get('deskResearch',{});d.sources=d.sources||[];return d.sources};
+const grp=s=>mode==='status'?(s.status||'inbox'):(s.type||'news');
+function rate(obj,key,color,label){obj[key]=obj[key]||3;const w=h('span',{class:'rate',style:'--c2:'+color,role:'group','aria-label':label});
+ for(let i=1;i<=5;i++){const b=h('button',{class:i<=obj[key]?'on':'','aria-label':label+' '+i+' 分',title:label+' '+i+'/5'},'●');b.onclick=e=>{e.stopPropagation();obj[key]=i;save();render()};w.appendChild(b)}return w}
+function render(){const app=document.getElementById('app');app.innerHTML='';const arr=S();
+ app.appendChild(h('p',{class:'secsub'},'记录每条二手资料的出处、摘要与可信度。可信度看权威性 / 时效 / 方法透明度 / 立场；相关性看它能回答多少研究子问题。可信度 ≤ 2 的来源会标红，不要单独作为结论依据。'));
+ const bar=h('div',{class:'sb-bar'});const sg=h('div',{class:'seg'});[['status','按筛选状态'],['type','按来源类型']].forEach(([k,v])=>{const b=h('button',{'aria-pressed':mode===k?'true':'false'},v);b.onclick=()=>{mode=k;render()};sg.appendChild(b)});bar.appendChild(sg);
+ const keep=arr.filter(s=>s.status==='keep'),low=arr.filter(s=>(s.credibility||3)<=2),avg=arr.length?(arr.reduce((a,s)=>a+(s.credibility||3),0)/arr.length).toFixed(1):'–';
+ const st=h('div',{class:'sb-stats'});st.innerHTML='<span class="badge mute">共 '+arr.length+' 条</span><span class="badge ok">采纳 '+keep.length+'</span><span class="badge info">平均可信度 '+avg+'</span>'+(low.length?'<span class="badge" style="background:var(--red-s);color:var(--red)">低可信 '+low.length+'</span>':'');bar.appendChild(st);app.appendChild(bar);
+ const cols=mode==='status'?STATUS:TYPE;const bd=h('div',{class:'sb-bd'});bd.style.gridTemplateColumns='repeat('+Math.min(cols.length,mode==='status'?4:3)+',minmax(0,1fr))';
+ cols.forEach(([k,title,c],ci)=>{const items=arr.filter(s=>grp(s)===k).sort((a,b)=>(b.relevance||3)*(b.credibility||3)-(a.relevance||3)*(a.credibility||3));
+  const col=h('section',{class:'sb-col',style:'--c:'+c,'aria-label':title});col.appendChild(h('h2',{},esc(title)+'<span>'+items.length+'</span>'));
+  items.forEach(s=>{const i=arr.indexOf(s);const cd=h('div',{class:'sc'+((s.credibility||3)<=2?' low':''),draggable:'true'});
+   cd.addEventListener('dragstart',e=>{drag=s.id;e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',s.id)}catch(_){}});
+   const top=h('div',{class:'sc-top'});top.appendChild(h('span',{class:'sc-id'},esc(s.id)));top.appendChild(ed(h('div',{class:'sc-t'}),s,'title','来源标题'));cd.appendChild(top);
+   const u=h('div',{class:'sc-u'});u.appendChild(ed(h('div'),s,'url','https://…'));if(/^https?:\/\//.test(s.url||''))u.appendChild(h('a',{href:s.url,target:'_blank',rel:'noopener',title:'打开来源'},'↗'));cd.appendChild(u);
+   const sm=ed(h('div',{class:'sc-s'}),s,'summary','一两句摘要：它说了什么、用什么数据');sm.dataset.multi='1';cd.appendChild(sm);
+   const meta=h('div',{class:'sc-meta'});const c1=h('span',{},'可信 ');c1.appendChild(rate(s,'credibility','var(--green)','可信度'));const c2=h('span',{},'相关 ');c2.appendChild(rate(s,'relevance','var(--blue)','相关性'));
+   const dt=h('span',{});dt.appendChild(ed(h('span'),s,'date','发布时间'));meta.append(c1,c2,dt);cd.appendChild(meta);
+   const tg=h('div',{class:'sc-tags'});const tagObj={t:(s.tags||[]).join('，')};tg.appendChild(ed(h('div'),tagObj,'t','# 标签（逗号分隔）',()=>{s.tags=tagObj.t.split(/[,，]/).map(x=>x.trim()).filter(Boolean);save()}));cd.appendChild(tg);
+   const ft=h('div',{class:'sc-ft'});const other=mode==='status'?TYPE:STATUS,okey=mode==='status'?'type':'status';const sel=h('select',{'aria-label':mode==='status'?'来源类型':'筛选状态'});
+   other.forEach(([v,t])=>{const o=h('option',{value:v},t);if((s[okey]||(okey==='type'?'news':'inbox'))===v)o.selected=true;sel.appendChild(o)});sel.onchange=()=>{s[okey]=sel.value;save();render()};ft.append(sel,h('span',{class:'sp'}));
+   const l=h('button',{class:'icon','aria-label':'移到左一列'},'‹'),r=h('button',{class:'icon','aria-label':'移到右一列'},'›');l.disabled=ci===0;r.disabled=ci===cols.length-1;
+   l.onclick=()=>{s[mode]=cols[ci-1][0];save();render()};r.onclick=()=>{s[mode]=cols[ci+1][0];save();render()};
+   const x=h('button',{class:'icon','aria-label':'删除来源'},'×');x.onclick=()=>{if(!confirm('删除来源 '+s.id+'？'))return;arr.splice(i,1);save();render()};ft.append(l,r,x);cd.appendChild(ft);col.appendChild(cd)});
+  const a=h('button',{class:'ghost'},'+ 来源');a.onclick=()=>{let n=arr.length+1;while(arr.some(x=>x.id==='S'+n))n++;const it={id:'S'+n,url:'',title:'',summary:'',credibility:3,relevance:3,tags:[],status:mode==='status'?k:'inbox',type:mode==='type'?k:'news',date:''};arr.push(it);save();render()};col.appendChild(a);
+  col.addEventListener('dragover',e=>{e.preventDefault();col.classList.add('over')});col.addEventListener('dragleave',()=>col.classList.remove('over'));
+  col.addEventListener('drop',e=>{e.preventDefault();col.classList.remove('over');const s=arr.find(x=>x.id===drag);if(s){s[mode]=k;save();render()}drag=null});bd.appendChild(col)});
+ app.appendChild(bd);
+ app.appendChild(DT.aiPanel([{label:'让 AI 填充',kind:'fill',build:fillPrompt},{label:'质量审查',kind:'review',build:reviewPrompt}]))}
+function fillPrompt(){const q=DT.get('deskResearch.query')||{};return `你是桌面研究分析师。请围绕以下研究子问题检索公开资料，整理成来源清单。\n${DT.ctx()}\n核心问题：${q.question||''}\n子问题：\n${(q.subQuestions||[]).map((s,i)=>(i+1)+'. '+s.text).join('\n')||'（未拆解，请先用「研究问题拆解」）'}\n\n要求：\n1. 每个子问题 2–3 条来源，优先官方统计、行业报告、上市公司财报、同行评审论文，其次权威媒体，社区 / UGC 只作旁证。\n2. 只收录你真实检索到、可访问的 URL；无法联网时 url 留空、summary 写“待检索：建议搜索 …”，绝不编造链接、机构或数字。\n3. summary 1–2 句，写清它给出的关键事实 / 数据及口径（时间、样本、地区）。\n4. credibility 1–5（权威性、时效、方法透明、利益立场），relevance 1–5（对子问题的回答程度）。\n5. type 取 report/gov/academic/news/company/ugc；status 默认 inbox；date 写发布时间；tags 写对应子问题关键词。\n6. id 依次为 S1、S2…，与已有来源不重复。\n\n只输出 JSON 数组，追加到 deskResearch.sources：\n[{"id":"S1","url":"","title":"","summary":"","credibility":3,"relevance":3,"tags":[],"type":"report","status":"inbox","date":""}]\n\n已有来源：\n${JSON.stringify(S(),null,1)}`}
+function reviewPrompt(){return `请用 CRAAP 框架（Currency 时效 / Relevance 相关 / Authority 权威 / Accuracy 准确 / Purpose 立场）逐条审查以下来源：\n${DT.ctx()}\n\n对每条来源输出：id、问题、建议的 credibility / relevance、建议 status（keep/maybe/drop）。并特别检查：\n- URL 是否可能失效或无法核实？标题与机构是否对得上？（疑似编造的直接标出）\n- 是否超过 3 年、口径（地区 / 样本 / 时间）与研究问题不符？\n- 是否是厂商软文、营销稿、二次转载而非原始出处？请给出原始出处的查找建议。\n- 是否过度依赖单一来源或单一类型？哪些子问题还缺少高可信来源？\n- 摘要是否夸大或曲解了原文结论？\n\n最后给出修改后的 deskResearch.sources JSON。\n\n${JSON.stringify(S(),null,1)}`}
+function md(){const L=['# 来源管理板','','| ID | 标题 | 类型 | 状态 | 可信度 | 相关性 | 摘要 | 链接 |','|---|---|---|---|---|---|---|---|'];const Ss=Object.fromEntries(STATUS.map(x=>[x[0],x[1]]));
+ S().forEach(s=>L.push('| '+[s.id,s.title,(TYPE.find(t=>t[0]===s.type)||[,''])[1],Ss[s.status||'inbox'],s.credibility,s.relevance,s.summary,s.url].map(x=>String(x==null?'':x).replace(/\|/g,'\\|').replace(/\n/g,' ')).join(' | ')+' |'));return L.join('\n')}
+DT.boot({title:'来源管理板',en:'Source Board',subtitle:()=>S().length+' 条二手来源',render,md});
+})();
+</script>

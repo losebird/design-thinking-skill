@@ -62,6 +62,8 @@ const TOOLS=[
  ['empathize','故事板 Storyboard','用分镜讲清用户在具体情境中的经历','理解场景，或在原型阶段讲述新方案','storyboard.html',s=>has(s.storyboard&&s.storyboard.frames),'storyboard'],
  ['empathize','Hook 上瘾模型','触发-行动-奖赏-投入，含伦理检查','研究习惯与持续使用','hook.html',s=>has(s.hook),'hook'],
  ['empathize','竞品分析','对比现有方案的优缺点与空白','了解用户当前的替代方案','table-competitors.html',T('competitors'),'tables.competitors'],
+ ['empathize','研究问题拆解','把模糊问题拆成可检索的子问题，生成中英文搜索关键词矩阵','桌面研究开始前，或进入陌生领域时','research-query.html',s=>has(s.deskResearch&&s.deskResearch.query&&s.deskResearch.query.question),'deskResearch.query'],
+ ['empathize','来源管理板','记录二手资料的 URL、摘要、可信度与相关性，看板式筛选','检索资料过程中，边读边记','source-board.html',s=>has(s.deskResearch&&s.deskResearch.sources),'deskResearch.sources'],
  ['define','洞察聚类','把观察卡片聚类、投票选出关键洞察','共情资料较多、需要收敛时','board-insights.html',B('insights'),'boards.insights'],
  ['define','360 度视角','从多个利益相关方视角审视问题','问题涉及多方角色','radial-view360.html',R('view360'),'radials.view360'],
  ['define','九宫格','3×3 结构化拆解问题','问题过于宽泛','board-ninegrid.html',B('ninegrid'),'boards.ninegrid'],
@@ -69,6 +71,9 @@ const TOOLS=[
  ['define','JTBD → PoV → HMW','任务、视角陈述与“我们可以如何”问题','形成问题陈述、进入构思前','pov.html',s=>has(s.define),'define'],
  ['define','价值主张画布','顾客任务/痛点/收益 ↔ 产品/止痛剂/增益','检验方案是否对准真实需求','value-canvas.html',s=>has(s.valueCanvas),'valueCanvas'],
  ['define','关键假设清单','列出风险最高的假设及验证方式','任何阶段，尤其是测试前','table-assumptions.html',T('assumptions'),'tables.assumptions'],
+ ['define','综合矩阵','跨来源对比观点：共识 / 分歧 / 不确定三列，每条关联来源','来源收集到 6 条以上、需要提炼结论时','synthesis.html',s=>{const y=s.deskResearch&&s.deskResearch.synthesis;return !!y&&has([].concat(y.consensus||[],y.divergence||[],y.uncertain||[]))},'deskResearch.synthesis'],
+ ['define','研究空白','已知 / 未知 / 需验证三格 + 下一步行动，衔接一手研究','桌面研究收尾、决定还要研究什么时','gap-analysis.html',s=>{const g=s.deskResearch&&s.deskResearch.gaps;return !!g&&has([].concat(g.known||[],g.unknown||[],g.toVerify||[]))},'deskResearch.gaps'],
+ ['define','研究报告','背景 → 发现 → 含义 → 行动建议，一键复制分享','向团队同步桌面研究结论时','research-report.html',s=>{const r=s.deskResearch&&s.deskResearch.report;return !!r&&(has(r.background)||has(r.findings))},'deskResearch.report'],
  ['ideate','头脑风暴墙','计时发散、贴卡、投票','需要大量点子','board-brainstorm.html',B('brainstorm'),'boards.brainstorm'],
  ['ideate','Crazy 8s','8 分钟画 8 个不同方案（补充工具）','需要快速产出多个差异化方案','board-crazy8.html',B('crazy8'),'boards.crazy8'],
  ['ideate','SCAMPER 奔驰法','七个角度改造现有方案','有可改造的现有产品/流程','scamper.html',s=>has(s.ideate&&s.ideate.scamper),'ideate.scamper'],
@@ -105,7 +110,7 @@ function render(){const s=DT.st,app=document.getElementById('app');app.innerHTML
  M.forEach(m=>{const sel=s.meta.macro===m[0];const b=h('button',{'aria-pressed':sel?'true':'false',class:m[0]==='pivot'?'pv':''},m[1]+(m[0]==='pivot'?'':'<small>'+m[2]+'</small>'));b.title=m[2];b.onclick=()=>{if(s.meta.macro===m[0])return;s.meta.macro=m[0];save();render();DT.toast('已标记为：'+macroLabels[m[0]])};mc.appendChild(b)});app.appendChild(mc);
  // 项目状态卡片（嵌入式仪表盘）
  const totalT=TOOLS.length,doneT=TOOLS.filter(t=>t[5](s)).length;
- const CORE_TOOLS=new Set(['personas','empathyMap','journey','hook','define','valueCanvas','ideate.scamper','ideate.matrix','prototype','storyboard','researchPlan','test.ab']);
+ const CORE_TOOLS=new Set(['personas','empathyMap','journey','hook','define','valueCanvas','ideate.scamper','ideate.matrix','prototype','storyboard','researchPlan','test.ab','deskResearch.report']);
  const coreT=TOOLS.filter(t=>CORE_TOOLS.has(t[6])),coreDoneT=coreT.filter(t=>t[5](s)).length;
  const vl2=[];(function wk(o,p){if(!o||typeof o!=='object')return;for(const k in o){if(k==='toVerify'&&Array.isArray(o[k]))o[k].forEach(v=>vl2.push(typeof v==='string'?v:(v.text||'')));else wk(o[k],p?p+'.'+k:k)}})(s,'');
  const pCard=h('div',{style:'border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:14px;background:var(--bg)'});

@@ -34,6 +34,11 @@ PAGES = [  # (输出文件, 模板, 判断数据是否存在)
     ("value-canvas.html", "value-canvas", lambda d: bool(d.get("valueCanvas"))),
     ("ab-test.html", "ab-test", lambda d: bool((d.get("test") or {}).get("ab"))),
     ("research-plan.html", "research-plan", lambda d: bool(d.get("researchPlan"))),
+    ("research-query.html", "research-query", lambda d: bool(((d.get("deskResearch") or {}).get("query") or {}).get("question"))),
+    ("source-board.html", "source-board", lambda d: bool((d.get("deskResearch") or {}).get("sources"))),
+    ("synthesis.html", "synthesis", lambda d: any(((d.get("deskResearch") or {}).get("synthesis") or {}).get(k) for k in ("consensus", "divergence", "uncertain"))),
+    ("gap-analysis.html", "gap-analysis", lambda d: any(((d.get("deskResearch") or {}).get("gaps") or {}).get(k) for k in ("known", "unknown", "toVerify"))),
+    ("research-report.html", "research-report", lambda d: bool(((d.get("deskResearch") or {}).get("report") or {}).get("background") or ((d.get("deskResearch") or {}).get("report") or {}).get("findings"))),
     ("dashboard.html", "dashboard", lambda d: True),
 ]
 
