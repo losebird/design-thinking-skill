@@ -589,9 +589,10 @@ function md(){
   return lines.join('\n');
 }
 
+const ovBtn=DT.h('button',{},'工具总览 →');ovBtn.onclick=()=>location.href='overview.html';
 DT.boot({title:'项目仪表盘',en:'Dashboard',subtitle:()=>{
   const s=DT.st;return TOOLS.filter(t=>t[3](s)).length+'/'+TOOLS.length+' 个工具有内容';
-},render,md});
+},extra:[ovBtn],render,md});
 })();
 </script>
 </body>

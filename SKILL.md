@@ -75,9 +75,9 @@ description: 用设计思维（共情 → 定义视角 → 构思 → 原型 →
 ```
 
 渲染命令参考（你自己用，不要展示给用户）：
-- 全量渲染：`python3 <skill>/scripts/render.py --all project.json pages/`
-- 单页渲染：`python3 <skill>/scripts/render.py persona project.json pages/persona.html`
-- 通用看板（需指定路径）：`python3 <skill>/scripts/render.py board project.json pages/board-retro.html --target boards.retro`
+- **全量渲染（必须用这个）**：`python3 <skill>/scripts/render.py --all project.json pages/`
+- ⚠️ 禁止单页渲染——单页渲染会导致仪表盘和工具总览无法同步更新，永远使用 `--all`。
+- 通用看板（需指定路径，仍用 --all 后单独补充）：`python3 <skill>/scripts/render.py board project.json pages/board-retro.html --target boards.retro`
 
 使用预设时，数据中只需写内容（`boards.<key>.cards`、`tables.<key>.rows`、`radials.<key>.items`），列定义、说明、步骤、计时、投票由预设补齐。预设一览见 `references/tools-index.md`。
 
