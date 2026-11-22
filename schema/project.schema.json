@@ -42,6 +42,13 @@
         },
         "updatedAt": {
           "type": "string"
+        },
+        "domainTerms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "方案词检查白名单：列出项目领域内的正常词汇（如医疗类'系统'、硬件类'设备'），validate 检查时跳过这些词"
         }
       }
     },
