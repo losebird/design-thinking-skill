@@ -51,6 +51,66 @@ def check(d):
     if gb not in ("ai", "mixed", "human"):
         err(f"meta.generatedBy 只能是 ai / mixed / human，当前为 {gb!r}")
 
+    # ── 阶段入场条件检查 ──────────────────────────────────────────────
+    # 顺序：empathize(0) → define(1) → ideate(2) → prototype(3) → test(4) → reflect(5)
+    # 若 meta.phase 声明已进入某阶段，检查前序必备数据是否存在。
+    PHASE_ORDER = ["empathize", "define", "ideate", "prototype", "test", "reflect"]
+    phase = meta.get("phase", "empathize")
+    if phase not in PHASE_ORDER:
+        warn(f"meta.phase 值 {phase!r} 不合法，应为 {PHASE_ORDER}")
+    else:
+        pi = PHASE_ORDER.index(phase)
+
+        def _nonempty(path):
+            """检查 path（点分）对应的值是否非空（非 None / 非空列表 / 非空对象 / 非空字符串）。"""
+            o = d
+            for k in path.split("."):
+                if not isinstance(o, dict):
+                    return False
+                o = o.get(k)
+            if o is None:
+                return False
+            if isinstance(o, (list, dict)):
+                return bool(o)
+            return str(o).strip() not in ("", "false", "False")
+
+        # 进入 define 阶段：需要至少 1 个画像 + 移情图有内容
+        if pi >= 1:
+            if not _nonempty("personas"):
+                warn("meta.phase 已是 define 或更后阶段，但 personas 为空；进入定义阶段前需至少完成 1 个用户画像")
+            if not _nonempty("empathyMap"):
+                warn("meta.phase 已是 define 或更后阶段，但 empathyMap 为空；进入定义阶段前需完成移情图")
+
+        # 进入 ideate 阶段：需要 JTBD + PoV + 至少 1 条 HMW
+        if pi >= 2:
+            if not _nonempty("define.jtbd"):
+                warn("meta.phase 已是 ideate 或更后阶段，但 define.jtbd 为空；进入构思阶段前需完成 JTBD 语句")
+            if not _nonempty("define.pov"):
+                warn("meta.phase 已是 ideate 或更后阶段，但 define.pov 为空；进入构思阶段前需完成 PoV 句子")
+            if not _nonempty("define.hmw"):
+                warn("meta.phase 已是 ideate 或更后阶段，但 define.hmw 为空；进入构思阶段前需至少 1 条 HMW 问题")
+
+        # 进入 prototype 阶段：需要丘吉尔矩阵中至少 1 条被选中的点子
+        if pi >= 3:
+            mx_raw = (d.get("ideate") or {}).get("matrix") or {}
+            matrix_items = mx_raw.get("items", []) if isinstance(mx_raw, dict) else mx_raw
+            if not any(isinstance(x, dict) and x.get("selected") for x in matrix_items):
+                warn("meta.phase 已是 prototype 或更后阶段，但 ideate.matrix 中没有 selected:true 的点子；进入原型阶段前需在丘吉尔矩阵中选定至少 1 个方向")
+
+        # 进入 test 阶段：需要盒子原则 + 原型规划
+        if pi >= 4:
+            if not _nonempty("prototype.box"):
+                warn("meta.phase 已是 test 或更后阶段，但 prototype.box 为空；进入测试阶段前需完成盒子原则")
+            if not _nonempty("prototype.plan"):
+                warn("meta.phase 已是 test 或更后阶段，但 prototype.plan 为空；进入测试阶段前需完成原型规划")
+
+        # 进入 reflect 阶段：需要至少做过一轮测试（testplan 或 ab）
+        if pi >= 5:
+            has_testplan = _nonempty("tables.testplan")
+            has_ab = _nonempty("test.ab")
+            if not has_testplan and not has_ab:
+                warn("meta.phase 已是 reflect，但 tables.testplan 和 test.ab 均为空；进入反思阶段前需至少完成一轮测试")
+
     def ids(path, arr):
         if not isinstance(arr, list):
             err(f"{path} 应为数组"); return
@@ -205,6 +265,9 @@ def check(d):
         for k in "SCAMPER":
             ids(f"ideate.scamper.{k}", sc.get(k) or [])
     mx = ide.get("matrix")
+    if mx and isinstance(mx, list):
+        warn("ideate.matrix 应为对象（含 mode 和 items），当前是数组（旧格式），请按新结构迁移")
+        mx = None
     if mx:
         if mx.get("mode") not in (None, "value", "urgency"):
             err(f"ideate.matrix.mode 只能是 value / urgency")
