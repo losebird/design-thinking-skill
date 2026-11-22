@@ -48,7 +48,7 @@ const PH=[
  {k:'reflect',n:'反思',en:'Reflect',c:'var(--pink)',d:'每个小循环后回溯、改进'}];
 const has=(o)=>{if(o==null)return false;if(Array.isArray(o))return o.length>0;if(typeof o==='object')return Object.keys(o).some(k=>k!=='id'&&has(o[k]));return String(o).trim()!==''&&o!==false&&o!==0};
 const B=k=>s=>{const b=s.boards&&s.boards[k];return b&&has(b.cards);};
-const T=k=>s=>{const tb=s.tables&&s.tables[k];return tb&&has(tb.rows||tb.questions||tb.items);};
+const T=k=>s=>{const tb=s.tables&&s.tables[k];return !!tb&&(has(tb.rows)||has(tb.questions)||has(tb.items));};
 const R=k=>s=>{const r=s.radials&&s.radials[k];return r&&has(r.items||r.petals);};
 const TOOLS=[
  ['empathize','AEIOU 观察','按活动/环境/互动/物体/用户结构化记录观察','进入现场观察前与观察中','board-aeiou.html',B('aeiou'),'boards.aeiou'],

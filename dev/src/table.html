@@ -21,7 +21,7 @@ table.t{border-collapse:collapse;width:100%;font-size:14px}
 (function(){
 const {h,esc,save,ed}=DT;
 const TINT={blue:['var(--blue-s)','var(--blue)'],green:['var(--green-s)','var(--green)'],orange:['var(--orange-s)','var(--orange)'],red:['var(--red-s)','var(--red)'],purple:['var(--purple-s)','var(--purple)'],gray:['var(--surface)','var(--muted)'],yellow:['var(--yellow-s)','var(--yellow)']};
-const T=()=>{const t=DT.get(DT.target||'tables.table',{});t.columns=t.columns||[{key:'a',label:'列 1'}];t.rows=t.rows||[];return t};
+const T=()=>{const t=DT.get(DT.target||'tables.table',{});t.columns=t.columns||[{key:'a',label:'列 1'}];if(!(t.rows&&t.rows.length)){const alt=t.questions||t.items;if(Array.isArray(alt)&&alt.length){t.rows=alt;delete t.questions;delete t.items}}t.rows=t.rows||[];t.rows.forEach(r=>{if(r&&!r.id)r.id=DT.nid('r')});return t};
 function render(){const app=document.getElementById('app');app.innerHTML='';const t=T();
  if(t.intro)app.appendChild(h('p',{class:'intro'},esc(t.intro)));
  const tw=h('div',{class:'tw'});const tb=h('table',{class:'t'});

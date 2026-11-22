@@ -162,8 +162,23 @@ const DT=(function(){
   b('导出 JSON','',()=>dl((st.meta.project||'project')+'.json',JSON.stringify(out(),null,2),'application/json'));
   b('导入','',openImport,'粘贴 JSON 数据替换当前页面');
   b('重置','',()=>{if(!confirm('清除本项目所有页面的本地修改，恢复 agent 生成的初始数据？'))return;try{localStorage.removeItem(KEY)}catch(e){}st=strip(init);st.meta=st.meta||{};rerender();toast('已恢复初始数据')},'清除本地修改')}
- function openImport(){const m=$('dt-modal');m.classList.add('open');const ta=$('dt-imp');ta.value='';ta.focus()}
- function doImport(){let t=$('dt-imp').value.trim().replace(/^```(json)?/,'').replace(/```$/,'').trim();try{const o=JSON.parse(t);st=strip(o);st.meta=st.meta||{};save();$('dt-modal').classList.remove('open');rerender();toast('已导入')}catch(e){toast('JSON 格式不正确')}}
+ const TOPS=['meta','personas','personaSteps','empathyMap','journey','hook','define','ideate','prototype','test','boards','tables','radials','storyboard','valueCanvas','researchPlan','deskResearch'];
+ const isObj=o=>o!==null&&typeof o==='object'&&!Array.isArray(o);
+ function deep(a,b){if(!isObj(a)||!isObj(b))return clone(b);const r=Object.assign({},a);for(const k in b)r[k]=deep(a[k],b[k]);return r}
+ function setPath(path,val){const ks=path.split('.');let o=st;for(let i=0;i<ks.length-1;i++){if(!isObj(o[ks[i]]))o[ks[i]]={};o=o[ks[i]]}const k=ks[ks.length-1];o[k]=isObj(o[k])&&isObj(val)?deep(o[k],val):clone(val)}
+ const myPaths=()=>PATH()==='全部'?[]:PATH().split(/\s*,\s*/).filter(Boolean);
+ function openImport(){const m=$('dt-modal');m.classList.add('open');const ps=myPaths();$('dt-imp-h').textContent='可粘贴：① 完整项目 JSON（含 meta，会替换全部数据）；② 数据片段'+(ps.length?'——只合并到本页负责的路径 '+ps.join('、')+'，其他数据不受影响':'，如 {"deskResearch":{…}}，按顶层字段合并')+'。可带 ```json 代码块。';const ta=$('dt-imp');ta.value='';ta.focus()}
+ // 合并规则：含 meta → 整体替换（需确认）；顶层字段片段 → 深度合并；否则写入本页路径（对象深度合并、数组整体替换）
+ function importData(o){const ps=myPaths();
+  if(isObj(o)&&o.meta){if(!confirm('这是一份完整项目数据（含 meta），将替换当前项目的全部内容。继续？'))return null;st=strip(o);st.meta=st.meta||{};return '已导入完整项目'}
+  const keys=isObj(o)?Object.keys(o):[];
+  if(keys.length&&keys.every(k=>TOPS.indexOf(k)>=0)){st=deep(st,o);return '已合并：'+keys.join('、')}
+  if(!ps.length)throw new Error('片段需以顶层字段包裹，如 {"deskResearch":{…}}');
+  const last=ps.map(p=>p.split('.').pop());
+  if(keys.length&&keys.every(k=>last.indexOf(k)>=0)){keys.forEach(k=>setPath(ps[last.indexOf(k)],o[k]));return '已合并到 '+keys.map(k=>ps[last.indexOf(k)]).join('、')}
+  setPath(ps[0],o);return '已合并到 '+ps[0]}
+ function doImport(){let t=$('dt-imp').value.trim().replace(/^```(json)?/,'').replace(/```$/,'').trim();let o;try{o=JSON.parse(t)}catch(e){toast('JSON 格式不正确');return}
+  try{const msg=importData(o);if(!msg)return;save();$('dt-modal').classList.remove('open');rerender();toast(msg)}catch(e){toast(e.message)}}
  function rerender(){header();opts.render&&opts.render()}
  function evBtn(obj){const EV=['quote','observed','inferred','assumed'],L={quote:'原话',observed:'观察',inferred:'推断',assumed:'假设'};obj.evidence=obj.evidence||'assumed';
   const b=h('button',{class:'ev '+obj.evidence,title:'切换证据类型'},L[obj.evidence]);b.onclick=e=>{e.stopPropagation();obj.evidence=EV[(EV.indexOf(obj.evidence)+1)%4];b.className='ev '+obj.evidence;b.textContent=L[obj.evidence];save()};return b}
@@ -190,12 +205,12 @@ const DT=(function(){
     // 更新项目名
     setTimeout(()=>{const el=document.getElementById('dt-nav-proj');if(el)el.textContent=st.meta&&st.meta.name||st.meta&&st.meta.project||'';},50);
   }
-  document.body.insertAdjacentHTML('beforeend','<div class="toast" id="dt-toast" role="status" aria-live="polite"></div><div class="modal" id="dt-modal" role="dialog" aria-label="导入 JSON"><div class="panel"><b>导入 JSON</b><p class="hint">粘贴 agent 给你的项目 JSON（可带 ```json 代码块）。将替换本页当前数据。</p><textarea id="dt-imp"></textarea><div class="tools" style="justify-content:flex-end;margin-top:12px"><button id="dt-imp-c">取消</button><button class="primary" id="dt-imp-ok">导入</button></div></div></div>');
+  document.body.insertAdjacentHTML('beforeend','<div class="toast" id="dt-toast" role="status" aria-live="polite"></div><div class="modal" id="dt-modal" role="dialog" aria-label="导入 JSON"><div class="panel"><b>导入 JSON</b><p class="hint" id="dt-imp-h"></p><textarea id="dt-imp"></textarea><div class="tools" style="justify-content:flex-end;margin-top:12px"><button id="dt-imp-c">取消</button><button class="primary" id="dt-imp-ok">导入</button></div></div></div>');
   $('dt-imp-c').onclick=()=>$('dt-modal').classList.remove('open');$('dt-imp-ok').onclick=doImport;
   document.addEventListener('keydown',e=>{if(e.key==='Escape')$('dt-modal').classList.remove('open')});
   window.addEventListener('storage',e=>{if(e.key!==KEY||!e.newValue)return;try{const o=JSON.parse(e.newValue);if(o.__base===HS){st=o.st;st.meta=st.meta||{};rerender()}}catch(_){}});
   rerender();if(fresh)setTimeout(()=>toast('已载入 agent 生成的新版本数据（旧的本地修改已备份）'),300);if(older)setTimeout(()=>toast('本页数据比其他已打开的页面旧，修改只保存在本页'),300)}
- return {get st(){return st},get,save,toast,esc,ed,h,nid,dl,copy,boot,rerender,evBtn,list,aiPanel,ctx,srcPick,target:init._target||''};
+ return {get st(){return st},get,save,toast,esc,ed,h,nid,dl,copy,boot,rerender,evBtn,list,openImport,importData,aiPanel,ctx,srcPick,target:init._target||''};
 })();
 
 (function(){
@@ -233,7 +248,7 @@ function render(){const app=document.getElementById('app');app.innerHTML='';cons
   col.addEventListener('drop',e=>{e.preventDefault();col.classList.remove('over');const s=arr.find(x=>x.id===drag);if(s){s[mode]=k;save();render()}drag=null});bd.appendChild(col)});
  app.appendChild(bd);
  app.appendChild(DT.aiPanel([{label:'让 AI 填充',kind:'fill',build:fillPrompt},{label:'质量审查',kind:'review',build:reviewPrompt}]))}
-function fillPrompt(){const q=DT.get('deskResearch.query')||{};return `你是桌面研究分析师。请围绕以下研究子问题检索公开资料，整理成来源清单。\n${DT.ctx()}\n核心问题：${q.question||''}\n子问题：\n${(q.subQuestions||[]).map((s,i)=>(i+1)+'. '+s.text).join('\n')||'（未拆解，请先用「研究问题拆解」）'}\n\n要求：\n1. 每个子问题 2–3 条来源，优先官方统计、行业报告、上市公司财报、同行评审论文，其次权威媒体，社区 / UGC 只作旁证。\n2. 只收录你真实检索到、可访问的 URL；无法联网时 url 留空、summary 写“待检索：建议搜索 …”，绝不编造链接、机构或数字。\n3. summary 1–2 句，写清它给出的关键事实 / 数据及口径（时间、样本、地区）。\n4. credibility 1–5（权威性、时效、方法透明、利益立场），relevance 1–5（对子问题的回答程度）。\n5. type 取 report/gov/academic/news/company/ugc；status 默认 inbox；date 写发布时间；tags 写对应子问题关键词。\n6. id 依次为 S1、S2…，与已有来源不重复。\n\n只输出 JSON 数组，追加到 deskResearch.sources：\n[{"id":"S1","url":"","title":"","summary":"","credibility":3,"relevance":3,"tags":[],"type":"report","status":"inbox","date":""}]\n\n已有来源：\n${JSON.stringify(S(),null,1)}`}
+function fillPrompt(){const q=DT.get('deskResearch.query')||{};return `你是桌面研究分析师。请围绕以下研究子问题检索公开资料，整理成来源清单。\n${DT.ctx()}\n核心问题：${q.question||''}\n子问题：\n${(q.subQuestions||[]).map((s,i)=>(i+1)+'. '+s.text).join('\n')||'（未拆解，请先用「研究问题拆解」）'}\n\n要求：\n1. 每个子问题 2–3 条来源，优先官方统计、行业报告、上市公司财报、同行评审论文，其次权威媒体，社区 / UGC 只作旁证。\n2. 只收录你真实检索到、可访问的 URL；无法联网时 url 留空、summary 写“待检索：建议搜索 …”，绝不编造链接、机构或数字。\n3. summary 1–2 句，写清它给出的关键事实 / 数据及口径（时间、样本、地区）。\n4. credibility 1–5（权威性、时效、方法透明、利益立场），relevance 1–5（对子问题的回答程度）。\n5. type 取 report/gov/academic/news/company/ugc；status 默认 inbox；date 写发布时间；tags 写对应子问题关键词。\n6. id 依次为 S1、S2…，与已有来源不重复。\n\n只输出 JSON 数组（保留下方已有来源，在末尾追加新来源），作为 deskResearch.sources 的完整内容：\n[{"id":"S1","url":"","title":"","summary":"","credibility":3,"relevance":3,"tags":[],"type":"report","status":"inbox","date":""}]\n\n已有来源：\n${JSON.stringify(S(),null,1)}`}
 function reviewPrompt(){return `请用 CRAAP 框架（Currency 时效 / Relevance 相关 / Authority 权威 / Accuracy 准确 / Purpose 立场）逐条审查以下来源：\n${DT.ctx()}\n\n对每条来源输出：id、问题、建议的 credibility / relevance、建议 status（keep/maybe/drop）。并特别检查：\n- URL 是否可能失效或无法核实？标题与机构是否对得上？（疑似编造的直接标出）\n- 是否超过 3 年、口径（地区 / 样本 / 时间）与研究问题不符？\n- 是否是厂商软文、营销稿、二次转载而非原始出处？请给出原始出处的查找建议。\n- 是否过度依赖单一来源或单一类型？哪些子问题还缺少高可信来源？\n- 摘要是否夸大或曲解了原文结论？\n\n最后给出修改后的 deskResearch.sources JSON。\n\n${JSON.stringify(S(),null,1)}`}
 function md(){const L=['# 来源管理板','','| ID | 标题 | 类型 | 状态 | 可信度 | 相关性 | 摘要 | 链接 |','|---|---|---|---|---|---|---|---|'];const Ss=Object.fromEntries(STATUS.map(x=>[x[0],x[1]]));
  S().forEach(s=>L.push('| '+[s.id,s.title,(TYPE.find(t=>t[0]===s.type)||[,''])[1],Ss[s.status||'inbox'],s.credibility,s.relevance,s.summary,s.url].map(x=>String(x==null?'':x).replace(/\|/g,'\\|').replace(/\n/g,' ')).join(' | ')+' |'));return L.join('\n')}

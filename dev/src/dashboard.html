@@ -7,7 +7,7 @@
 .db-hero-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
 
 /* 进度条 */
-.db-progress{margin:12px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.db-progress{margin:12px 0 0;display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
 .db-ph{border-radius:8px;padding:8px 10px;border:2px solid transparent;cursor:default;background:var(--soft)}
 .db-ph.cur{border-color:var(--c);background:var(--bg);box-shadow:0 0 0 1px var(--c)}
 .db-ph-name{font-size:12.5px;font-weight:650;color:var(--c)}
@@ -76,7 +76,7 @@
 
 @media(max-width:720px){
   .db-hero{grid-template-columns:1fr}.db-hero-actions{align-items:flex-start}
-  .db-stats{grid-template-columns:1fr 1fr}.db-progress{grid-template-columns:1fr 1fr}
+  .db-stats{grid-template-columns:1fr 1fr}.db-progress{grid-template-columns:repeat(3,1fr)}
   .db-next-item{grid-template-columns:28px 1fr;gap:6px}.db-next-actions{grid-column:1/-1}
 }
 </style>
@@ -90,11 +90,14 @@ const PH=[
  {k:'ideate',   n:'构思',en:'Ideate',   c:'var(--orange)'},
  {k:'prototype',n:'原型',en:'Prototype',c:'var(--green)'},
  {k:'test',     n:'测试',en:'Test',     c:'var(--teal)'},
+ {k:'reflect',  n:'反思',en:'Reflect',  c:'var(--pink)'},
 ];
 
 const has=o=>{if(o==null)return false;if(Array.isArray(o))return o.length>0;if(typeof o==='object')return Object.keys(o).some(k=>k!=='id'&&has(o[k]));return String(o).trim()!==''&&o!==false&&o!==0};
-const B=k=>s=>{const b=(s.boards||{})[k];return b&&has(b.cards);};
-const T=k=>s=>{const tb=(s.tables||{})[k];return tb&&has(tb.rows||tb.questions||tb.items);};
+const MVPF=['vision','users','hypothesis','hypo','features','form','metrics','success','next'];
+const B=k=>s=>{const b=(s.boards||{})[k];return !!b&&(has(b.cards)||(k==='mvp'&&MVPF.some(f=>typeof b[f]!=='object'||Array.isArray(b[f])?has(b[f]):false)));};
+const rowsOf=tb=>{if(!tb)return [];for(const k of ['rows','questions','items'])if(Array.isArray(tb[k])&&tb[k].length)return tb[k];return []};
+const T=k=>s=>{const tb=(s.tables||{})[k];return !!tb&&(has(tb.rows)||has(tb.questions)||has(tb.items));};
 const R=k=>s=>{const r=(s.radials||{})[k];return r&&has(r.items||r.petals);};
 
 // 工具定义：[阶段, 中文名, 文件, 有数据?, 重要(1核心/2补充), 预览函数]
@@ -110,17 +113,17 @@ const TOOLS=[
  ['empathize','AEIOU 观察','board-aeiou.html',B('aeiou'),2,
   s=>{const b=s.boards&&s.boards.aeiou;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'}],
  ['empathize','访谈提纲','table-interview.html',T('interview'),2,
-  s=>{const r=(s.tables&&s.tables.interview&&(s.tables.interview.rows||s.tables.interview.questions))||[];return r.length?`${r.length} 条问题`:'未填写'}],
+  s=>{const r=rowsOf(s.tables&&s.tables.interview);return r.length?`${r.length} 条问题`:'未填写'}],
  ['empathize','AEIOU 问卷','table-survey.html',T('survey'),2,
-  s=>{const r=(s.tables&&s.tables.survey&&(s.tables.survey.questions||s.tables.survey.rows))||[];return r.length?`${r.length} 题`:'未填写'}],
+  s=>{const r=rowsOf(s.tables&&s.tables.survey);return r.length?`${r.length} 题`:'未填写'}],
  ['empathize','利益相关者地图','radial-stakeholders.html',R('stakeholders'),2,
   s=>{const r=s.radials&&s.radials.stakeholders;const p=(r&&(r.petals||r.items))||[];return p.length?p.map(x=>esc(x.label||x.text||'')).filter(Boolean).join('、').slice(0,50):'未填写'}],
  ['empathize','极端 / 未来用户','table-extremes.html',T('extremes'),2,
-  s=>{const r=(s.tables&&s.tables.extremes&&(s.tables.extremes.rows||s.tables.extremes.questions))||[];return r.length?`${r.length} 位极端用户`:'未填写'}],
+  s=>{const r=rowsOf(s.tables&&s.tables.extremes);return r.length?`${r.length} 位极端用户`:'未填写'}],
  ['empathize','故事板 Storyboard','storyboard.html',s=>has(s.storyboard&&s.storyboard.frames),2,
   s=>{const fr=(s.storyboard&&s.storyboard.frames)||[];return fr.length?`${fr.length} 格：${esc((fr[0]&&fr[0].title)||'')}→${esc((fr[fr.length-1]&&fr[fr.length-1].title)||'')}`:'未填写'}],
  ['empathize','竞品分析','table-competitors.html',T('competitors'),2,
-  s=>{const r=(s.tables&&s.tables.competitors&&(s.tables.competitors.rows||s.tables.competitors.questions))||[];return r.length?`${r.length} 个竞品`:'未填写'}],
+  s=>{const r=rowsOf(s.tables&&s.tables.competitors);return r.length?`${r.length} 个竞品`:'未填写'}],
  ['empathize','研究问题拆解','research-query.html',s=>has(s.deskResearch&&s.deskResearch.query&&s.deskResearch.query.question),2,
   s=>{const q=s.deskResearch&&s.deskResearch.query;if(!q||!q.question)return '未填写';return `<b>${esc(q.question).slice(0,36)}</b> · ${(q.subQuestions||[]).length} 个子问题`},'deskResearch.query'],
  ['empathize','来源管理板','source-board.html',s=>has(s.deskResearch&&s.deskResearch.sources),2,
@@ -138,7 +141,7 @@ const TOOLS=[
  ['define','雏菊图','radial-daisy.html',  R('daisy'),2,
   s=>{const r=s.radials&&s.radials.daisy;const p=(r&&(r.petals||r.items))||[];return p.length?`${p.length} 个花瓣`:'未填写'}],
  ['define','关键假设清单','table-assumptions.html',T('assumptions'),2,
-  s=>{const r=(s.tables&&s.tables.assumptions&&(s.tables.assumptions.rows||s.tables.assumptions.questions))||[];return r.length?`${r.length} 条假设`:'未填写'}],
+  s=>{const r=rowsOf(s.tables&&s.tables.assumptions);return r.length?`${r.length} 条假设`:'未填写'}],
  ['define','综合矩阵','synthesis.html',s=>{const y=s.deskResearch&&s.deskResearch.synthesis;return !!y&&has([].concat(y.consensus||[],y.divergence||[],y.uncertain||[]))},2,
   s=>{const y=s.deskResearch&&s.deskResearch.synthesis;if(!y)return '未填写';return `共识 ${(y.consensus||[]).length} · 分歧 ${(y.divergence||[]).length} · 不确定 ${(y.uncertain||[]).length}`},'deskResearch.synthesis'],
  ['define','研究空白','gap-analysis.html',s=>{const g=s.deskResearch&&s.deskResearch.gaps;return !!g&&has([].concat(g.known||[],g.unknown||[],g.toVerify||[]))},2,
@@ -154,11 +157,11 @@ const TOOLS=[
  ['ideate','头脑风暴墙','board-brainstorm.html',B('brainstorm'),2,
   s=>{const b=s.boards&&s.boards.brainstorm;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'}],
  ['ideate','问题反转','table-reversal.html',T('reversal'),2,
-  s=>{const r=(s.tables&&s.tables.reversal&&(s.tables.reversal.rows||s.tables.reversal.questions))||[];return r.length?`${r.length} 条反转`:'未填写'}],
+  s=>{const r=rowsOf(s.tables&&s.tables.reversal);return r.length?`${r.length} 条反转`:'未填写'}],
  ['ideate','跨行业对标','table-analogy.html',T('analogy'),2,
-  s=>{const r=(s.tables&&s.tables.analogy&&(s.tables.analogy.rows||s.tables.analogy.questions))||[];return r.length?`${r.length} 个对标`:'未填写'}],
+  s=>{const r=rowsOf(s.tables&&s.tables.analogy);return r.length?`${r.length} 个对标`:'未填写'}],
  ['ideate','点子沟通表','table-ideas.html',T('ideas'),2,
-  s=>{const r=(s.tables&&s.tables.ideas&&(s.tables.ideas.rows||s.tables.ideas.questions))||[];return r.length?`${r.length} 个点子`:'未填写'}],
+  s=>{const r=rowsOf(s.tables&&s.tables.ideas);return r.length?`${r.length} 个点子`:'未填写'}],
  ['prototype','盒子原则 + 保真度','box.html',s=>has(s.prototype),1,
   s=>{const pt=s.prototype;if(!pt)return '未填写';const bx=pt.box||pt;const name=bx.name||bx.solution||'';const slogan=bx.slogan||'';return name?`<b>${esc(name)}</b>${slogan?' · '+esc(slogan.slice(0,30)):''}`:slogan?esc(slogan.slice(0,50)):'已填写'}],
  ['prototype','架子原则','board-shelf.html',B('shelf'),2,
@@ -166,19 +169,19 @@ const TOOLS=[
  ['prototype','原型工作坊','board-workshop.html',B('workshop'),2,
   s=>{const b=s.boards&&s.boards.workshop;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'}],
  ['prototype','MVP 画布','board-mvp.html',  B('mvp'),1,
-  s=>{const b=s.boards&&s.boards.mvp;return b&&b.hypothesis?`<b>假设：</b>${esc(b.hypothesis).slice(0,50)}…`:'未填写'}],
+  s=>{const b=s.boards&&s.boards.mvp;if(!b)return '未填写';const hy=((b.cards&&b.cards.hypo)||[]).map(x=>x.text).filter(Boolean)[0]||b.hypothesis||'';return hy?`<b>假设：</b>${esc(hy).slice(0,50)}…`:(has(b.cards)?'已填写':'未填写')}],
  ['prototype','服务蓝图','table-blueprint.html',T('blueprint'),2,
-  s=>{const r=(s.tables&&s.tables.blueprint&&(s.tables.blueprint.rows||s.tables.blueprint.questions))||[];return r.length?`${r.length} 个触点`:'未填写'}],
+  s=>{const r=rowsOf(s.tables&&s.tables.blueprint);return r.length?`${r.length} 个触点`:'未填写'}],
  ['test','用户研究计划','research-plan.html',s=>has(s.researchPlan&&s.researchPlan.hypotheses),1,
   s=>{const rp=s.researchPlan;if(!rp)return '未填写';const h=(rp.hypotheses||[]).filter(x=>x.selected).length,q=(rp.script&&((rp.script.warmup||[]).concat(rp.script.main||[]).concat(rp.script.wrap||[]))||[]).length;return `${h} 条假设 · ${q} 题提纲`}],
  ['test','A/B 测试','ab-test.html',         s=>has(s.test&&s.test.ab&&s.test.ab.a),1,
   s=>{const ab=s.test&&s.test.ab;if(!ab||!ab.a)return '未填写';return ab.a.n?`A: ${ab.a.n} 人 · B: ${(ab.b&&ab.b.n)||0} 人`:'已建立但无数据'}],
  ['test','测试计划','table-testplan.html',  T('testplan'),2,
-  s=>{const r=(s.tables&&s.tables.testplan&&(s.tables.testplan.rows||s.tables.testplan.questions))||[];return r.length?`${r.length} 个测试场景`:'未填写'}],
+  s=>{const r=rowsOf(s.tables&&s.tables.testplan);return r.length?`${r.length} 个测试场景`:'未填写'}],
  ['test','反馈收集表','board-feedback.html',B('feedback'),2,
   s=>{const b=s.boards&&s.boards.feedback;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 条反馈`:'未填写'}],
  ['test','试验表','table-experiments.html',T('experiments'),2,
-  s=>{const r=(s.tables&&s.tables.experiments&&(s.tables.experiments.rows||s.tables.experiments.questions))||[];return r.length?`${r.length} 条试验`:'未填写'}],
+  s=>{const r=rowsOf(s.tables&&s.tables.experiments);return r.length?`${r.length} 条试验`:'未填写'}],
  ['reflect','回溯板','board-retro.html',    B('retro'),2,
   s=>{const b=s.boards&&s.boards.retro;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 条复盘`:'未填写'}],
 ];
@@ -230,7 +233,7 @@ function render(){
   const hero=h('div',{class:'db-hero'});
   const hl=h('div');
   const pname=s.meta&&(s.meta.name||s.meta.project)||'未命名项目';
-  hl.appendChild(h('div',{class:'db-hero-title'},pname+'<small>'+(s.meta&&s.meta.challenge||'点击「编辑」填写设计挑战')+'</small>'));
+  hl.appendChild(h('div',{class:'db-hero-title'},esc(pname)+'<small>'+esc(s.meta&&s.meta.challenge||'点击「编辑」填写设计挑战')+'</small>'));
   // 进度条
   const prog=h('div',{class:'db-progress'});
   PH.forEach(p=>{
@@ -246,7 +249,7 @@ function render(){
   editBtn.onclick=()=>window.open('overview.html','_self');
   hr.appendChild(editBtn);
   const impBtn=h('button',{},'导入 JSON');
-  impBtn.onclick=()=>document.getElementById('dt-modal').classList.add('open');
+  impBtn.onclick=()=>DT.openImport();
   hr.appendChild(impBtn);
   hero.appendChild(hr);
   app.appendChild(hero);
@@ -350,7 +353,7 @@ function render(){
         save();render();
       };
       row.appendChild(cb);
-      row.appendChild(h('span',{style:'flex:1'},item.t));
+      row.appendChild(h('span',{style:'flex:1'},esc(item.t)));
       row.appendChild(h('span',{class:'db-verify-src'},item.src));
       vbox.appendChild(row);
     });
@@ -370,7 +373,7 @@ function render(){
   aibody.appendChild(promptPre);
   const pa=h('div',{class:'db-prompt-actions'});
   const cpAll=h('button',{class:'primary'},'复制');cpAll.onclick=()=>{const t=document.getElementById('db-ai-prompt').textContent;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>DT.toast('已复制'))};
-  const impAll=h('button',{},'导入 AI 返回的 JSON');impAll.onclick=()=>document.getElementById('dt-modal').classList.add('open');
+  const impAll=h('button',{},'导入 AI 返回的 JSON');impAll.onclick=()=>DT.openImport();
   pa.append(cpAll,impAll);
   aibody.appendChild(pa);
   aip.appendChild(aibody);

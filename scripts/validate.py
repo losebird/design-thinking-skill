@@ -249,6 +249,9 @@ def check(d):
         if not cols:
             err(f"boards.{key} 不是预设，必须自带 columns"); continue
         keys = {c["key"] for c in cols}
+        loose = [k for k in b if k in keys | {"hypothesis"} and not isinstance(b[k], dict)]
+        if loose:
+            warn(f"boards.{key} 把内容写在了 {', '.join(loose)} 字段：渲染时会转成 cards，建议直接写 cards.<列>")
         for ck, arr in (b.get("cards") or {}).items():
             if ck not in keys:
                 err(f"boards.{key}.cards 中的列 {ck!r} 不在列定义中（可用：{', '.join(sorted(keys))}）")
@@ -258,6 +261,8 @@ def check(d):
         if not cols:
             err(f"tables.{key} 不是预设，必须自带 columns"); continue
         keys = {c["key"] for c in cols}
+        if not t.get("rows") and (t.get("questions") or t.get("items")):
+            warn(f"tables.{key} 用了 {'questions' if t.get('questions') else 'items'} 字段：渲染时会自动转成 rows，建议直接写 rows")
         ids(f"tables.{key}.rows", t.get("rows") or [])
         for i, r in enumerate(t.get("rows") or []):
             extra = [k for k in r if k != "id" and k not in keys]

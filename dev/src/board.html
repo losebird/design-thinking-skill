@@ -38,7 +38,7 @@
 const {h,esc,save,ed}=DT;
 const COL={blue:'var(--blue)',green:'var(--green)',orange:'var(--orange)',red:'var(--red)',purple:'var(--purple)',yellow:'var(--yellow)',teal:'var(--teal)',pink:'var(--pink)',gray:'var(--muted)'};
 const BG={blue:'var(--blue-s)',green:'var(--green-s)',orange:'var(--orange-s)',red:'var(--red-s)',purple:'var(--purple-s)',yellow:'var(--yellow-s)',teal:'var(--teal-s)',pink:'var(--pink-s)',gray:'var(--soft)'};
-const B=()=>{const b=DT.get(DT.target||'boards.board',{});b.columns=b.columns||[{key:'a',title:'第一列'},{key:'b',title:'第二列'}];b.cards=b.cards||{};b.columns.forEach(c=>b.cards[c.key]=b.cards[c.key]||[]);return b};
+const B=()=>{const b=DT.get(DT.target||'boards.board',{});b.columns=b.columns||[{key:'a',title:'第一列'},{key:'b',title:'第二列'}];b.cards=b.cards||{};const AL={hypo:['hypothesis']};b.columns.forEach(c=>{b.cards[c.key]=b.cards[c.key]||[];if(!b.cards[c.key].length){[c.key].concat(AL[c.key]||[]).forEach(f=>{const v=b[f];if(v==null||typeof v==='object'&&!Array.isArray(v))return;(Array.isArray(v)?v:[v]).forEach(x=>{const t=typeof x==='string'?x:(x&&x.text)||'';if(t)b.cards[c.key].push({id:DT.nid(c.key.slice(0,2)),text:t})});delete b[f]})}});return b};
 let tmr=null,left=null,drag=null;
 function myUsed(b){return Object.values(b.myVotes||{}).reduce((a,n)=>a+n,0)}
 function render(){const app=document.getElementById('app');app.innerHTML='';const b=B();

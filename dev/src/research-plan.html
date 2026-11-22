@@ -185,7 +185,7 @@ function render(){
     row.appendChild(cb);
     row.appendChild(ed(h('div',{style:'flex:1'}),hyp,'text','假设：用户……（可证伪的陈述）'));
     // 来源
-    if(hyp.source) row.appendChild(h('span',{style:'font-size:12px;color:var(--muted);white-space:nowrap'},hyp.source));
+    if(hyp.source) row.appendChild(h('span',{style:'font-size:12px;color:var(--muted);white-space:nowrap'},esc(hyp.source||'')));
     // 风险
     const rs=h('div',{class:'risk-sel '+RISK_C[hyp.risk||'M']});
     ['H','M','L'].forEach(lv=>{

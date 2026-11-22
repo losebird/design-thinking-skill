@@ -60,14 +60,46 @@ def merge(base, over):
     return copy.deepcopy(over)
 
 
+MVP_ALIAS = {"hypo": ["hypothesis"]}
+
+
+def normalize(d):
+    """兼容旧写法，让所有页面读到同一结构：
+    tables.*.questions / items → rows；boards.* 中与列同名的画布字段（如 mvp 的 hypothesis）→ cards。"""
+    for t in (d.get("tables") or {}).values():
+        if isinstance(t, dict) and not t.get("rows"):
+            for alt in ("questions", "items"):
+                if isinstance(t.get(alt), list) and t[alt]:
+                    t["rows"] = t.pop(alt); break
+        for i, r in enumerate((t or {}).get("rows") or []):
+            if isinstance(r, dict) and not r.get("id"):
+                r["id"] = f"r{i + 1}"
+    for b in (d.get("boards") or {}).values():
+        if not isinstance(b, dict) or not b.get("columns"):
+            continue
+        cards = b.setdefault("cards", {})
+        for c in b["columns"]:
+            k = c["key"]
+            if cards.get(k):
+                continue
+            for f in [k] + MVP_ALIAS.get(k, []):
+                v = b.get(f)
+                if v is None or isinstance(v, dict):
+                    continue
+                items = [x if isinstance(x, str) else (x or {}).get("text", "") for x in (v if isinstance(v, list) else [v])]
+                cards[k] = [{"id": f"{k[:2]}{i + 1}", "text": t} for i, t in enumerate(items) if t]
+                b.pop(f); break
+    return d
+
+
 def with_presets(data):
-    """为 boards/tables/radials 中与预设同名的项补全默认结构。"""
+    """为 boards/tables/radials 中与预设同名的项补全默认结构，并统一旧写法。"""
     pre, d = load_presets(), copy.deepcopy(data)
     for group in GENERIC:
         for key, val in (d.get(group) or {}).items():
             if key in pre[group] and isinstance(val, dict):
                 d[group][key] = merge(pre[group][key], val)
-    return d
+    return normalize(d)
 
 
 def tpl_path(name):

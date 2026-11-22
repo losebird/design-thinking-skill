@@ -150,8 +150,23 @@ const DT=(function(){
   b('导出 JSON','',()=>dl((st.meta.project||'project')+'.json',JSON.stringify(out(),null,2),'application/json'));
   b('导入','',openImport,'粘贴 JSON 数据替换当前页面');
   b('重置','',()=>{if(!confirm('清除本项目所有页面的本地修改，恢复 agent 生成的初始数据？'))return;try{localStorage.removeItem(KEY)}catch(e){}st=strip(init);st.meta=st.meta||{};rerender();toast('已恢复初始数据')},'清除本地修改')}
- function openImport(){const m=$('dt-modal');m.classList.add('open');const ta=$('dt-imp');ta.value='';ta.focus()}
- function doImport(){let t=$('dt-imp').value.trim().replace(/^```(json)?/,'').replace(/```$/,'').trim();try{const o=JSON.parse(t);st=strip(o);st.meta=st.meta||{};save();$('dt-modal').classList.remove('open');rerender();toast('已导入')}catch(e){toast('JSON 格式不正确')}}
+ const TOPS=['meta','personas','personaSteps','empathyMap','journey','hook','define','ideate','prototype','test','boards','tables','radials','storyboard','valueCanvas','researchPlan','deskResearch'];
+ const isObj=o=>o!==null&&typeof o==='object'&&!Array.isArray(o);
+ function deep(a,b){if(!isObj(a)||!isObj(b))return clone(b);const r=Object.assign({},a);for(const k in b)r[k]=deep(a[k],b[k]);return r}
+ function setPath(path,val){const ks=path.split('.');let o=st;for(let i=0;i<ks.length-1;i++){if(!isObj(o[ks[i]]))o[ks[i]]={};o=o[ks[i]]}const k=ks[ks.length-1];o[k]=isObj(o[k])&&isObj(val)?deep(o[k],val):clone(val)}
+ const myPaths=()=>PATH()==='全部'?[]:PATH().split(/\s*,\s*/).filter(Boolean);
+ function openImport(){const m=$('dt-modal');m.classList.add('open');const ps=myPaths();$('dt-imp-h').textContent='可粘贴：① 完整项目 JSON（含 meta，会替换全部数据）；② 数据片段'+(ps.length?'——只合并到本页负责的路径 '+ps.join('、')+'，其他数据不受影响':'，如 {"deskResearch":{…}}，按顶层字段合并')+'。可带 ```json 代码块。';const ta=$('dt-imp');ta.value='';ta.focus()}
+ // 合并规则：含 meta → 整体替换（需确认）；顶层字段片段 → 深度合并；否则写入本页路径（对象深度合并、数组整体替换）
+ function importData(o){const ps=myPaths();
+  if(isObj(o)&&o.meta){if(!confirm('这是一份完整项目数据（含 meta），将替换当前项目的全部内容。继续？'))return null;st=strip(o);st.meta=st.meta||{};return '已导入完整项目'}
+  const keys=isObj(o)?Object.keys(o):[];
+  if(keys.length&&keys.every(k=>TOPS.indexOf(k)>=0)){st=deep(st,o);return '已合并：'+keys.join('、')}
+  if(!ps.length)throw new Error('片段需以顶层字段包裹，如 {"deskResearch":{…}}');
+  const last=ps.map(p=>p.split('.').pop());
+  if(keys.length&&keys.every(k=>last.indexOf(k)>=0)){keys.forEach(k=>setPath(ps[last.indexOf(k)],o[k]));return '已合并到 '+keys.map(k=>ps[last.indexOf(k)]).join('、')}
+  setPath(ps[0],o);return '已合并到 '+ps[0]}
+ function doImport(){let t=$('dt-imp').value.trim().replace(/^```(json)?/,'').replace(/```$/,'').trim();let o;try{o=JSON.parse(t)}catch(e){toast('JSON 格式不正确');return}
+  try{const msg=importData(o);if(!msg)return;save();$('dt-modal').classList.remove('open');rerender();toast(msg)}catch(e){toast(e.message)}}
  function rerender(){header();opts.render&&opts.render()}
  function evBtn(obj){const EV=['quote','observed','inferred','assumed'],L={quote:'原话',observed:'观察',inferred:'推断',assumed:'假设'};obj.evidence=obj.evidence||'assumed';
   const b=h('button',{class:'ev '+obj.evidence,title:'切换证据类型'},L[obj.evidence]);b.onclick=e=>{e.stopPropagation();obj.evidence=EV[(EV.indexOf(obj.evidence)+1)%4];b.className='ev '+obj.evidence;b.textContent=L[obj.evidence];save()};return b}
@@ -178,12 +193,12 @@ const DT=(function(){
     // 更新项目名
     setTimeout(()=>{const el=document.getElementById('dt-nav-proj');if(el)el.textContent=st.meta&&st.meta.name||st.meta&&st.meta.project||'';},50);
   }
-  document.body.insertAdjacentHTML('beforeend','<div class="toast" id="dt-toast" role="status" aria-live="polite"></div><div class="modal" id="dt-modal" role="dialog" aria-label="导入 JSON"><div class="panel"><b>导入 JSON</b><p class="hint">粘贴 agent 给你的项目 JSON（可带 ```json 代码块）。将替换本页当前数据。</p><textarea id="dt-imp"></textarea><div class="tools" style="justify-content:flex-end;margin-top:12px"><button id="dt-imp-c">取消</button><button class="primary" id="dt-imp-ok">导入</button></div></div></div>');
+  document.body.insertAdjacentHTML('beforeend','<div class="toast" id="dt-toast" role="status" aria-live="polite"></div><div class="modal" id="dt-modal" role="dialog" aria-label="导入 JSON"><div class="panel"><b>导入 JSON</b><p class="hint" id="dt-imp-h"></p><textarea id="dt-imp"></textarea><div class="tools" style="justify-content:flex-end;margin-top:12px"><button id="dt-imp-c">取消</button><button class="primary" id="dt-imp-ok">导入</button></div></div></div>');
   $('dt-imp-c').onclick=()=>$('dt-modal').classList.remove('open');$('dt-imp-ok').onclick=doImport;
   document.addEventListener('keydown',e=>{if(e.key==='Escape')$('dt-modal').classList.remove('open')});
   window.addEventListener('storage',e=>{if(e.key!==KEY||!e.newValue)return;try{const o=JSON.parse(e.newValue);if(o.__base===HS){st=o.st;st.meta=st.meta||{};rerender()}}catch(_){}});
   rerender();if(fresh)setTimeout(()=>toast('已载入 agent 生成的新版本数据（旧的本地修改已备份）'),300);if(older)setTimeout(()=>toast('本页数据比其他已打开的页面旧，修改只保存在本页'),300)}
- return {get st(){return st},get,save,toast,esc,ed,h,nid,dl,copy,boot,rerender,evBtn,list,aiPanel,ctx,srcPick,target:init._target||''};
+ return {get st(){return st},get,save,toast,esc,ed,h,nid,dl,copy,boot,rerender,evBtn,list,openImport,importData,aiPanel,ctx,srcPick,target:init._target||''};
 })();
 
 (function(){
