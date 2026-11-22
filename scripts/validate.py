@@ -12,13 +12,13 @@ SOL = re.compile(r"(" + "|".join(re.escape(t) for t in SOL_TERMS) + r")")
 
 
 def sol_check(text, domain_terms=()):
-    """检查文本是否含方案词；domain_terms 为白名单（meta.domainTerms），命中则跳过。"""
-    m = SOL.search(text)
-    if not m:
-        return None
-    if m.group(1) in (domain_terms or []):
-        return None
-    return m.group(1)
+    """检查文本是否含方案词；domain_terms 为白名单（meta.domainTerms），命中则跳过。
+    逐词判断：只有所有命中词都在白名单里时才返回 None，否则返回第一个非白名单方案词。
+    """
+    for m in SOL.finditer(text):
+        if m.group(1) not in (domain_terms or []):
+            return m.group(1)
+    return None
 EV = {"quote", "observed", "inferred", "assumed"}
 EM_ZONES = ["sees", "hears", "says", "does", "thinks", "feels", "pains", "gains"]
 
