@@ -73,6 +73,16 @@
 
 ![用户研究计划](docs/screenshots/research-plan.png)
 
+### AI 辅助桌面研究
+
+**来源管理板**：记录二手资料的出处、摘要、可信度与相关性，按筛选状态或来源类型分组；低可信来源自动标红。
+
+![来源管理板](docs/screenshots/source-board.png)
+
+**综合矩阵**：跨来源对比观点——共识 / 分歧 / 不确定，每条观点关联来源编号；每个页面都内置「让 AI 填充」「质量审查」prompt。
+
+![综合矩阵](docs/screenshots/synthesis.png)
+
 
 ---
 
@@ -118,14 +128,15 @@ agent 会自动完成：
 
 ```
 SKILL.md                    agent 入口（安装后 agent 自动读取）
+tools.json                  工具注册表（唯一来源：阶段、文件、数据路径、完成判断）
 README.md                   本文件
 LICENSE                     MIT（代码）+ CC BY-NC-SA 4.0（内容）
 
-templates/                  35 个交互模板（单文件 HTML，离线可用）
+templates/                  交互模板（单文件 HTML，离线可用；通用模板 board/table/radial 配合预设复用）
   dashboard.html            ← 项目统一入口，双击即可打开
   overview.html             工具速查 + 项目进度
   persona.html              用户画像
-  ...（其余 32 个工具页面）
+  ...（其余工具页面，清单见 tools.json）
 
 presets/                    看板 / 表格 / 环形图预设（20+ 个）
   boards.json               头脑风暴、AEIOU、回溯板等

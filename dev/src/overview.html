@@ -47,51 +47,8 @@ const PH=[
  {k:'test',n:'测试',en:'Test',c:'var(--teal)',d:'以学习为目的，验证假设'},
  {k:'reflect',n:'反思',en:'Reflect',c:'var(--pink)',d:'每个小循环后回溯、改进'}];
 const has=(o)=>{if(o==null)return false;if(Array.isArray(o))return o.length>0;if(typeof o==='object')return Object.keys(o).some(k=>k!=='id'&&has(o[k]));return String(o).trim()!==''&&o!==false&&o!==0};
-const B=k=>s=>{const b=s.boards&&s.boards[k];return b&&has(b.cards);};
-const T=k=>s=>{const tb=s.tables&&s.tables[k];return !!tb&&(has(tb.rows)||has(tb.questions)||has(tb.items));};
-const R=k=>s=>{const r=s.radials&&s.radials[k];return r&&has(r.items||r.petals);};
-const TOOLS=[
- ['empathize','AEIOU 观察','按活动/环境/互动/物体/用户结构化记录观察','进入现场观察前与观察中','board-aeiou.html',B('aeiou'),'boards.aeiou'],
- ['empathize','访谈提纲','开放式问题 + 追问“为什么” + 例外','真人访谈前准备','table-interview.html',T('interview'),'tables.interview'],
- ['empathize','AEIOU 问卷','按五维度设计问卷，验证访谈发现有多普遍','访谈之后、需要量化验证时','table-survey.html',T('survey'),'tables.survey'],
- ['empathize','利益相关者地图','谁使用、谁付钱、谁决定、谁受影响（补充工具）','项目开始、涉及多方时','radial-stakeholders.html',R('stakeholders'),'radials.stakeholders'],
- ['empathize','用户画像 Persona','10 步法 + 画像画布，描述典型用户','有了初步观察/访谈之后','persona.html',s=>has(s.personas)||has(s.persona),'personas'],
- ['empathize','移情图 Empathy Map','看/听/说/做/想/感 + 痛点与收获','整理访谈与观察记录','empathy-map.html',s=>has(s.empathyMap),'empathyMap'],
- ['empathize','极端 / 未来用户','从极端与领先用户身上发现隐性需求','想突破主流用户的常规答案','table-extremes.html',T('extremes'),'tables.extremes'],
- ['empathize','顾客旅程图','分阶段的行为、触点、情绪曲线与机会点','理解完整体验与断点','journey.html',s=>has(s.journey&&s.journey.stages),'journey'],
- ['empathize','故事板 Storyboard','用分镜讲清用户在具体情境中的经历','理解场景，或在原型阶段讲述新方案','storyboard.html',s=>has(s.storyboard&&s.storyboard.frames),'storyboard'],
- ['empathize','Hook 上瘾模型','触发-行动-奖赏-投入，含伦理检查','研究习惯与持续使用','hook.html',s=>has(s.hook),'hook'],
- ['empathize','竞品分析','对比现有方案的优缺点与空白','了解用户当前的替代方案','table-competitors.html',T('competitors'),'tables.competitors'],
- ['empathize','研究问题拆解','把模糊问题拆成可检索的子问题，生成中英文搜索关键词矩阵','桌面研究开始前，或进入陌生领域时','research-query.html',s=>has(s.deskResearch&&s.deskResearch.query&&s.deskResearch.query.question),'deskResearch.query'],
- ['empathize','来源管理板','记录二手资料的 URL、摘要、可信度与相关性，看板式筛选','检索资料过程中，边读边记','source-board.html',s=>has(s.deskResearch&&s.deskResearch.sources),'deskResearch.sources'],
- ['define','洞察聚类','把观察卡片聚类、投票选出关键洞察','共情资料较多、需要收敛时','board-insights.html',B('insights'),'boards.insights'],
- ['define','360 度视角','从多个利益相关方视角审视问题','问题涉及多方角色','radial-view360.html',R('view360'),'radials.view360'],
- ['define','九宫格','3×3 结构化拆解问题','问题过于宽泛','board-ninegrid.html',B('ninegrid'),'boards.ninegrid'],
- ['define','雏菊图','围绕核心问题展开要素花瓣','梳理问题的组成部分','radial-daisy.html',R('daisy'),'radials.daisy'],
- ['define','JTBD → PoV → HMW','任务、视角陈述与“我们可以如何”问题','形成问题陈述、进入构思前','pov.html',s=>has(s.define),'define'],
- ['define','价值主张画布','顾客任务/痛点/收益 ↔ 产品/止痛剂/增益','检验方案是否对准真实需求','value-canvas.html',s=>has(s.valueCanvas),'valueCanvas'],
- ['define','关键假设清单','列出风险最高的假设及验证方式','任何阶段，尤其是测试前','table-assumptions.html',T('assumptions'),'tables.assumptions'],
- ['define','综合矩阵','跨来源对比观点：共识 / 分歧 / 不确定三列，每条关联来源','来源收集到 6 条以上、需要提炼结论时','synthesis.html',s=>{const y=s.deskResearch&&s.deskResearch.synthesis;return !!y&&has([].concat(y.consensus||[],y.divergence||[],y.uncertain||[]))},'deskResearch.synthesis'],
- ['define','研究空白','已知 / 未知 / 需验证三格 + 下一步行动，衔接一手研究','桌面研究收尾、决定还要研究什么时','gap-analysis.html',s=>{const g=s.deskResearch&&s.deskResearch.gaps;return !!g&&has([].concat(g.known||[],g.unknown||[],g.toVerify||[]))},'deskResearch.gaps'],
- ['define','研究报告','背景 → 发现 → 含义 → 行动建议，一键复制分享','向团队同步桌面研究结论时','research-report.html',s=>{const r=s.deskResearch&&s.deskResearch.report;return !!r&&(has(r.background)||has(r.findings))},'deskResearch.report'],
- ['ideate','头脑风暴墙','计时发散、贴卡、投票','需要大量点子','board-brainstorm.html',B('brainstorm'),'boards.brainstorm'],
- ['ideate','Crazy 8s','8 分钟画 8 个不同方案（补充工具）','需要快速产出多个差异化方案','board-crazy8.html',B('crazy8'),'boards.crazy8'],
- ['ideate','SCAMPER 奔驰法','七个角度改造现有方案','有可改造的现有产品/流程','scamper.html',s=>has(s.ideate&&s.ideate.scamper),'ideate.scamper'],
- ['ideate','问题反转','先想“如何让它更糟”，再反转','思路卡住时','table-reversal.html',T('reversal'),'tables.reversal'],
- ['ideate','跨行业对标','借鉴其他行业如何解决类似问题','想要突破行业惯性','table-analogy.html',T('analogy'),'tables.analogy'],
- ['ideate','点子沟通表','把点子讲清楚：名称、用户、价值、风险','向团队/用户展示点子','table-ideas.html',T('ideas'),'tables.ideas'],
- ['ideate','丘吉尔矩阵','价值×可行性 或 影响×紧迫 两种维度收敛','点子太多需要排序','matrix.html',s=>has(s.ideate&&s.ideate.matrix&&(s.ideate.matrix.items||Object.values(s.ideate.matrix).find(v=>Array.isArray(v)))),'ideate.matrix'],
- ['prototype','盒子原则 + 保真度','把方案做成一个“产品包装盒”，选择原型类型与保真度','把点子变得有形','box.html',s=>has(s.prototype),'prototype'],
- ['prototype','架子原则','把产品/服务/方案摆上不同货架，找空白与协同','有多个方案或产品组合','board-shelf.html',B('shelf'),'boards.shelf'],
- ['prototype','原型工作坊','定义功能→变体→制作→红绿反馈→改进','团队集体快速做原型','board-workshop.html',B('workshop'),'boards.workshop'],
- ['prototype','服务蓝图','前台/后台/支持流程逐步拆解','服务类方案原型','table-blueprint.html',T('blueprint'),'tables.blueprint'],
- ['prototype','MVP 画布','用最小实验验证最关键假设（补充工具）','准备上线验证前','board-mvp.html',B('mvp'),'boards.mvp'],
- ['test','用户研究计划','假设清单、招募方案、访谈提纲、分析框架与进度追踪','每轮测试前整理假设与访谈脚本','research-plan.html',s=>has(s.researchPlan&&s.researchPlan.hypotheses),'researchPlan'],
- ['test','测试计划','目标、场景、问题地图、角色分工','每轮测试前','table-testplan.html',T('testplan'),'tables.testplan'],
- ['test','反馈收集表','喜欢 / 期望 / 问题 / 新点子 四象限','测试中与测试后','board-feedback.html',B('feedback'),'boards.feedback'],
- ['test','A/B 测试','两版本对比，浏览器内计算显著性','有可量化指标、样本足够时','ab-test.html',s=>has(s.test&&s.test.ab&&s.test.ab.a),'test.ab'],
- ['test','试验表','假设→试验→指标→成功标准→学习→结论','把每次测试记录成可复盘的试验','table-experiments.html',T('experiments'),'tables.experiments'],
- ['reflect','回溯板','做得好 / 可改进 / 问题 / 行动项，含 6 步流程','每个阶段或冲刺结束后','board-retro.html',B('retro'),'boards.retro']];
+// 工具清单来自 tools.json（DT.TOOLS）
+const TOOLS=DT.TOOLS.map(t=>[t.phase,t.name,t.desc,t.when,t.file,s=>DT.hasData(t,s),t.path[0],t.core]);
 let sel=null,q='',fm='all';
 function verifyList(s){const out=[];(function walk(o,p){if(!o||typeof o!=='object')return;for(const k in o){if(k==='toVerify'&&Array.isArray(o[k]))o[k].forEach(v=>out.push({t:typeof v==='string'?v:(v.text||''),p}));else walk(o[k],p?p+'.'+k:k)}})(s,'');return out.filter(x=>x.t)}
 function render(){const s=DT.st,app=document.getElementById('app');app.innerHTML='';s.meta.phase=s.meta.phase||'empathize';
@@ -110,8 +67,7 @@ function render(){const s=DT.st,app=document.getElementById('app');app.innerHTML
  M.forEach(m=>{const sel=s.meta.macro===m[0];const b=h('button',{'aria-pressed':sel?'true':'false',class:m[0]==='pivot'?'pv':''},m[1]+(m[0]==='pivot'?'':'<small>'+m[2]+'</small>'));b.title=m[2];b.onclick=()=>{if(s.meta.macro===m[0])return;s.meta.macro=m[0];save();render();DT.toast('已标记为：'+macroLabels[m[0]])};mc.appendChild(b)});app.appendChild(mc);
  // 项目状态卡片（嵌入式仪表盘）
  const totalT=TOOLS.length,doneT=TOOLS.filter(t=>t[5](s)).length;
- const CORE_TOOLS=new Set(['personas','empathyMap','journey','hook','define','valueCanvas','ideate.scamper','ideate.matrix','prototype','storyboard','researchPlan','test.ab','deskResearch.report']);
- const coreT=TOOLS.filter(t=>CORE_TOOLS.has(t[6])),coreDoneT=coreT.filter(t=>t[5](s)).length;
+  const coreT=TOOLS.filter(t=>t[7]===1),coreDoneT=coreT.filter(t=>t[5](s)).length;
  const vl2=[];(function wk(o,p){if(!o||typeof o!=='object')return;for(const k in o){if(k==='toVerify'&&Array.isArray(o[k]))o[k].forEach(v=>vl2.push(typeof v==='string'?v:(v.text||'')));else wk(o[k],p?p+'.'+k:k)}})(s,'');
  const pCard=h('div',{style:'border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:14px;background:var(--bg)'});
  const pHd=h('div',{style:'display:flex;justify-content:space-between;align-items:center;margin-bottom:10px'});
@@ -147,7 +103,7 @@ function render(){const s=DT.st,app=document.getElementById('app');app.innerHTML
    const p=PH.find(x=>x.k===t[0]);const d=h('div',{class:'tl',style:'--c:'+p.c});
    d.innerHTML='<div class="t"><b>'+esc(t[1])+'</b>'+(ok?'<span class="badge ok">有内容</span>':'<span class="badge mute">未开始</span>')+'</div><div class="u">'+esc(t[2])+'</div><div class="w">何时用：'+esc(t[3])+' · '+p.n+'</div>';
    const a=h('div',{class:'act'});
-   if(ok)a.appendChild(h('a',{class:'open',href:t[4]},'打开 '+esc(t[4])));
+   if(ok||(DT.pages&&DT.pages.indexOf(t[4])>=0))a.appendChild(h('a',{class:'open',href:t[4]},(ok?'打开 ':'打开空白页 ')+esc(t[4])));
    const cp=h('button',{},ok?'复制继续指令':'复制生成指令');cp.onclick=()=>DT.copy((ok?'请基于当前项目数据继续完善「':'请用设计思维 skill 为当前项目生成「')+t[1]+'」（数据路径 '+t[6]+'，输出 '+t[4]+'）。','已复制，粘贴给 agent');a.appendChild(cp);
    d.appendChild(a);g.appendChild(d)});
   if(!n)g.appendChild(h('div',{class:'empty'},'没有匹配的工具'))}

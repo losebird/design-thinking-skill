@@ -172,12 +172,13 @@ textarea{resize:vertical}
 <script id="dt-data" type="application/json">/*DT_DATA*/</script>
 <script>
 const DT=(function(){
+ const REG={"phases":[{"k":"empathize","n":"共情","en":"Empathize"},{"k":"define","n":"定义视角","en":"Point of View"},{"k":"ideate","n":"构思","en":"Ideate"},{"k":"prototype","n":"原型","en":"Prototype"},{"k":"test","n":"测试","en":"Test"},{"k":"reflect","n":"反思","en":"Reflect"}],"tools":[{"phase":"empathize","name":"用户画像 Persona","file":"persona.html","tpl":"persona","path":["personas","personaSteps"],"check":["personas","persona"],"core":1,"desc":"10 步法 + 画像画布，描述典型用户","when":"有了初步观察/访谈之后"},{"phase":"empathize","name":"移情图 Empathy Map","file":"empathy-map.html","tpl":"empathy-map","path":["empathyMap"],"check":["empathyMap"],"core":1,"desc":"看/听/说/做/想/感 + 痛点与收获","when":"整理访谈与观察记录"},{"phase":"empathize","name":"顾客旅程图","file":"journey.html","tpl":"journey","path":["journey"],"check":["journey.stages"],"core":1,"desc":"分阶段的行为、触点、情绪曲线与机会点","when":"理解完整体验与断点"},{"phase":"empathize","name":"Hook 上瘾模型","file":"hook.html","tpl":"hook","path":["hook"],"check":["hook"],"core":1,"desc":"触发-行动-奖赏-投入，含伦理检查","when":"研究习惯与持续使用"},{"phase":"empathize","name":"AEIOU 观察","file":"board-aeiou.html","tpl":"board","path":["boards.aeiou"],"check":["boards.aeiou.cards"],"core":2,"desc":"按活动/环境/互动/物体/用户结构化记录观察","when":"进入现场观察前与观察中"},{"phase":"empathize","name":"访谈提纲","file":"table-interview.html","tpl":"table","path":["tables.interview"],"check":["tables.interview.rows","tables.interview.questions","tables.interview.items"],"core":2,"desc":"开放式问题 + 追问“为什么” + 例外","when":"真人访谈前准备"},{"phase":"empathize","name":"AEIOU 问卷","file":"table-survey.html","tpl":"table","path":["tables.survey"],"check":["tables.survey.rows","tables.survey.questions","tables.survey.items"],"core":2,"desc":"按五维度设计问卷，验证访谈发现有多普遍","when":"访谈之后、需要量化验证时"},{"phase":"empathize","name":"利益相关者地图","file":"radial-stakeholders.html","tpl":"radial","path":["radials.stakeholders"],"check":["radials.stakeholders.items","radials.stakeholders.petals"],"core":2,"desc":"谁使用、谁付钱、谁决定、谁受影响（补充工具）","when":"项目开始、涉及多方时"},{"phase":"empathize","name":"极端 / 未来用户","file":"table-extremes.html","tpl":"table","path":["tables.extremes"],"check":["tables.extremes.rows","tables.extremes.questions","tables.extremes.items"],"core":2,"desc":"从极端与领先用户身上发现隐性需求","when":"想突破主流用户的常规答案"},{"phase":"empathize","name":"故事板 Storyboard","file":"storyboard.html","tpl":"storyboard","path":["storyboard"],"check":["storyboard.frames"],"core":2,"desc":"用分镜讲清用户在具体情境中的经历","when":"理解场景，或在原型阶段讲述新方案"},{"phase":"empathize","name":"竞品分析","file":"table-competitors.html","tpl":"table","path":["tables.competitors"],"check":["tables.competitors.rows","tables.competitors.questions","tables.competitors.items"],"core":2,"desc":"对比现有方案的优缺点与空白","when":"了解用户当前的替代方案"},{"phase":"empathize","name":"研究问题拆解","file":"research-query.html","tpl":"research-query","path":["deskResearch.query"],"check":["deskResearch.query.question"],"core":2,"desc":"把模糊问题拆成可检索的子问题，生成中英文搜索关键词矩阵","when":"桌面研究开始前，或进入陌生领域时"},{"phase":"empathize","name":"来源管理板","file":"source-board.html","tpl":"source-board","path":["deskResearch.sources"],"check":["deskResearch.sources"],"core":2,"desc":"记录二手资料的 URL、摘要、可信度与相关性，看板式筛选","when":"检索资料过程中，边读边记"},{"phase":"define","name":"JTBD → PoV → HMW","file":"pov.html","tpl":"pov","path":["define"],"check":["define"],"core":1,"desc":"任务、视角陈述与“我们可以如何”问题","when":"形成问题陈述、进入构思前"},{"phase":"define","name":"价值主张画布","file":"value-canvas.html","tpl":"value-canvas","path":["valueCanvas"],"check":["valueCanvas"],"core":1,"desc":"顾客任务/痛点/收益 ↔ 产品/止痛剂/增益","when":"检验方案是否对准真实需求"},{"phase":"define","name":"洞察聚类","file":"board-insights.html","tpl":"board","path":["boards.insights"],"check":["boards.insights.cards"],"core":2,"desc":"把观察卡片聚类、投票选出关键洞察","when":"共情资料较多、需要收敛时"},{"phase":"define","name":"360 度视角","file":"radial-view360.html","tpl":"radial","path":["radials.view360"],"check":["radials.view360.items","radials.view360.petals"],"core":2,"desc":"从多个利益相关方视角审视问题","when":"问题涉及多方角色"},{"phase":"define","name":"九宫格","file":"board-ninegrid.html","tpl":"board","path":["boards.ninegrid"],"check":["boards.ninegrid.cards"],"core":2,"desc":"3×3 结构化拆解问题","when":"问题过于宽泛"},{"phase":"define","name":"雏菊图","file":"radial-daisy.html","tpl":"radial","path":["radials.daisy"],"check":["radials.daisy.items","radials.daisy.petals"],"core":2,"desc":"围绕核心问题展开要素花瓣","when":"梳理问题的组成部分"},{"phase":"define","name":"关键假设清单","file":"table-assumptions.html","tpl":"table","path":["tables.assumptions"],"check":["tables.assumptions.rows","tables.assumptions.questions","tables.assumptions.items"],"core":2,"desc":"列出风险最高的假设及验证方式","when":"任何阶段，尤其是测试前"},{"phase":"define","name":"综合矩阵","file":"synthesis.html","tpl":"synthesis","path":["deskResearch.synthesis"],"check":["deskResearch.synthesis.consensus","deskResearch.synthesis.divergence","deskResearch.synthesis.uncertain"],"core":2,"desc":"跨来源对比观点：共识 / 分歧 / 不确定三列，每条关联来源","when":"来源收集到 6 条以上、需要提炼结论时"},{"phase":"define","name":"研究空白","file":"gap-analysis.html","tpl":"gap-analysis","path":["deskResearch.gaps"],"check":["deskResearch.gaps.known","deskResearch.gaps.unknown","deskResearch.gaps.toVerify"],"core":2,"desc":"已知 / 未知 / 需验证三格 + 下一步行动，衔接一手研究","when":"桌面研究收尾、决定还要研究什么时"},{"phase":"define","name":"研究报告","file":"research-report.html","tpl":"research-report","path":["deskResearch.report"],"check":["deskResearch.report.background","deskResearch.report.findings"],"core":1,"desc":"背景 → 发现 → 含义 → 行动建议，一键复制分享","when":"向团队同步桌面研究结论时"},{"phase":"ideate","name":"丘吉尔矩阵","file":"matrix.html","tpl":"matrix","path":["ideate.matrix"],"check":["ideate.matrix.items"],"core":1,"desc":"价值×可行性 或 影响×紧迫 两种维度收敛","when":"点子太多需要排序"},{"phase":"ideate","name":"SCAMPER 奔驰法","file":"scamper.html","tpl":"scamper","path":["ideate.scamper","ideate.matrix"],"check":["ideate.scamper"],"core":1,"desc":"七个角度改造现有方案","when":"有可改造的现有产品/流程"},{"phase":"ideate","name":"Crazy 8s","file":"board-crazy8.html","tpl":"board","path":["boards.crazy8"],"check":["boards.crazy8.cards"],"core":2,"desc":"8 分钟画 8 个不同方案（补充工具）","when":"需要快速产出多个差异化方案"},{"phase":"ideate","name":"头脑风暴墙","file":"board-brainstorm.html","tpl":"board","path":["boards.brainstorm"],"check":["boards.brainstorm.cards"],"core":2,"desc":"计时发散、贴卡、投票","when":"需要大量点子"},{"phase":"ideate","name":"问题反转","file":"table-reversal.html","tpl":"table","path":["tables.reversal"],"check":["tables.reversal.rows","tables.reversal.questions","tables.reversal.items"],"core":2,"desc":"先想“如何让它更糟”，再反转","when":"思路卡住时"},{"phase":"ideate","name":"跨行业对标","file":"table-analogy.html","tpl":"table","path":["tables.analogy"],"check":["tables.analogy.rows","tables.analogy.questions","tables.analogy.items"],"core":2,"desc":"借鉴其他行业如何解决类似问题","when":"想要突破行业惯性"},{"phase":"ideate","name":"点子沟通表","file":"table-ideas.html","tpl":"table","path":["tables.ideas"],"check":["tables.ideas.rows","tables.ideas.questions","tables.ideas.items"],"core":2,"desc":"把点子讲清楚：名称、用户、价值、风险","when":"向团队/用户展示点子"},{"phase":"prototype","name":"盒子原则 + 保真度","file":"box.html","tpl":"box","path":["prototype"],"check":["prototype"],"core":1,"desc":"把方案做成一个“产品包装盒”，选择原型类型与保真度","when":"把点子变得有形"},{"phase":"prototype","name":"架子原则","file":"board-shelf.html","tpl":"board","path":["boards.shelf"],"check":["boards.shelf.cards"],"core":2,"desc":"把产品/服务/方案摆上不同货架，找空白与协同","when":"有多个方案或产品组合"},{"phase":"prototype","name":"原型工作坊","file":"board-workshop.html","tpl":"board","path":["boards.workshop"],"check":["boards.workshop.cards"],"core":2,"desc":"定义功能→变体→制作→红绿反馈→改进","when":"团队集体快速做原型"},{"phase":"prototype","name":"MVP 画布","file":"board-mvp.html","tpl":"board","path":["boards.mvp"],"check":["boards.mvp.cards","boards.mvp.hypothesis","boards.mvp.vision"],"core":1,"desc":"用最小实验验证最关键假设（补充工具）","when":"准备上线验证前"},{"phase":"prototype","name":"服务蓝图","file":"table-blueprint.html","tpl":"table","path":["tables.blueprint"],"check":["tables.blueprint.rows","tables.blueprint.questions","tables.blueprint.items"],"core":2,"desc":"前台/后台/支持流程逐步拆解","when":"服务类方案原型"},{"phase":"test","name":"用户研究计划","file":"research-plan.html","tpl":"research-plan","path":["researchPlan"],"check":["researchPlan.hypotheses"],"core":1,"desc":"假设清单、招募方案、访谈提纲、分析框架与进度追踪","when":"每轮测试前整理假设与访谈脚本"},{"phase":"test","name":"A/B 测试","file":"ab-test.html","tpl":"ab-test","path":["test.ab"],"check":["test.ab.a"],"core":1,"desc":"两版本对比，浏览器内计算显著性","when":"有可量化指标、样本足够时"},{"phase":"test","name":"测试计划","file":"table-testplan.html","tpl":"table","path":["tables.testplan"],"check":["tables.testplan.rows","tables.testplan.questions","tables.testplan.items"],"core":2,"desc":"目标、场景、问题地图、角色分工","when":"每轮测试前"},{"phase":"test","name":"反馈收集表","file":"board-feedback.html","tpl":"board","path":["boards.feedback"],"check":["boards.feedback.cards"],"core":2,"desc":"喜欢 / 期望 / 问题 / 新点子 四象限","when":"测试中与测试后"},{"phase":"test","name":"试验表","file":"table-experiments.html","tpl":"table","path":["tables.experiments"],"check":["tables.experiments.rows","tables.experiments.questions","tables.experiments.items"],"core":2,"desc":"假设→试验→指标→成功标准→学习→结论","when":"把每次测试记录成可复盘的试验"},{"phase":"reflect","name":"回溯板","file":"board-retro.html","tpl":"board","path":["boards.retro"],"check":["boards.retro.cards"],"core":2,"desc":"做得好 / 可改进 / 问题 / 行动项，含 6 步流程","when":"每个阶段或冲刺结束后"}]}||{phases:[],tools:[]};// 由 dev/build.py 从 tools.json 注入
  const raw=document.getElementById('dt-data').textContent.trim();
  let init={};try{init=raw&&raw.indexOf('DT_DATA')<0?JSON.parse(raw):{}}catch(e){console.error('数据解析失败',e)}
  const tpl=document.body.dataset.tpl||'page';
  const clone=o=>JSON.parse(JSON.stringify(o));
  const PRJ=(init.meta&&init.meta.project)||'default',SK='dt:shared:'+PRJ,OWN='dt:'+tpl+':'+PRJ+':'+(init._target||'');
- const strip=o=>{const c=clone(o);delete c._target;delete c._rev;return c};
+ const strip=o=>{const c=clone(o);delete c._target;delete c._rev;delete c._pages;return c};
  const HS=(function(t){let x=5381;for(let i=0;i<t.length;i++)x=((x<<5)+x+t.charCodeAt(i))|0;return String(x>>>0)})(JSON.stringify(strip(init)));
  const REV=init._rev||'';
  // 同一项目的所有页面共享一份数据（dt:shared:<项目>）；若本页比共享数据旧，则只在本页独立保存，避免覆盖。
@@ -203,7 +204,11 @@ const DT=(function(){
  async function copy(t,msg){try{await navigator.clipboard.writeText(t);toast(msg||'已复制')}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(msg||'已复制')}catch(_){toast('复制失败，请改用导出 JSON')}ta.remove()}}
  const out=()=>strip(st);
  function aiBadge(){const g=st.meta.generatedBy||'ai';const m={ai:['','AI 假设 · 待验证'],mixed:['info','调研 + AI 推断'],human:['ok','基于真实调研']}[g]||['','AI 假设 · 待验证'];return '<button class="badge '+m[0]+'" id="dt-src" title="数据来源（点击切换）：AI 假设 / 调研 + AI 推断 / 基于真实调研">'+m[1]+'</button>'}
- const PATHS={persona:'personas, personaSteps','empathy-map':'empathyMap',journey:'journey',hook:'hook',pov:'define',scamper:'ideate.scamper, ideate.matrix',matrix:'ideate.matrix',box:'prototype','ab-test':'test.ab',storyboard:'storyboard','value-canvas':'valueCanvas',overview:'meta','research-plan':'researchPlan','research-query':'deskResearch.query','source-board':'deskResearch.sources',synthesis:'deskResearch.synthesis','gap-analysis':'deskResearch.gaps','research-report':'deskResearch.report',dashboard:'全部'};
+ const GEN=['board','table','radial'];
+ const PATHS={overview:'meta',dashboard:'全部'};REG.tools.forEach(t=>{if(GEN.indexOf(t.tpl)<0)PATHS[t.tpl]=t.path.join(', ')});
+ const hasV=o=>{if(o==null)return false;if(Array.isArray(o))return o.length>0;if(typeof o==='object')return Object.keys(o).some(k=>k!=='id'&&hasV(o[k]));return String(o).trim()!==''&&o!==false&&o!==0};
+ const at=(o,p)=>p.split('.').reduce((a,k)=>a==null?undefined:a[k],o);
+ const hasData=(t,s)=>t.check.some(p=>hasV(at(s||st,p)));
  const PATH=()=>init._target||PATHS[tpl]||'全部';
  function header(){const hd=$('dt-head');
   hd.innerHTML='<div><h1>'+esc(opts.title)+'<small>'+esc(opts.en||'')+'</small></h1><div class="sub">'+esc(st.meta.project||'')+(opts.subtitle?' · '+esc(opts.subtitle()):'')+' '+aiBadge()+'</div></div><div class="tools" id="dt-tools"></div>';
@@ -214,7 +219,7 @@ const DT=(function(){
   b('导出 JSON','',()=>dl((st.meta.project||'project')+'.json',JSON.stringify(out(),null,2),'application/json'));
   b('导入','',openImport,'粘贴 JSON 数据替换当前页面');
   b('重置','',()=>{if(!confirm('清除本项目所有页面的本地修改，恢复 agent 生成的初始数据？'))return;try{localStorage.removeItem(KEY)}catch(e){}st=strip(init);st.meta=st.meta||{};rerender();toast('已恢复初始数据')},'清除本地修改')}
- const TOPS=['meta','personas','personaSteps','empathyMap','journey','hook','define','ideate','prototype','test','boards','tables','radials','storyboard','valueCanvas','researchPlan','deskResearch'];
+ const TOPS=['meta'].concat(...REG.tools.map(t=>t.path.concat(t.check).map(p=>p.split('.')[0]))).filter((x,i,a)=>a.indexOf(x)===i);
  const isObj=o=>o!==null&&typeof o==='object'&&!Array.isArray(o);
  function deep(a,b){if(!isObj(a)||!isObj(b))return clone(b);const r=Object.assign({},a);for(const k in b)r[k]=deep(a[k],b[k]);return r}
  function setPath(path,val){const ks=path.split('.');let o=st;for(let i=0;i<ks.length-1;i++){if(!isObj(o[ks[i]]))o[ks[i]]={};o=o[ks[i]]}const k=ks[ks.length-1];o[k]=isObj(o[k])&&isObj(val)?deep(o[k],val):clone(val)}
@@ -262,7 +267,7 @@ const DT=(function(){
   document.addEventListener('keydown',e=>{if(e.key==='Escape')$('dt-modal').classList.remove('open')});
   window.addEventListener('storage',e=>{if(e.key!==KEY||!e.newValue)return;try{const o=JSON.parse(e.newValue);if(o.__base===HS){st=o.st;st.meta=st.meta||{};rerender()}}catch(_){}});
   rerender();if(fresh)setTimeout(()=>toast('已载入 agent 生成的新版本数据（旧的本地修改已备份）'),300);if(older)setTimeout(()=>toast('本页数据比其他已打开的页面旧，修改只保存在本页'),300)}
- return {get st(){return st},get,save,toast,esc,ed,h,nid,dl,copy,boot,rerender,evBtn,list,openImport,importData,aiPanel,ctx,srcPick,target:init._target||''};
+ return {get st(){return st},get,save,toast,esc,ed,h,nid,dl,copy,boot,rerender,evBtn,list,openImport,TOOLS:REG.tools,PHASES:REG.phases,hasData,has:hasV,pages:init._pages||null,importData,aiPanel,ctx,srcPick,target:init._target||''};
 })();
 
 (function(){
@@ -278,97 +283,97 @@ const PH=[
 ];
 
 const has=o=>{if(o==null)return false;if(Array.isArray(o))return o.length>0;if(typeof o==='object')return Object.keys(o).some(k=>k!=='id'&&has(o[k]));return String(o).trim()!==''&&o!==false&&o!==0};
-const MVPF=['vision','users','hypothesis','hypo','features','form','metrics','success','next'];
-const B=k=>s=>{const b=(s.boards||{})[k];return !!b&&(has(b.cards)||(k==='mvp'&&MVPF.some(f=>typeof b[f]!=='object'||Array.isArray(b[f])?has(b[f]):false)));};
 const rowsOf=tb=>{if(!tb)return [];for(const k of ['rows','questions','items'])if(Array.isArray(tb[k])&&tb[k].length)return tb[k];return []};
-const T=k=>s=>{const tb=(s.tables||{})[k];return !!tb&&(has(tb.rows)||has(tb.questions)||has(tb.items));};
-const R=k=>s=>{const r=(s.radials||{})[k];return r&&has(r.items||r.petals);};
+const okFile=(f,s)=>{const t=DT.TOOLS.find(x=>x.file===f);return !!t&&DT.hasData(t,s)};
 
-// 工具定义：[阶段, 中文名, 文件, 有数据?, 重要(1核心/2补充), 预览函数]
-const TOOLS=[
- ['empathize','用户画像 Persona','persona.html',    s=>has(s.personas),1,
-  s=>{const p=(s.personas||[])[0];return p?`<b>${esc(p.name||'')}</b>，${esc(p.snapshot||p.bio||'').slice(0,40)}…`:'未填写'}],
- ['empathize','移情图 Empathy Map','empathy-map.html',s=>has(s.empathyMap),1,
-  s=>{const em=s.empathyMap;if(!em)return '未填写';const ci=em.coreInsight||'';return ci?`<b>核心洞察：</b>${esc(ci).slice(0,50)}…`:`已有 ${(em.says||[]).length} 条 Says / ${(em.thinks||[]).length} 条 Thinks`}],
- ['empathize','顾客旅程图','journey.html', s=>has(s.journey&&s.journey.stages),1,
-  s=>{const st=(s.journey&&s.journey.stages)||[];const low=st.filter(x=>x.emotion<0);return st.length?`${st.length} 个阶段，${low.length} 个低谷`:'未填写'}],
- ['empathize','Hook 上瘾模型','hook.html',  s=>has(s.hook),1,
-  s=>{const hk=s.hook;if(!hk)return '未填写';const tr=typeof hk.trigger==='string'?hk.trigger:Object.values(hk.trigger||{}).filter(Boolean)[0]||'';const rw=typeof hk.reward==='string'?hk.reward:Object.values(hk.reward||{}).filter(Boolean)[0]||'';return `触发：${esc(hk.triggerDesc||tr)||'？'}　奖赏：${esc(hk.rewardDesc||rw)||'？'}`}],
- ['empathize','AEIOU 观察','board-aeiou.html',B('aeiou'),2,
-  s=>{const b=s.boards&&s.boards.aeiou;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'}],
- ['empathize','访谈提纲','table-interview.html',T('interview'),2,
-  s=>{const r=rowsOf(s.tables&&s.tables.interview);return r.length?`${r.length} 条问题`:'未填写'}],
- ['empathize','AEIOU 问卷','table-survey.html',T('survey'),2,
-  s=>{const r=rowsOf(s.tables&&s.tables.survey);return r.length?`${r.length} 题`:'未填写'}],
- ['empathize','利益相关者地图','radial-stakeholders.html',R('stakeholders'),2,
-  s=>{const r=s.radials&&s.radials.stakeholders;const p=(r&&(r.petals||r.items))||[];return p.length?p.map(x=>esc(x.label||x.text||'')).filter(Boolean).join('、').slice(0,50):'未填写'}],
- ['empathize','极端 / 未来用户','table-extremes.html',T('extremes'),2,
-  s=>{const r=rowsOf(s.tables&&s.tables.extremes);return r.length?`${r.length} 位极端用户`:'未填写'}],
- ['empathize','故事板 Storyboard','storyboard.html',s=>has(s.storyboard&&s.storyboard.frames),2,
-  s=>{const fr=(s.storyboard&&s.storyboard.frames)||[];return fr.length?`${fr.length} 格：${esc((fr[0]&&fr[0].title)||'')}→${esc((fr[fr.length-1]&&fr[fr.length-1].title)||'')}`:'未填写'}],
- ['empathize','竞品分析','table-competitors.html',T('competitors'),2,
-  s=>{const r=rowsOf(s.tables&&s.tables.competitors);return r.length?`${r.length} 个竞品`:'未填写'}],
- ['empathize','研究问题拆解','research-query.html',s=>has(s.deskResearch&&s.deskResearch.query&&s.deskResearch.query.question),2,
-  s=>{const q=s.deskResearch&&s.deskResearch.query;if(!q||!q.question)return '未填写';return `<b>${esc(q.question).slice(0,36)}</b> · ${(q.subQuestions||[]).length} 个子问题`},'deskResearch.query'],
- ['empathize','来源管理板','source-board.html',s=>has(s.deskResearch&&s.deskResearch.sources),2,
-  s=>{const a=(s.deskResearch&&s.deskResearch.sources)||[];if(!a.length)return '未填写';const k=a.filter(x=>x.status==='keep').length,low=a.filter(x=>(x.credibility||3)<=2).length;return `${a.length} 条来源 · 采纳 ${k}${low?` · ${low} 条低可信`:''}`},'deskResearch.sources'],
- ['define','JTBD → PoV → HMW','pov.html', s=>has(s.define),1,
-  s=>{const p=s.define&&s.define.pov;if(!p||!p.user)return '未填写';return `<b>${esc(p.user)}</b> 需要 ${esc(p.need||'…')}`}],
- ['define','价值主张画布','value-canvas.html',s=>has(s.valueCanvas),1,
-  s=>{const vc=s.valueCanvas;if(!vc)return '未填写';const pains=(vc.pains||[]).length,gains=(vc.gains||[]).length;return `痛点 ${pains} 个 · 收益 ${gains} 个`}],
- ['define','洞察聚类','board-insights.html',B('insights'),2,
-  s=>{const b=s.boards&&s.boards.insights;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'}],
- ['define','360 度视角','radial-view360.html',R('view360'),2,
-  s=>{const r=s.radials&&s.radials.view360;const p=(r&&(r.petals||r.items))||[];return p.length?p.map(x=>esc(x.label||x.text||'')).filter(Boolean).join('、').slice(0,50):'未填写'}],
- ['define','九宫格','board-ninegrid.html',B('ninegrid'),2,
-  s=>{const b=s.boards&&s.boards.ninegrid;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'}],
- ['define','雏菊图','radial-daisy.html',  R('daisy'),2,
-  s=>{const r=s.radials&&s.radials.daisy;const p=(r&&(r.petals||r.items))||[];return p.length?`${p.length} 个花瓣`:'未填写'}],
- ['define','关键假设清单','table-assumptions.html',T('assumptions'),2,
-  s=>{const r=rowsOf(s.tables&&s.tables.assumptions);return r.length?`${r.length} 条假设`:'未填写'}],
- ['define','综合矩阵','synthesis.html',s=>{const y=s.deskResearch&&s.deskResearch.synthesis;return !!y&&has([].concat(y.consensus||[],y.divergence||[],y.uncertain||[]))},2,
-  s=>{const y=s.deskResearch&&s.deskResearch.synthesis;if(!y)return '未填写';return `共识 ${(y.consensus||[]).length} · 分歧 ${(y.divergence||[]).length} · 不确定 ${(y.uncertain||[]).length}`},'deskResearch.synthesis'],
- ['define','研究空白','gap-analysis.html',s=>{const g=s.deskResearch&&s.deskResearch.gaps;return !!g&&has([].concat(g.known||[],g.unknown||[],g.toVerify||[]))},2,
-  s=>{const g=s.deskResearch&&s.deskResearch.gaps;if(!g)return '未填写';return `已知 ${(g.known||[]).length} · 未知 ${(g.unknown||[]).length} · 需验证 ${(g.toVerify||[]).length}`},'deskResearch.gaps'],
- ['define','研究报告','research-report.html',s=>{const r=s.deskResearch&&s.deskResearch.report;return !!r&&(has(r.background)||has(r.findings))},1,
-  s=>{const r=s.deskResearch&&s.deskResearch.report;if(!r)return '未填写';const f=(r.findings||[])[0];return f?`<b>发现：</b>${esc(f.text||'').slice(0,40)}… 共 ${(r.findings||[]).length} 条`:'已写背景，待补发现'},'deskResearch.report'],
- ['ideate','丘吉尔矩阵','matrix.html',     s=>has(s.ideate&&s.ideate.matrix&&(s.ideate.matrix.items||Object.values(s.ideate.matrix).find(v=>Array.isArray(v)))),1,
-  s=>{const mx=s.ideate&&s.ideate.matrix;if(!mx)return '未填写';const it=mx.items||(Object.values(mx).find(v=>Array.isArray(v)))||[];const qw=it.filter(x=>(x.y||x.impact||0)>=3&&(x.x||6-(x.effort||3))>=3).length;return it.length?`${it.length} 个点子，${qw} 个 Quick Win`:'已填写'}],
- ['ideate','SCAMPER 奔驰法','scamper.html',s=>has(s.ideate&&s.ideate.scamper),1,
-  s=>{const sc=s.ideate&&s.ideate.scamper;if(!sc)return '未填写';const filled=Object.values(sc).filter(v=>Array.isArray(v)?v.length:v).length;return `${filled}/7 个维度已填写`}],
- ['ideate','Crazy 8s','board-crazy8.html',  B('crazy8'),2,
-  s=>{const b=s.boards&&s.boards.crazy8;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 个草图方案`:'未填写'}],
- ['ideate','头脑风暴墙','board-brainstorm.html',B('brainstorm'),2,
-  s=>{const b=s.boards&&s.boards.brainstorm;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'}],
- ['ideate','问题反转','table-reversal.html',T('reversal'),2,
-  s=>{const r=rowsOf(s.tables&&s.tables.reversal);return r.length?`${r.length} 条反转`:'未填写'}],
- ['ideate','跨行业对标','table-analogy.html',T('analogy'),2,
-  s=>{const r=rowsOf(s.tables&&s.tables.analogy);return r.length?`${r.length} 个对标`:'未填写'}],
- ['ideate','点子沟通表','table-ideas.html',T('ideas'),2,
-  s=>{const r=rowsOf(s.tables&&s.tables.ideas);return r.length?`${r.length} 个点子`:'未填写'}],
- ['prototype','盒子原则 + 保真度','box.html',s=>has(s.prototype),1,
-  s=>{const pt=s.prototype;if(!pt)return '未填写';const bx=pt.box||pt;const name=bx.name||bx.solution||'';const slogan=bx.slogan||'';return name?`<b>${esc(name)}</b>${slogan?' · '+esc(slogan.slice(0,30)):''}`:slogan?esc(slogan.slice(0,50)):'已填写'}],
- ['prototype','架子原则','board-shelf.html',B('shelf'),2,
-  s=>{const b=s.boards&&s.boards.shelf;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 个方案`:'未填写'}],
- ['prototype','原型工作坊','board-workshop.html',B('workshop'),2,
-  s=>{const b=s.boards&&s.boards.workshop;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'}],
- ['prototype','MVP 画布','board-mvp.html',  B('mvp'),1,
-  s=>{const b=s.boards&&s.boards.mvp;if(!b)return '未填写';const hy=((b.cards&&b.cards.hypo)||[]).map(x=>x.text).filter(Boolean)[0]||b.hypothesis||'';return hy?`<b>假设：</b>${esc(hy).slice(0,50)}…`:(has(b.cards)?'已填写':'未填写')}],
- ['prototype','服务蓝图','table-blueprint.html',T('blueprint'),2,
-  s=>{const r=rowsOf(s.tables&&s.tables.blueprint);return r.length?`${r.length} 个触点`:'未填写'}],
- ['test','用户研究计划','research-plan.html',s=>has(s.researchPlan&&s.researchPlan.hypotheses),1,
-  s=>{const rp=s.researchPlan;if(!rp)return '未填写';const h=(rp.hypotheses||[]).filter(x=>x.selected).length,q=(rp.script&&((rp.script.warmup||[]).concat(rp.script.main||[]).concat(rp.script.wrap||[]))||[]).length;return `${h} 条假设 · ${q} 题提纲`}],
- ['test','A/B 测试','ab-test.html',         s=>has(s.test&&s.test.ab&&s.test.ab.a),1,
-  s=>{const ab=s.test&&s.test.ab;if(!ab||!ab.a)return '未填写';return ab.a.n?`A: ${ab.a.n} 人 · B: ${(ab.b&&ab.b.n)||0} 人`:'已建立但无数据'}],
- ['test','测试计划','table-testplan.html',  T('testplan'),2,
-  s=>{const r=rowsOf(s.tables&&s.tables.testplan);return r.length?`${r.length} 个测试场景`:'未填写'}],
- ['test','反馈收集表','board-feedback.html',B('feedback'),2,
-  s=>{const b=s.boards&&s.boards.feedback;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 条反馈`:'未填写'}],
- ['test','试验表','table-experiments.html',T('experiments'),2,
-  s=>{const r=rowsOf(s.tables&&s.tables.experiments);return r.length?`${r.length} 条试验`:'未填写'}],
- ['reflect','回溯板','board-retro.html',    B('retro'),2,
-  s=>{const b=s.boards&&s.boards.retro;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 条复盘`:'未填写'}],
-];
+// 工具清单来自 tools.json（DT.TOOLS）；这里只维护各工具的预览摘要
+const PV={
+ 'persona.html':
+  s=>{const p=(s.personas||[])[0];return p?`<b>${esc(p.name||'')}</b>，${esc(p.snapshot||p.bio||'').slice(0,40)}…`:'未填写'},
+ 'empathy-map.html':
+  s=>{const em=s.empathyMap;if(!em)return '未填写';const ci=em.coreInsight||'';return ci?`<b>核心洞察：</b>${esc(ci).slice(0,50)}…`:`已有 ${(em.says||[]).length} 条 Says / ${(em.thinks||[]).length} 条 Thinks`},
+ 'journey.html':
+  s=>{const st=(s.journey&&s.journey.stages)||[];const low=st.filter(x=>x.emotion<0);return st.length?`${st.length} 个阶段，${low.length} 个低谷`:'未填写'},
+ 'hook.html':
+  s=>{const hk=s.hook;if(!hk)return '未填写';const tr=typeof hk.trigger==='string'?hk.trigger:Object.values(hk.trigger||{}).filter(Boolean)[0]||'';const rw=typeof hk.reward==='string'?hk.reward:Object.values(hk.reward||{}).filter(Boolean)[0]||'';return `触发：${esc(hk.triggerDesc||tr)||'？'}　奖赏：${esc(hk.rewardDesc||rw)||'？'}`},
+ 'board-aeiou.html':
+  s=>{const b=s.boards&&s.boards.aeiou;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'},
+ 'table-interview.html':
+  s=>{const r=rowsOf(s.tables&&s.tables.interview);return r.length?`${r.length} 条问题`:'未填写'},
+ 'table-survey.html':
+  s=>{const r=rowsOf(s.tables&&s.tables.survey);return r.length?`${r.length} 题`:'未填写'},
+ 'radial-stakeholders.html':
+  s=>{const r=s.radials&&s.radials.stakeholders;const p=(r&&(r.petals||r.items))||[];return p.length?p.map(x=>esc(x.label||x.text||'')).filter(Boolean).join('、').slice(0,50):'未填写'},
+ 'table-extremes.html':
+  s=>{const r=rowsOf(s.tables&&s.tables.extremes);return r.length?`${r.length} 位极端用户`:'未填写'},
+ 'storyboard.html':
+  s=>{const fr=(s.storyboard&&s.storyboard.frames)||[];return fr.length?`${fr.length} 格：${esc((fr[0]&&fr[0].title)||'')}→${esc((fr[fr.length-1]&&fr[fr.length-1].title)||'')}`:'未填写'},
+ 'table-competitors.html':
+  s=>{const r=rowsOf(s.tables&&s.tables.competitors);return r.length?`${r.length} 个竞品`:'未填写'},
+ 'research-query.html':
+  s=>{const q=s.deskResearch&&s.deskResearch.query;if(!q||!q.question)return '未填写';return `<b>${esc(q.question).slice(0,36)}</b> · ${(q.subQuestions||[]).length} 个子问题`},
+ 'source-board.html':
+  s=>{const a=(s.deskResearch&&s.deskResearch.sources)||[];if(!a.length)return '未填写';const k=a.filter(x=>x.status==='keep').length,low=a.filter(x=>(x.credibility||3)<=2).length;return `${a.length} 条来源 · 采纳 ${k}${low?` · ${low} 条低可信`:''}`},
+ 'pov.html':
+  s=>{const p=s.define&&s.define.pov;if(!p||!p.user)return '未填写';return `<b>${esc(p.user)}</b> 需要 ${esc(p.need||'…')}`},
+ 'value-canvas.html':
+  s=>{const vc=s.valueCanvas;if(!vc)return '未填写';const pains=(vc.pains||[]).length,gains=(vc.gains||[]).length;return `痛点 ${pains} 个 · 收益 ${gains} 个`},
+ 'board-insights.html':
+  s=>{const b=s.boards&&s.boards.insights;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'},
+ 'radial-view360.html':
+  s=>{const r=s.radials&&s.radials.view360;const p=(r&&(r.petals||r.items))||[];return p.length?p.map(x=>esc(x.label||x.text||'')).filter(Boolean).join('、').slice(0,50):'未填写'},
+ 'board-ninegrid.html':
+  s=>{const b=s.boards&&s.boards.ninegrid;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'},
+ 'radial-daisy.html':
+  s=>{const r=s.radials&&s.radials.daisy;const p=(r&&(r.petals||r.items))||[];return p.length?`${p.length} 个花瓣`:'未填写'},
+ 'table-assumptions.html':
+  s=>{const r=rowsOf(s.tables&&s.tables.assumptions);return r.length?`${r.length} 条假设`:'未填写'},
+ 'synthesis.html':
+  s=>{const y=s.deskResearch&&s.deskResearch.synthesis;if(!y)return '未填写';return `共识 ${(y.consensus||[]).length} · 分歧 ${(y.divergence||[]).length} · 不确定 ${(y.uncertain||[]).length}`},
+ 'gap-analysis.html':
+  s=>{const g=s.deskResearch&&s.deskResearch.gaps;if(!g)return '未填写';return `已知 ${(g.known||[]).length} · 未知 ${(g.unknown||[]).length} · 需验证 ${(g.toVerify||[]).length}`},
+ 'research-report.html':
+  s=>{const r=s.deskResearch&&s.deskResearch.report;if(!r)return '未填写';const f=(r.findings||[])[0];return f?`<b>发现：</b>${esc(f.text||'').slice(0,40)}… 共 ${(r.findings||[]).length} 条`:'已写背景，待补发现'},
+ 'matrix.html':
+  s=>{const mx=s.ideate&&s.ideate.matrix;if(!mx)return '未填写';const it=mx.items||(Object.values(mx).find(v=>Array.isArray(v)))||[];const qw=it.filter(x=>(x.y||x.impact||0)>=3&&(x.x||6-(x.effort||3))>=3).length;return it.length?`${it.length} 个点子，${qw} 个 Quick Win`:'已填写'},
+ 'scamper.html':
+  s=>{const sc=s.ideate&&s.ideate.scamper;if(!sc)return '未填写';const filled=Object.values(sc).filter(v=>Array.isArray(v)?v.length:v).length;return `${filled}/7 个维度已填写`},
+ 'board-crazy8.html':
+  s=>{const b=s.boards&&s.boards.crazy8;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 个草图方案`:'未填写'},
+ 'board-brainstorm.html':
+  s=>{const b=s.boards&&s.boards.brainstorm;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'},
+ 'table-reversal.html':
+  s=>{const r=rowsOf(s.tables&&s.tables.reversal);return r.length?`${r.length} 条反转`:'未填写'},
+ 'table-analogy.html':
+  s=>{const r=rowsOf(s.tables&&s.tables.analogy);return r.length?`${r.length} 个对标`:'未填写'},
+ 'table-ideas.html':
+  s=>{const r=rowsOf(s.tables&&s.tables.ideas);return r.length?`${r.length} 个点子`:'未填写'},
+ 'box.html':
+  s=>{const pt=s.prototype;if(!pt)return '未填写';const bx=pt.box||pt;const name=bx.name||bx.solution||'';const slogan=bx.slogan||'';return name?`<b>${esc(name)}</b>${slogan?' · '+esc(slogan.slice(0,30)):''}`:slogan?esc(slogan.slice(0,50)):'已填写'},
+ 'board-shelf.html':
+  s=>{const b=s.boards&&s.boards.shelf;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 个方案`:'未填写'},
+ 'board-workshop.html':
+  s=>{const b=s.boards&&s.boards.workshop;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 张卡片`:'未填写'},
+ 'board-mvp.html':
+  s=>{const b=s.boards&&s.boards.mvp;if(!b)return '未填写';const hy=((b.cards&&b.cards.hypo)||[]).map(x=>x.text).filter(Boolean)[0]||b.hypothesis||'';return hy?`<b>假设：</b>${esc(hy).slice(0,50)}…`:(has(b.cards)?'已填写':'未填写')},
+ 'table-blueprint.html':
+  s=>{const r=rowsOf(s.tables&&s.tables.blueprint);return r.length?`${r.length} 个触点`:'未填写'},
+ 'research-plan.html':
+  s=>{const rp=s.researchPlan;if(!rp)return '未填写';const h=(rp.hypotheses||[]).filter(x=>x.selected).length,q=(rp.script&&((rp.script.warmup||[]).concat(rp.script.main||[]).concat(rp.script.wrap||[]))||[]).length;return `${h} 条假设 · ${q} 题提纲`},
+ 'ab-test.html':
+  s=>{const ab=s.test&&s.test.ab;if(!ab||!ab.a)return '未填写';return ab.a.n?`A: ${ab.a.n} 人 · B: ${(ab.b&&ab.b.n)||0} 人`:'已建立但无数据'},
+ 'table-testplan.html':
+  s=>{const r=rowsOf(s.tables&&s.tables.testplan);return r.length?`${r.length} 个测试场景`:'未填写'},
+ 'board-feedback.html':
+  s=>{const b=s.boards&&s.boards.feedback;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 条反馈`:'未填写'},
+ 'table-experiments.html':
+  s=>{const r=rowsOf(s.tables&&s.tables.experiments);return r.length?`${r.length} 条试验`:'未填写'},
+ 'board-retro.html':
+  s=>{const b=s.boards&&s.boards.retro;if(!b)return '未填写';const n=Object.values(b.cards||{}).flat().length;return n?`${n} 条复盘`:'未填写'},
+};
+// [阶段, 中文名, 文件, 有数据?, 重要(1核心/2补充), 预览函数, 数据路径]
+const TOOLS=DT.TOOLS.map(t=>[t.phase,t.name,t.file,s=>DT.hasData(t,s),t.core,PV[t.file]||(s=>DT.hasData(t,s)?'已填写':'未填写'),t.path.join(', ')]);
+const exists=f=>!!(DT.pages&&DT.pages.indexOf(f)>=0);
 
 function collectVerify(s){
   const out=[];
@@ -384,7 +389,7 @@ function nextSteps(s){
   const hasPersona=has(s.personas);
   const hasPOV=has(s.define);
   const mx=s.ideate&&s.ideate.matrix;const hasMatrix=mx&&has(mx.items||Object.values(mx).find(v=>Array.isArray(v)));
-  const hasProto=has(s.prototype)||B('mvp')(s);
+  const hasProto=has(s.prototype)||okFile('board-mvp.html',s);
   const hasResearch=has(s.researchPlan&&s.researchPlan.hypotheses);
   const hasVC=has(s.valueCanvas);
   if(!hasPersona) steps.push({t:'建立用户画像',d:'用 AI 生成第一个画像，作为后续所有工具的基础',f:'persona.html',ok:false});
@@ -504,7 +509,7 @@ function render(){
       prev.innerHTML=tool[5](s);
       card.appendChild(prev);
       const acts=h('div',{class:'db-tool-actions'});
-      if(ok) acts.appendChild(h('a',{href:tool[2]},'打开 →'));
+      if(ok||exists(tool[2])) acts.appendChild(h('a',{href:tool[2]},ok?'打开 →':'打开空白页'));
       const cp=h('button',{},ok?'继续优化':'复制生成指令');
       cp.onclick=()=>{
         const p=genPrompt(tool);

@@ -1,10 +1,11 @@
 const DT=(function(){
+ const REG=/*DT_TOOLS*/null||{phases:[],tools:[]};// 由 dev/build.py 从 tools.json 注入
  const raw=document.getElementById('dt-data').textContent.trim();
  let init={};try{init=raw&&raw.indexOf('DT_DATA')<0?JSON.parse(raw):{}}catch(e){console.error('数据解析失败',e)}
  const tpl=document.body.dataset.tpl||'page';
  const clone=o=>JSON.parse(JSON.stringify(o));
  const PRJ=(init.meta&&init.meta.project)||'default',SK='dt:shared:'+PRJ,OWN='dt:'+tpl+':'+PRJ+':'+(init._target||'');
- const strip=o=>{const c=clone(o);delete c._target;delete c._rev;return c};
+ const strip=o=>{const c=clone(o);delete c._target;delete c._rev;delete c._pages;return c};
  const HS=(function(t){let x=5381;for(let i=0;i<t.length;i++)x=((x<<5)+x+t.charCodeAt(i))|0;return String(x>>>0)})(JSON.stringify(strip(init)));
  const REV=init._rev||'';
  // 同一项目的所有页面共享一份数据（dt:shared:<项目>）；若本页比共享数据旧，则只在本页独立保存，避免覆盖。
@@ -30,7 +31,11 @@ const DT=(function(){
  async function copy(t,msg){try{await navigator.clipboard.writeText(t);toast(msg||'已复制')}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(msg||'已复制')}catch(_){toast('复制失败，请改用导出 JSON')}ta.remove()}}
  const out=()=>strip(st);
  function aiBadge(){const g=st.meta.generatedBy||'ai';const m={ai:['','AI 假设 · 待验证'],mixed:['info','调研 + AI 推断'],human:['ok','基于真实调研']}[g]||['','AI 假设 · 待验证'];return '<button class="badge '+m[0]+'" id="dt-src" title="数据来源（点击切换）：AI 假设 / 调研 + AI 推断 / 基于真实调研">'+m[1]+'</button>'}
- const PATHS={persona:'personas, personaSteps','empathy-map':'empathyMap',journey:'journey',hook:'hook',pov:'define',scamper:'ideate.scamper, ideate.matrix',matrix:'ideate.matrix',box:'prototype','ab-test':'test.ab',storyboard:'storyboard','value-canvas':'valueCanvas',overview:'meta','research-plan':'researchPlan','research-query':'deskResearch.query','source-board':'deskResearch.sources',synthesis:'deskResearch.synthesis','gap-analysis':'deskResearch.gaps','research-report':'deskResearch.report',dashboard:'全部'};
+ const GEN=['board','table','radial'];
+ const PATHS={overview:'meta',dashboard:'全部'};REG.tools.forEach(t=>{if(GEN.indexOf(t.tpl)<0)PATHS[t.tpl]=t.path.join(', ')});
+ const hasV=o=>{if(o==null)return false;if(Array.isArray(o))return o.length>0;if(typeof o==='object')return Object.keys(o).some(k=>k!=='id'&&hasV(o[k]));return String(o).trim()!==''&&o!==false&&o!==0};
+ const at=(o,p)=>p.split('.').reduce((a,k)=>a==null?undefined:a[k],o);
+ const hasData=(t,s)=>t.check.some(p=>hasV(at(s||st,p)));
  const PATH=()=>init._target||PATHS[tpl]||'全部';
  function header(){const hd=$('dt-head');
   hd.innerHTML='<div><h1>'+esc(opts.title)+'<small>'+esc(opts.en||'')+'</small></h1><div class="sub">'+esc(st.meta.project||'')+(opts.subtitle?' · '+esc(opts.subtitle()):'')+' '+aiBadge()+'</div></div><div class="tools" id="dt-tools"></div>';
@@ -41,7 +46,7 @@ const DT=(function(){
   b('导出 JSON','',()=>dl((st.meta.project||'project')+'.json',JSON.stringify(out(),null,2),'application/json'));
   b('导入','',openImport,'粘贴 JSON 数据替换当前页面');
   b('重置','',()=>{if(!confirm('清除本项目所有页面的本地修改，恢复 agent 生成的初始数据？'))return;try{localStorage.removeItem(KEY)}catch(e){}st=strip(init);st.meta=st.meta||{};rerender();toast('已恢复初始数据')},'清除本地修改')}
- const TOPS=['meta','personas','personaSteps','empathyMap','journey','hook','define','ideate','prototype','test','boards','tables','radials','storyboard','valueCanvas','researchPlan','deskResearch'];
+ const TOPS=['meta'].concat(...REG.tools.map(t=>t.path.concat(t.check).map(p=>p.split('.')[0]))).filter((x,i,a)=>a.indexOf(x)===i);
  const isObj=o=>o!==null&&typeof o==='object'&&!Array.isArray(o);
  function deep(a,b){if(!isObj(a)||!isObj(b))return clone(b);const r=Object.assign({},a);for(const k in b)r[k]=deep(a[k],b[k]);return r}
  function setPath(path,val){const ks=path.split('.');let o=st;for(let i=0;i<ks.length-1;i++){if(!isObj(o[ks[i]]))o[ks[i]]={};o=o[ks[i]]}const k=ks[ks.length-1];o[k]=isObj(o[k])&&isObj(val)?deep(o[k],val):clone(val)}
@@ -89,5 +94,5 @@ const DT=(function(){
   document.addEventListener('keydown',e=>{if(e.key==='Escape')$('dt-modal').classList.remove('open')});
   window.addEventListener('storage',e=>{if(e.key!==KEY||!e.newValue)return;try{const o=JSON.parse(e.newValue);if(o.__base===HS){st=o.st;st.meta=st.meta||{};rerender()}}catch(_){}});
   rerender();if(fresh)setTimeout(()=>toast('已载入 agent 生成的新版本数据（旧的本地修改已备份）'),300);if(older)setTimeout(()=>toast('本页数据比其他已打开的页面旧，修改只保存在本页'),300)}
- return {get st(){return st},get,save,toast,esc,ed,h,nid,dl,copy,boot,rerender,evBtn,list,openImport,importData,aiPanel,ctx,srcPick,target:init._target||''};
+ return {get st(){return st},get,save,toast,esc,ed,h,nid,dl,copy,boot,rerender,evBtn,list,openImport,TOOLS:REG.tools,PHASES:REG.phases,hasData,has:hasV,pages:init._pages||null,importData,aiPanel,ctx,srcPick,target:init._target||''};
 })();

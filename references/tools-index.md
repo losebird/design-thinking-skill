@@ -2,50 +2,53 @@
 
 渲染：`python3 scripts/render.py <模板> <数据.json> <输出.html> [--target 路径]`，或 `--all <数据.json> <目录>` 一次生成全部。通用模板（board/table/radial）的预设见 `presets/`，用 `--list` 查看、`--preset boards.retro` 打印。数据只需写 `cards` / `rows` / `items`，预设会自动补齐列定义与说明。
 
+<!-- tools:start（由 dev/build.py 根据 tools.json 生成，请勿手改） -->
 | 阶段 | 工具 | 模板 / 输出文件 | 数据路径 | 方法 |
 |---|---|---|---|---|
+| 全程 | 项目仪表盘（入口） | dashboard / dashboard.html | 整个项目 | SKILL.md |
 | 全程 | 项目总览 + 工具速查 | overview / overview.html | 整个项目 | 本文件 |
+| 共情 | 用户画像 Persona | persona / persona.html | `personas`、`personaSteps` | empathize.md §4 |
+| 共情 | 移情图 Empathy Map | empathy-map / empathy-map.html | `empathyMap` | empathize.md §5 |
+| 共情 | 顾客旅程图 | journey / journey.html | `journey` | empathize.md §6 |
+| 共情 | Hook 上瘾模型 | hook / hook.html | `hook` | empathize.md §7 |
 | 共情 | AEIOU 观察 | board / board-aeiou.html | `boards.aeiou` | empathize.md §3 |
 | 共情 | 访谈提纲 | table / table-interview.html | `tables.interview` | empathize.md §2 |
-| 共情 | 用户画像（10 步 + 画布） | persona / persona.html | `personas`、`personaSteps` | empathize.md §4 |
-| 共情 | 移情图 | empathy-map / empathy-map.html | `empathyMap` | empathize.md §5 |
-| 共情 | 极端 / 未来 / 领先用户 | table / table-extremes.html | `tables.extremes` | empathize.md §8 |
-| 共情 | 顾客旅程图 | journey / journey.html | `journey` | empathize.md §6 |
-| 共情 | Hook 上瘾模型 + 伦理 | hook / hook.html | `hook` | empathize.md §7 |
+| 共情 | AEIOU 问卷 | table / table-survey.html | `tables.survey` | empathize.md §3 |
+| 共情 | 利益相关者地图 | radial / radial-stakeholders.html | `radials.stakeholders` | empathize.md §1 |
+| 共情 | 极端 / 未来用户 | table / table-extremes.html | `tables.extremes` | empathize.md §8 |
+| 共情 | 故事板 Storyboard | storyboard / storyboard.html | `storyboard` | empathize.md §6 |
 | 共情 | 竞品分析 | table / table-competitors.html | `tables.competitors` | empathize.md §9 |
+| 共情 | 研究问题拆解 | research-query / research-query.html | `deskResearch.query` | desk-research.md §2.1 |
+| 共情 | 来源管理板 | source-board / source-board.html | `deskResearch.sources` | desk-research.md §2.2 |
+| 定义 | JTBD → PoV → HMW | pov / pov.html | `define` | define.md §3–6 |
+| 定义 | 价值主张画布 | value-canvas / value-canvas.html | `valueCanvas` | define.md §2 |
 | 定义 | 洞察聚类 | board / board-insights.html | `boards.insights` | define.md §1 |
 | 定义 | 360 度视角 | radial / radial-view360.html | `radials.view360` | define.md §2 |
-| 定义 | 九宫格视窗 | board / board-ninegrid.html | `boards.ninegrid` | define.md §2 |
+| 定义 | 九宫格 | board / board-ninegrid.html | `boards.ninegrid` | define.md §2 |
 | 定义 | 雏菊图 | radial / radial-daisy.html | `radials.daisy` | define.md §2 |
-| 定义 | JTBD → PoV → HMW | pov / pov.html | `define` | define.md §3–6 |
 | 定义 | 关键假设清单 | table / table-assumptions.html | `tables.assumptions` | define.md §2 |
+| 定义 | 综合矩阵 | synthesis / synthesis.html | `deskResearch.synthesis` | desk-research.md §2.3 |
+| 定义 | 研究空白 | gap-analysis / gap-analysis.html | `deskResearch.gaps` | desk-research.md §2.4 |
+| 定义 | 研究报告 | research-report / research-report.html | `deskResearch.report` | desk-research.md §2.5 |
+| 构思 | 丘吉尔矩阵 | matrix / matrix.html | `ideate.matrix` | ideate.md §9 |
+| 构思 | SCAMPER 奔驰法 | scamper / scamper.html | `ideate.scamper`、`ideate.matrix` | ideate.md §4 |
+| 构思 | Crazy 8s | board / board-crazy8.html | `boards.crazy8` | ideate.md §3 |
 | 构思 | 头脑风暴墙 | board / board-brainstorm.html | `boards.brainstorm` | ideate.md §3 |
-| 构思 | SCAMPER | scamper / scamper.html | `ideate.scamper` | ideate.md §4 |
 | 构思 | 问题反转 | table / table-reversal.html | `tables.reversal` | ideate.md §5 |
 | 构思 | 跨行业对标 | table / table-analogy.html | `tables.analogy` | ideate.md §6 |
 | 构思 | 点子沟通表 | table / table-ideas.html | `tables.ideas` | ideate.md §8 |
-| 构思 | 丘吉尔矩阵 | matrix / matrix.html | `ideate.matrix` | ideate.md §9 |
-| 原型 | 盒子原则 + 类型 + 保真度 | box / box.html | `prototype` | prototype.md §2–4 |
+| 原型 | 盒子原则 + 保真度 | box / box.html | `prototype` | prototype.md §2–4 |
 | 原型 | 架子原则 | board / board-shelf.html | `boards.shelf` | prototype.md §5 |
 | 原型 | 原型工作坊 | board / board-workshop.html | `boards.workshop` | prototype.md §6 |
+| 原型 | MVP 画布 | board / board-mvp.html | `boards.mvp` | prototype.md §4 |
 | 原型 | 服务蓝图 | table / table-blueprint.html | `tables.blueprint` | prototype.md §2 |
+| 测试 | 用户研究计划 | research-plan / research-plan.html | `researchPlan` | test.md §1 |
+| 测试 | A/B 测试 | ab-test / ab-test.html | `test.ab` | test.md §4 |
 | 测试 | 测试计划 | table / table-testplan.html | `tables.testplan` | test.md §2 |
 | 测试 | 反馈收集表 | board / board-feedback.html | `boards.feedback` | test.md §3 |
-| 测试 | A/B 测试 | ab-test / ab-test.html | `test.ab` | test.md §4 |
 | 测试 | 试验表 | table / table-experiments.html | `tables.experiments` | test.md §5 |
 | 反思 | 回溯板 | board / board-retro.html | `boards.retro` | reflect.md |
-| 共情 | AEIOU 问卷 | table / table-survey.html | `tables.survey` | empathize.md §3 |
-| 共情 | 利益相关者地图 | radial / radial-stakeholders.html | `radials.stakeholders` | empathize.md §1 |
-| 共情 | 故事板（场景分镜） | storyboard / storyboard.html | `storyboard` | empathize.md §6 |
-| 定义 | 价值主张画布 | value-canvas / value-canvas.html | `valueCanvas` | define.md §2 |
-| 构思 | Crazy 8s 快速草图 | board / board-crazy8.html | `boards.crazy8` | ideate.md §3 |
-| 原型 | MVP 画布 | board / board-mvp.html | `boards.mvp` | prototype.md §4 |
-| 测试 | 用户研究计划 | research-plan / research-plan.html | `researchPlan` | test.md §1 |
-| 共情 | 研究问题拆解（桌面研究） | research-query / research-query.html | `deskResearch.query` | desk-research.md §2.1 |
-| 共情 | 来源管理板（桌面研究） | source-board / source-board.html | `deskResearch.sources` | desk-research.md §2.2 |
-| 定义 | 综合矩阵（桌面研究） | synthesis / synthesis.html | `deskResearch.synthesis` | desk-research.md §2.3 |
-| 定义 | 研究空白（桌面研究） | gap-analysis / gap-analysis.html | `deskResearch.gaps` | desk-research.md §2.4 |
-| 定义 | 研究报告（桌面研究） | research-report / research-report.html | `deskResearch.report` | desk-research.md §2.5 |
+<!-- tools:end -->
 
 只有方法、没有专门页面的：发言棒、正念、WH 问题（并入访谈提纲）、草图、理想原型、MVP。需要时可自建 `boards.<新key>` / `tables.<新key>`（自带 `title`、`columns`），通用模板同样能渲染。
 

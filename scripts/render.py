@@ -20,27 +20,33 @@ from validate import check
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 TPL, PRE = ROOT / "templates", ROOT / "presets"
 GENERIC = {"boards": "board", "tables": "table", "radials": "radial"}
-PAGES = [  # (输出文件, 模板, 判断数据是否存在)
-    ("overview.html", "overview", lambda d: True),
-    ("persona.html", "persona", lambda d: bool(d.get("personas") or d.get("persona"))),
-    ("empathy-map.html", "empathy-map", lambda d: bool(d.get("empathyMap"))),
-    ("journey.html", "journey", lambda d: bool((d.get("journey") or {}).get("stages"))),
-    ("hook.html", "hook", lambda d: bool(d.get("hook"))),
-    ("pov.html", "pov", lambda d: bool(d.get("define"))),
-    ("scamper.html", "scamper", lambda d: bool((d.get("ideate") or {}).get("scamper"))),
-    ("matrix.html", "matrix", lambda d: bool((d.get("ideate") or {}).get("matrix"))),
-    ("box.html", "box", lambda d: bool(d.get("prototype"))),
-    ("storyboard.html", "storyboard", lambda d: bool((d.get("storyboard") or {}).get("frames"))),
-    ("value-canvas.html", "value-canvas", lambda d: bool(d.get("valueCanvas"))),
-    ("ab-test.html", "ab-test", lambda d: bool((d.get("test") or {}).get("ab"))),
-    ("research-plan.html", "research-plan", lambda d: bool(d.get("researchPlan"))),
-    ("research-query.html", "research-query", lambda d: bool(((d.get("deskResearch") or {}).get("query") or {}).get("question"))),
-    ("source-board.html", "source-board", lambda d: bool((d.get("deskResearch") or {}).get("sources"))),
-    ("synthesis.html", "synthesis", lambda d: any(((d.get("deskResearch") or {}).get("synthesis") or {}).get(k) for k in ("consensus", "divergence", "uncertain"))),
-    ("gap-analysis.html", "gap-analysis", lambda d: any(((d.get("deskResearch") or {}).get("gaps") or {}).get(k) for k in ("known", "unknown", "toVerify"))),
-    ("research-report.html", "research-report", lambda d: bool(((d.get("deskResearch") or {}).get("report") or {}).get("background") or ((d.get("deskResearch") or {}).get("report") or {}).get("findings"))),
-    ("dashboard.html", "dashboard", lambda d: True),
-]
+REG = json.loads((ROOT / "tools.json").read_text("utf-8"))
+
+
+def has(o):
+    """与页面 DT.has 一致：空字符串 / 空数组 / 只有 id 的对象 / false / 0 视为无内容。"""
+    if o is None or o is False: return False
+    if isinstance(o, list): return len(o) > 0
+    if isinstance(o, dict): return any(k != "id" and has(v) for k, v in o.items())
+    if isinstance(o, (int, float)): return o != 0
+    return str(o).strip() != ""
+
+
+def at(d, path):
+    for k in path.split("."):
+        if not isinstance(d, dict): return None
+        d = d.get(k)
+    return d
+
+
+def has_data(tool, d):
+    return any(has(at(d, p)) for p in tool["check"])
+
+
+# (输出文件, 模板, 判断数据是否存在)——专用模板来自 tools.json；通用模板（board/table/radial）按数据中的键生成
+PAGES = [("overview.html", "overview", lambda d: True)] + [
+    (t["file"], t["tpl"], (lambda t: lambda d: has_data(t, d))(t)) for t in REG["tools"] if t["tpl"] not in GENERIC.values()
+] + [("dashboard.html", "dashboard", lambda d: True)]
 
 
 def load_presets():
@@ -113,8 +119,10 @@ def tpl_path(name):
     return p
 
 
-def render(tpl, data, out, target=None, rev=None):
+def render(tpl, data, out, target=None, rev=None, pages=None):
     data = with_presets(data)
+    if pages is not None:
+        data["_pages"] = pages  # 已生成的页面，仪表盘 / 总览据此显示“打开”链接
     data["_rev"] = rev or datetime.datetime.now().isoformat(timespec="seconds")  # 渲染时间，页面据此判断数据新旧
     if target:
         data["_target"] = target
@@ -132,15 +140,14 @@ def render(tpl, data, out, target=None, rev=None):
 
 
 def render_all(data, outdir):
-    outdir, made = pathlib.Path(outdir), []
+    outdir = pathlib.Path(outdir)
     rev = datetime.datetime.now().isoformat(timespec="seconds")
-    for fname, tpl, ok in PAGES:
-        if ok(data):
-            made.append(render(tpl, data, outdir / fname, rev=rev))
+    jobs = [(tpl, fname, None) for fname, tpl, ok in PAGES if ok(data)]
     for group, tpl in GENERIC.items():
         for key in (data.get(group) or {}):
-            made.append(render(tpl, data, outdir / f"{tpl}-{key}.html", f"{group}.{key}", rev))
-    return made
+            jobs.append((tpl, f"{tpl}-{key}.html", f"{group}.{key}"))
+    pages = [f for _, f, _ in jobs]
+    return [render(tpl, data, outdir / f, target, rev, pages) for tpl, f, target in jobs]
 
 
 def report(data):

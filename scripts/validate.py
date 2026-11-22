@@ -19,9 +19,9 @@ def check(d):
         return ["顶层必须是 JSON 对象"], []
 
     # 顶层结构检查
-    KNOWN_TOP = {'meta','personas','personaSteps','empathyMap','journey','hook','define',
-                 'ideate','prototype','test','boards','tables','radials',
-                 'storyboard','valueCanvas','researchPlan','deskResearch','project','name','_target','_rev'}
+    reg = json.loads((pathlib.Path(__file__).resolve().parent.parent / "tools.json").read_text("utf-8"))
+    KNOWN_TOP = {p.split(".")[0] for t in reg["tools"] for p in t["path"] + t["check"]} | {
+        'meta', 'project', 'name', '_target', '_rev', '_pages'}
     SHOULD_NEST = {'pov':'define.pov','scamper':'ideate.scamper','matrix':'ideate.matrix',
                    'box':'prototype.box','plan':'prototype.plan','ab':'test.ab'}
     for k in d:
