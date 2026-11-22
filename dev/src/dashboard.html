@@ -258,7 +258,10 @@ function render(){
   const totalT=TOOLS.length,doneT=TOOLS.filter(t=>t[3](s)).length;
   const coreT=TOOLS.filter(t=>t[4]===1),coreDoneT=coreT.filter(t=>t[3](s)).length;
   const vl=collectVerify(s);
-  const checked=(s.meta._vchecked||[]);
+  // _vchecked 存 localStorage 避免污染 JSON 导出
+  const vcKey='dt:vchecked:'+(s.meta.project||'default');
+  let _vcArr=null;const vcLoad=()=>{if(_vcArr)return _vcArr;try{_vcArr=JSON.parse(localStorage.getItem(vcKey)||'[]')}catch(e){_vcArr=[];}return _vcArr};const vcSave=()=>{try{localStorage.setItem(vcKey,JSON.stringify(vcLoad()))}catch(e){}};
+  const checked=vcLoad();
   const pendV=vl.filter(x=>!checked.includes(x.t)).length;
   const stat=h('div',{class:'db-stats'});
   [[doneT+' / '+totalT,'工具已填写','var(--blue)'],[coreDoneT+' / '+coreT.length,'核心工具','var(--green)'],[pendV,'待验证项','var(--orange)'],[(PH.find(p=>p.k===s.meta.phase)||PH[0]).n,'当前阶段','var(--purple)']].forEach(([v,l,c])=>{
@@ -286,7 +289,7 @@ function render(){
       const tool=TOOLS.find(t=>t[2]===n.f);
       if(tool){
         const cp=h('button',{},'复制生成指令');
-        cp.onclick=()=>{const p=genPrompt(tool);navigator.clipboard&&navigator.clipboard.writeText(p).then(()=>DT.toast('已复制，粘贴给 AI 即可'));};
+        cp.onclick=()=>{const p=genPrompt(tool);DT.copy(p,'已复制，粘贴给 AI 即可')};
         na.appendChild(cp);
       }
     }
@@ -324,7 +327,7 @@ function render(){
       const cp=h('button',{},ok?'继续优化':'复制生成指令');
       cp.onclick=()=>{
         const p=genPrompt(tool);
-        navigator.clipboard&&navigator.clipboard.writeText(p).then(()=>DT.toast('已复制，粘贴给 AI'));
+        DT.copy(p,'已复制，粘贴给 AI');
         // 展开 AI 面板
         const panel=document.getElementById('db-ai-panel');
         if(panel){panel.classList.add('open');document.getElementById('db-ai-prompt').textContent=p;}
@@ -347,10 +350,10 @@ function render(){
       const row=h('div',{class:'db-verify-item'+(isChecked?' checked':'')});
       const cb=h('input',{type:'checkbox','aria-label':'标记为已验证'});cb.checked=isChecked;
       cb.onchange=()=>{
-        const vc=s.meta._vchecked=s.meta._vchecked||[];
+        const vc=vcLoad();
         if(cb.checked&&!vc.includes(item.t)) vc.push(item.t);
         else{const i=vc.indexOf(item.t);if(i>=0)vc.splice(i,1);}
-        save();render();
+        vcSave();render();
       };
       row.appendChild(cb);
       row.appendChild(h('span',{style:'flex:1'},esc(item.t)));
@@ -372,7 +375,7 @@ function render(){
   const promptPre=h('div',{class:'db-prompt-box',id:'db-ai-prompt'},'（点击工具卡片的「复制生成指令」后，prompt 会出现在这里）');
   aibody.appendChild(promptPre);
   const pa=h('div',{class:'db-prompt-actions'});
-  const cpAll=h('button',{class:'primary'},'复制');cpAll.onclick=()=>{const t=document.getElementById('db-ai-prompt').textContent;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>DT.toast('已复制'))};
+  const cpAll=h('button',{class:'primary'},'复制');cpAll.onclick=()=>{const t=document.getElementById('db-ai-prompt').textContent;DT.copy(t,'已复制')};
   const impAll=h('button',{},'导入 AI 返回的 JSON');impAll.onclick=()=>DT.openImport();
   pa.append(cpAll,impAll);
   aibody.appendChild(pa);

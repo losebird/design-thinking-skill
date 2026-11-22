@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/代码-MIT-blue.svg)](LICENSE)
 [![Content: CC BY-NC-SA 4.0](https://img.shields.io/badge/内容-CC%20BY--NC--SA%204.0-lightgrey.svg)](LICENSE)
 [![Tools](https://img.shields.io/badge/工具页面-35个-orange.svg)](references/tools-index.md)
+[![Version](https://img.shields.io/badge/版本-1.2.0-green.svg)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/Python-3.8+-green.svg)]()
 
 让 AI agent 带你走完设计思维全流程：**共情 → 定义视角 → 构思 → 原型 → 测试 → 反思**。每个步骤、每个工具都会生成一个**可交互的图形化页面**，直接在浏览器里打开，无需服务器、无需联网。

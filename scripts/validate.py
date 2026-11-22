@@ -7,7 +7,18 @@
 """
 import json, re, sys, pathlib
 
-SOL = re.compile(r"(App|APP|app|应用|小程序|平台|系统|功能|按钮|界面|页面|网站|设备|机器|柜|台灯|灯具|推送|通知|算法|插件|软件|硬件|二维码|优惠券|会员卡|机器人|AI|传感器|屏幕)")
+SOL_TERMS = ["App","APP","app","应用","小程序","平台","系统","功能","按钮","界面","页面","网站","设备","机器","柜","台灯","灯具","推送","通知","算法","插件","软件","硬件","二维码","优惠券","会员卡","机器人","AI","传感器","屏幕"]
+SOL = re.compile(r"(" + "|".join(re.escape(t) for t in SOL_TERMS) + r")")
+
+
+def sol_check(text, domain_terms=()):
+    """检查文本是否含方案词；domain_terms 为白名单（meta.domainTerms），命中则跳过。"""
+    m = SOL.search(text)
+    if not m:
+        return None
+    if m.group(1) in (domain_terms or []):
+        return None
+    return m.group(1)
 EV = {"quote", "observed", "inferred", "assumed"}
 EM_ZONES = ["sees", "hears", "says", "does", "thinks", "feels", "pains", "gains"]
 
@@ -17,6 +28,10 @@ def check(d):
     err, warn = E.append, W.append
     if not isinstance(d, dict):
         return ["顶层必须是 JSON 对象"], []
+
+    # domainTerms 白名单（meta.domainTerms 中的词不触发 SOL 方案词告警）
+    domain_terms = (d.get("meta") or {}).get("domainTerms") or []
+    sol = lambda text: sol_check(text, domain_terms)
 
     # 顶层结构检查
     reg = json.loads((pathlib.Path(__file__).resolve().parent.parent / "tools.json").read_text("utf-8"))
@@ -60,7 +75,7 @@ def check(d):
         if j and not all(j.get(k) for k in ("functional", "emotional", "social")):
             warn(f"personas[{i}].jobs 应区分功能 / 情感 / 社交三类需求")
         for x in p.get("pains") or []:
-            if isinstance(x, dict) and SOL.search(x.get("text", "")):
+            if isinstance(x, dict) and sol(x.get("text", "")):
                 warn(f"personas[{i}] 痛点含方案词：{x.get('text')}")
 
     # 故事板
@@ -103,7 +118,7 @@ def check(d):
                 if not x.get("targets"):
                     warn(f"valueCanvas.{k}（{x.get('text', '')}）没有对应任何{nm}，可能是“自嗨功能”")
         for x in (vc.get("pains") or []) + (vc.get("jobs") or []) + (vc.get("gains") or []):
-            if SOL.search(x.get("text", "")):
+            if sol(x.get("text", "")):
                 warn(f"valueCanvas 顾客侧含方案词（顾客档案应描述需求而非产品）：{x.get('text')}")
         for x in vc.get("jobs") or []:
             if x.get("type") not in ("functional", "emotional", "social"):
@@ -176,8 +191,8 @@ def check(d):
         pov = df.get("pov") or {}
         if pov.get("format") not in (None, "standard", "story", "storyPain", "hmw"):
             err(f"define.pov.format 无效：{pov.get('format')}")
-        if SOL.search(pov.get("need", "")):
-            warn(f"PoV 需求含方案词（{SOL.search(pov['need']).group(1)}）：方案不是需求，请改写为用户要完成的任务")
+        if sol(pov.get("need", "")):
+            warn(f"PoV 需求含方案词（{sol(pov['need'])}）：方案不是需求，请改写为用户要完成的任务")
         if pov.get("insight") and len(pov["insight"]) < 12:
             warn("PoV 洞察过短，可能是“正确的废话”，请解释“为什么”")
         if not df.get("hmw"):
@@ -236,7 +251,15 @@ def check(d):
         if not isinstance(dr, dict):
             err("deskResearch 应为对象")
         else:
-            check_desk(dr, err, warn)
+            check_desk(dr, err, warn, domain_terms)
+
+    # 研究计划
+    rp_data = d.get("researchPlan")
+    if rp_data is not None:
+        if not isinstance(rp_data, dict):
+            err("researchPlan 应为对象")
+        else:
+            check_research_plan(rp_data, err, warn)
 
     # 通用看板 / 表格 / 环形图
     pre = {}
@@ -275,7 +298,7 @@ def check(d):
     return E, W
 
 
-def check_desk(dr, err, warn):
+def check_desk(dr, err, warn, domain_terms=()):
     """deskResearch：研究问题 → 来源 → 综合 → 空白 → 报告。"""
     def ids(path, arr):
         if not isinstance(arr, list):
@@ -303,8 +326,8 @@ def check_desk(dr, err, warn):
     if q.get("question") and not 3 <= len(subs) <= 7:
         warn(f"deskResearch.query 有 {len(subs)} 个子问题，建议 4–6 个且互不重叠")
     for s in subs:
-        if s.get("angle") != "competitor" and SOL.search(s.get("text", "")):
-            warn(f"研究子问题含方案词（{SOL.search(s['text']).group(1)}），可能预设了答案：{s.get('text')}")
+        if s.get("angle") != "competitor" and sol_check(s.get("text", ""), domain_terms):
+            warn(f"研究子问题含方案词（{sol_check(s['text'], domain_terms)}），可能预设了答案：{s.get('text')}")
 
     srcs = ids("deskResearch.sources", dr.get("sources") or [])
     src_ids = {s.get("id") for s in srcs}
@@ -362,6 +385,66 @@ def check_desk(dr, err, warn):
                 warn(f"研究报告的发现没有关联来源：{x.get('text', '')[:30]}")
     if nonempty(rp) and not any(gp.get(k) for k in ("known", "unknown", "toVerify")):
         warn("deskResearch.report 已填写但 gaps 为空：报告前请先用「研究空白」说明已知 / 未知 / 需验证")
+
+
+def check_research_plan(rp, err, warn):
+    """researchPlan：假设 → 招募 → 访谈脚本 → 分析 → 追踪。"""
+    RISK_SET = {"H", "M", "L"}
+    MODE_SET = {"remote", "inperson", "diary", "usability"}
+    CRIT_TYPE_SET = {"include", "prefer", "exclude"}
+    QTYPE_SET = {"open", "probe", "scenario", "close"}
+
+    def items(path, arr):
+        """提取数组中的 dict 元素，同时检查 id 存在性。"""
+        if not isinstance(arr, list):
+            err(f"{path} 应为数组"); return []
+        seen = set()
+        result = []
+        for i, x in enumerate(arr):
+            if not isinstance(x, dict):
+                continue
+            if not x.get("id"):
+                err(f"{path}[{i}] 缺少 id")
+            elif x["id"] in seen:
+                err(f"{path} 中 id 重复：{x['id']}")
+            seen.add(x.get("id"))
+            result.append(x)
+        return result
+
+    # ① 假设清单
+    hyps = items("researchPlan.hypotheses", rp.get("hypotheses") or [])
+    if not hyps:
+        warn("researchPlan.hypotheses 为空：至少需要 1 条研究假设")
+    for h in hyps:
+        if h.get("risk") and h.get("risk") not in RISK_SET:
+            err(f"researchPlan.hypotheses（{h.get('id')}）risk 只能是 H/M/L")
+        if not h.get("text"):
+            warn(f"researchPlan.hypotheses（{h.get('id')}）text 为空")
+    if hyps and not any(h.get("selected") for h in hyps):
+        warn("researchPlan.hypotheses 没有任何假设被 selected：研究计划应标记本轮验证的假设")
+
+    # ② 招募方案
+    rec = rp.get("recruit") or {}
+    n = rec.get("n")
+    if n is not None and not (isinstance(n, int) and n > 0):
+        err(f"researchPlan.recruit.n 应为正整数，当前为 {n!r}")
+    mode = rec.get("mode")
+    if mode is not None and mode not in MODE_SET:
+        err(f"researchPlan.recruit.mode 只能是 remote/inperson/diary/usability，当前为 {mode!r}")
+    for c in items("researchPlan.recruit.criteria", rec.get("criteria") or []):
+        if c.get("type") and c.get("type") not in CRIT_TYPE_SET:
+            err(f"researchPlan.recruit.criteria（{c.get('id')}）type 只能是 include/prefer/exclude")
+
+    # ③ 访谈脚本
+    script = rp.get("script") or {}
+    for sec in ("warmup", "main", "wrap"):
+        for q in items(f"researchPlan.script.{sec}", script.get(sec) or []):
+            if q.get("type") and q.get("type") not in QTYPE_SET:
+                err(f"researchPlan.script.{sec}（{q.get('id')}）type 只能是 open/probe/scenario/close")
+            if q.get("type") == "close":
+                warn(f"researchPlan.script.{sec}（{q.get('id')}）是封闭式提问（close），定性访谈应优先用开放式问题")
+    if not (script.get("main") or []):
+        warn("researchPlan.script.main 为空：核心问题尚未填写")
 
 
 def main(a):

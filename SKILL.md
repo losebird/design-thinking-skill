@@ -99,7 +99,7 @@ description: 用设计思维（共情 → 定义视角 → 构思 → 原型 →
 
 ## 收到用户贴回的 JSON
 
-贴回的文字会注明“本页负责的数据路径”（如 `empathyMap`、`boards.retro`）。只把这些路径的内容合并回 `project.json`（外加 `meta.generatedBy` 等元信息），其他部分以 `project.json` 为准——因为每个页面各自保存一份副本。简要说明用户改了什么，重新渲染，再继续。
+「复制给 AI」只发本页负责路径的数据 + `meta`（dashboard/overview 发完整数据）。贴回的文字会注明“本页负责的数据路径”（如 `empathyMap`、`boards.retro`）。只把这些路径的内容合并回 `project.json`（外加 `meta.generatedBy` 等元信息），其他部分以 `project.json` 为准——因为每个页面各自保存一份副本。简要说明用户改了什么，重新渲染，再继续。
 
 ## 来源
 

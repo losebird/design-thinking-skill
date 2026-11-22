@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build templates
+        run: python3 dev/build.py
+
+      - name: Verify no uncommitted template/registry changes
+        run: git diff --exit-code templates references/tools-index.md
+
+      - name: Validate examples
+        run: |
+          python3 scripts/validate.py examples/smart-locker.json
+          python3 scripts/validate.py examples/clinic.json
+
+      - name: Render examples
+        run: |
+          python3 scripts/render.py --all examples/smart-locker.json examples/demo
+          python3 scripts/render.py --all examples/clinic.json examples/demo-clinic
+
+      - name: XSS injection test
+        run: python3 dev/xss.py
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Page structural check
+        run: node dev/check.mjs examples/demo examples/demo-clinic --out /tmp/shots

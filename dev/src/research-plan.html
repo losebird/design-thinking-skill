@@ -246,7 +246,7 @@ function render(){
   const rpBtn=h('button',{style:'margin-top:10px'},'生成招募筛选问卷 prompt');
   rpBtn.onclick=()=>{
     const p=buildPrompt(d,'recruit');
-    navigator.clipboard&&navigator.clipboard.writeText(p).then(()=>DT.toast('招募问卷 prompt 已复制'));
+    DT.copy(p,'招募问卷 prompt 已复制');
     document.getElementById('prompt-preview').textContent=p;
     document.getElementById('prompt-section').style.display='';
   };
@@ -294,7 +294,7 @@ function render(){
   const gpBtn=h('button',{class:'primary'},'让 AI 优化提纲');
   gpBtn.onclick=()=>{
     const p=buildPrompt(d,'guide');
-    navigator.clipboard&&navigator.clipboard.writeText(p).then(()=>DT.toast('提纲优化 prompt 已复制'));
+    DT.copy(p,'提纲优化 prompt 已复制');
     document.getElementById('prompt-preview').textContent=p;
     document.getElementById('prompt-section').style.display='';
   };
@@ -380,7 +380,7 @@ function render(){
   const apBtn=h('button',{},'让 AI 分析访谈笔记');
   apBtn.onclick=()=>{
     const p=buildPrompt(d,'analysis');
-    navigator.clipboard&&navigator.clipboard.writeText(p).then(()=>DT.toast('分析 prompt 已复制，请在 AI 对话中粘贴并附上笔记'));
+    DT.copy(p,'分析 prompt 已复制，请在 AI 对话中粘贴并附上笔记');
     document.getElementById('prompt-preview').textContent=p;
     document.getElementById('prompt-section').style.display='';
   };
@@ -416,11 +416,11 @@ function render(){
   ps.appendChild(pb);
   const pa=h('div',{class:'prompt-actions'});
   const cpAll=h('button',{class:'primary'},'复制给 AI');
-  cpAll.onclick=()=>{const t=document.getElementById('prompt-preview').textContent;navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>DT.toast('已复制'))};
+  cpAll.onclick=()=>{const t=document.getElementById('prompt-preview').textContent;DT.copy(t,'已复制')};
   const evalBtn=h('button',{},'让 AI 评分（质量自评）');
   evalBtn.onclick=()=>{
     const p=buildPrompt(d,'eval');
-    navigator.clipboard&&navigator.clipboard.writeText(p).then(()=>DT.toast('质量自评 prompt 已复制'));
+    DT.copy(p,'质量自评 prompt 已复制');
     document.getElementById('prompt-preview').textContent=p;
     document.getElementById('prompt-section').style.display='';
   };
@@ -434,7 +434,7 @@ function render(){
   const qBtn=h('button',{},'让 AI 评分本研究计划');
   qBtn.onclick=()=>{
     const p=buildPrompt(d,'eval');
-    navigator.clipboard&&navigator.clipboard.writeText(p).then(()=>DT.toast('质量自评 prompt 已复制'));
+    DT.copy(p,'质量自评 prompt 已复制');
     document.getElementById('prompt-preview').textContent=p;
     document.getElementById('prompt-section').style.display='';
     document.getElementById('prompt-section').scrollIntoView({behavior:'smooth'});

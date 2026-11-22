@@ -132,13 +132,15 @@ const DT=(function(){
  function get(path,def){if(!path)return st;let o=st;const ks=path.split('.');for(let i=0;i<ks.length;i++){if(o[ks[i]]==null){if(def===undefined)return undefined;o[ks[i]]=i===ks.length-1?def:{}}o=o[ks[i]]}return o}
  function save(){st.meta.updatedAt=new Date().toISOString();try{localStorage.setItem(KEY,JSON.stringify({__base:HS,__rev:REV,st:strip(st)}))}catch(e){}}
  function toast(t){let e=$('dt-toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1800)}
- function ed(el,obj,key,ph,onChange){el.contentEditable='true';el.spellcheck=false;el.classList.add('ed');if(ph)el.dataset.ph=ph;el.textContent=obj[key]==null?'':obj[key];
+ function ed(el,obj,key,ph,onChange){el.contentEditable='true';el.spellcheck=false;el.classList.add('ed');if(ph)el.dataset.ph=ph;el.setAttribute('role','textbox');el.setAttribute('aria-multiline',el.dataset.multi==='1'?'true':'false');if(ph)el.setAttribute('aria-label',ph);el.textContent=obj[key]==null?'':obj[key];
   el.addEventListener('input',()=>{obj[key]=el.textContent;save();onChange&&onChange()});
   el.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&el.dataset.multi!=='1'){e.preventDefault();el.blur()}});return el}
  function h(tag,attrs,html){const e=document.createElement(tag);if(attrs)for(const k in attrs){if(k==='class')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else e.setAttribute(k,attrs[k])}if(html!=null)e.innerHTML=html;return e}
  function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
  async function copy(t,msg){try{await navigator.clipboard.writeText(t);toast(msg||'已复制')}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(msg||'已复制')}catch(_){toast('复制失败，请改用导出 JSON')}ta.remove()}}
- const out=()=>strip(st);
+ // out()：裁剪空结构（null/""/[]/{}，保留 0/false 和数组元素）；去除 meta._vchecked（改存 localStorage）
+ function pruneEmpty(o){if(Array.isArray(o))return o.map(pruneEmpty);if(o!==null&&typeof o==='object'){const r={};for(const k in o){const v=pruneEmpty(o[k]);if(v===null||v===''||(Array.isArray(v)&&!v.length)||(typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===0))continue;r[k]=v}return r}return o}
+ const out=()=>{const c=pruneEmpty(strip(st));if(c.meta)delete c.meta._vchecked;return c};
  function aiBadge(){const g=st.meta.generatedBy||'ai';const m={ai:['','AI 假设 · 待验证'],mixed:['info','调研 + AI 推断'],human:['ok','基于真实调研']}[g]||['','AI 假设 · 待验证'];return '<button class="badge '+m[0]+'" id="dt-src" title="数据来源（点击切换）：AI 假设 / 调研 + AI 推断 / 基于真实调研">'+m[1]+'</button>'}
  const GEN=['board','table','radial'];
  const PATHS={overview:'meta',dashboard:'全部'};REG.tools.forEach(t=>{if(GEN.indexOf(t.tpl)<0)PATHS[t.tpl]=t.path.join(', ')});
@@ -150,7 +152,9 @@ const DT=(function(){
   hd.innerHTML='<div><h1>'+esc(opts.title)+'<small>'+esc(opts.en||'')+'</small></h1><div class="sub">'+esc(st.meta.project||'')+(opts.subtitle?' · '+esc(opts.subtitle()):'')+' '+aiBadge()+'</div></div><div class="tools" id="dt-tools"></div>';
   $('dt-src').onclick=()=>{const o=['ai','mixed','human'];st.meta.generatedBy=o[(o.indexOf(st.meta.generatedBy||'ai')+1)%3];save();header()};const t=$('dt-tools');(opts.extra||[]).forEach(b=>t.appendChild(b));
   const b=(txt,cls,fn,title)=>{const x=h('button',{class:cls||''},txt);if(title)x.title=title;x.onclick=fn;t.appendChild(x)};
-  b('复制给 AI','primary',()=>copy('以下是我在可视化页面中修改后的设计思维项目数据（当前页面「'+opts.title+'」，负责路径：'+PATH()+'）。'+(older?'注意：本页是旧版本，只合并本页负责的路径。':'各页面数据已同步，与 project.json 不同的部分都是我的修改。')+'请合并回 project.json，然后继续：\n```json\n'+JSON.stringify(out(),null,2)+'\n```','已复制，粘贴回对话即可继续'),'把修改后的完整数据复制到剪贴板');
+  // #7：复制给 AI 只含本页路径数据 + meta，减少发给 AI 的 token；dashboard/overview（PATH==='全部'）仍发完整数据
+  const copyPayload=()=>{const ps=myPaths();if(!ps.length)return out();const full=out();const r={meta:full.meta||{}};ps.forEach(p=>{const top=p.split('.')[0];if(full[top]!==undefined)r[top]=full[top]});return r};
+  b('复制给 AI','primary',()=>copy('以下是我在可视化页面中修改后的设计思维项目数据（当前页面「'+opts.title+'」，负责路径：'+PATH()+'）。'+(older?'注意：本页是旧版本，只合并本页负责的路径。':'本页路径的数据已同步，请合并到对应路径。')+'请合并回 project.json，然后继续：\n```json\n'+JSON.stringify(copyPayload(),null,2)+'\n```','已复制，粘贴回对话即可继续'),'把修改后的本页数据复制到剪贴板');
   if(opts.md)b('导出 Markdown','',()=>dl(tpl+'.md',opts.md(),'text/markdown'));
   b('导出 JSON','',()=>dl((st.meta.project||'project')+'.json',JSON.stringify(out(),null,2),'application/json'));
   b('导入','',openImport,'粘贴 JSON 数据替换当前页面');

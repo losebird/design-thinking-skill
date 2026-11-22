@@ -147,6 +147,16 @@ def render_all(data, outdir):
         for key in (data.get(group) or {}):
             jobs.append((tpl, f"{tpl}-{key}.html", f"{group}.{key}"))
     pages = [f for _, f, _ in jobs]
+    # 清理过期页面：注册表中的固定文件名 + board-/table-/radial- 前缀但本次未生成的 html
+    if outdir.exists():
+        reg_files = {fname for fname, _, _ in PAGES}
+        for f in outdir.glob("*.html"):
+            name = f.name
+            is_reg = name in reg_files
+            is_gen = any(name.startswith(p + "-") for p in ("board", "table", "radial"))
+            if (is_reg or is_gen) and name not in pages:
+                f.unlink()
+                print("已删除过期页面", f)
     return [render(tpl, data, outdir / f, target, rev, pages) for tpl, f, target in jobs]
 
 
