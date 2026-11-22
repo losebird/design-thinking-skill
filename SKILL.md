@@ -53,17 +53,22 @@ description: 用设计思维（共情 → 定义视角 → 构思 → 原型 →
 
 前置条件不满足时，**告知用户还缺什么，建议先补齐，而不是强行跳过**。用户明确说"我知道，先继续"时才允许跳过。
 
+> ⚠️ **工具使用时机提醒**：
+> - **用户研究计划**：在共情阶段做访谈/问卷**之前**制定（假设清单、招募方案、访谈脚本）；测试阶段可复用同一工具制定测试脚本。
+> - **价值主张画布**：定义阶段只填**顾客侧**（Jobs/Pains/Gains）；构思阶段有方向后再补填**解决方案侧**（Products/Pain Relievers/Gain Creators）。
+> - **故事板**：在**原型阶段**使用，描述未来方案的使用场景（to-be）；不要在共情阶段用来画未来方案。
+
 ## 阶段、交付物与工具
 
 | 阶段 | 必备交付物 | 可选工具 | 方法 |
 |---|---|---|---|
-| 共情 | 用户画像、移情图（含矛盾洞察） | AEIOU 观察、AEIOU 问卷、访谈提纲、旅程图、故事板、Hook 模型、利益相关者地图、极端/未来用户、竞品分析 | `references/empathize.md` |
+| 共情 | 用户画像、移情图（含矛盾洞察） | 用户研究计划（访谈前制定）、AEIOU 观察、AEIOU 问卷、访谈提纲、旅程图、Hook 模型、利益相关者地图、极端/未来用户、竞品分析 | `references/empathize.md` |
 | 共情 · 桌面研究 | — | 研究问题拆解（`research-query.html`）、来源管理板（`source-board.html`） | `references/desk-research.md` |
-| 定义视角 | JTBD 语句、PoV 句子、3–5 条 HMW | 价值主张画布、洞察聚类、360 度视角、九宫格、雏菊图、关键假设清单 | `references/define.md` |
+| 定义视角 | JTBD 语句、PoV 句子、3–5 条 HMW | 价值主张画布（此阶段只填顾客侧）、洞察聚类、360 度视角、九宫格、雏菊图、关键假设清单 | `references/define.md` |
 | 定义 · 桌面研究 | 研究报告（做了桌面研究时） | 综合矩阵（`synthesis.html`）、研究空白（`gap-analysis.html`）、研究报告（`research-report.html`） | `references/desk-research.md` |
 | 构思 | 点子池 + 丘吉尔矩阵决策清单 | 头脑风暴墙、Crazy 8s、SCAMPER、问题反转、跨行业对标、点子沟通表 | `references/ideate.md` |
-| 原型 | 盒子原则 + 原型规划（类型/保真度/要学什么）+ 原型本身 | 架子原则、原型工作坊、服务蓝图、MVP 画布、HTML 可点击原型 | `references/prototype.md` |
-| 测试 | 用户研究计划、测试计划、试验表 | 反馈收集表、A/B 测试 | `references/test.md` |
+| 原型 | 盒子原则 + 原型规划（类型/保真度/要学什么）+ 原型本身 | 故事板（描述方案使用场景）、架子原则、原型工作坊、服务蓝图、MVP 画布、HTML 可点击原型 | `references/prototype.md` |
+| 测试 | 测试计划、试验表 | 反馈收集表、A/B 测试 | `references/test.md` |
 | 反思 | 回溯板（含负责人与时间的行动项） | — | `references/reflect.md` |
 
 `overview.html`（项目总览）始终生成：展示微观/宏观循环、各阶段进度、41 个工具速查卡片（可打开已生成页面，或复制“生成指令”给你），并汇总所有 `toVerify`。

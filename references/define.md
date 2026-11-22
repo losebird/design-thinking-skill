@@ -47,3 +47,20 @@
 
 ## 7. 桌面研究的收敛（→ `deskResearch.synthesis`、`deskResearch.gaps`、`deskResearch.report`）
 做过桌面研究时，在写 PoV 之前：用「综合矩阵」把来源整理成共识 / 分歧 / 不确定，用「研究空白」区分已知 / 未知 / 需验证（需验证项会进入「待真人验证」清单），再用「研究报告」把背景 → 发现 → 含义 → 行动建议交给团队。二手发现在洞察与 PoV 中最多算 `inferred`，不能当作用户原话或观察。详见 `desk-research.md`。
+
+## 8. 价值主张画布（→ `value-canvas.html`，数据 `valueCanvas`）——分阶段使用
+价值主张画布分两侧，**不要在同一时间填完**：
+
+**定义阶段填：顾客档案侧（Customer Profile）**
+- **Jobs**：用户要完成的功能型 / 情感型 / 社交型任务（直接来自 JTBD）
+- **Pains**：完成任务时遇到的障碍、风险和负面结果
+- **Gains**：用户期待的好处、惊喜、期望结果
+
+此时**不填**解决方案侧。填了也是凭空猜测，会过早锁死方向。
+
+**构思阶段（有方向后）补填：价值地图侧（Value Map）**
+- **Products & Services**：提供的产品 / 功能列表
+- **Pain Relievers**：具体缓解哪条 Pain，如何缓解
+- **Gain Creators**：具体创造哪条 Gain，如何创造
+
+契合度检查：Pain Relievers 覆盖 100% 的 Pains，Gain Creators 覆盖 ≥70% 的 Gains。没有对应 Gain 的功能是"自嗨功能"，优先砍掉。

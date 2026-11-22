@@ -16,7 +16,7 @@
 | 共情 | AEIOU 问卷 | table / table-survey.html | `tables.survey` | empathize.md §3 |
 | 共情 | 利益相关者地图 | radial / radial-stakeholders.html | `radials.stakeholders` | empathize.md §1 |
 | 共情 | 极端 / 未来用户 | table / table-extremes.html | `tables.extremes` | empathize.md §8 |
-| 共情 | 故事板 Storyboard | storyboard / storyboard.html | `storyboard` | empathize.md §6 |
+| 原型 | 故事板 Storyboard | storyboard / storyboard.html | `storyboard` | empathize.md §6 |
 | 共情 | 竞品分析 | table / table-competitors.html | `tables.competitors` | empathize.md §9 |
 | 共情 | 研究问题拆解 | research-query / research-query.html | `deskResearch.query` | desk-research.md §2.1 |
 | 共情 | 来源管理板 | source-board / source-board.html | `deskResearch.sources` | desk-research.md §2.2 |
@@ -42,7 +42,7 @@
 | 原型 | 原型工作坊 | board / board-workshop.html | `boards.workshop` | prototype.md §6 |
 | 原型 | MVP 画布 | board / board-mvp.html | `boards.mvp` | prototype.md §4 |
 | 原型 | 服务蓝图 | table / table-blueprint.html | `tables.blueprint` | prototype.md §2 |
-| 测试 | 用户研究计划 | research-plan / research-plan.html | `researchPlan` | test.md §1 |
+| 共情 | 用户研究计划 | research-plan / research-plan.html | `researchPlan` | test.md §1 |
 | 测试 | A/B 测试 | ab-test / ab-test.html | `test.ab` | test.md §4 |
 | 测试 | 测试计划 | table / table-testplan.html | `tables.testplan` | test.md §2 |
 | 测试 | 反馈收集表 | board / board-feedback.html | `boards.feedback` | test.md §3 |
