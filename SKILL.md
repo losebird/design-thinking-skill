@@ -47,9 +47,9 @@ description: 用设计思维（共情 → 定义视角 → 构思 → 原型 →
 |---|---|
 | 定义视角 | 至少 1 个用户画像（`personas` 非空）+ 移情图有内容（`empathyMap` 非空） |
 | 构思 | `define.jtbd` 非空 + `define.pov` 非空 + `define.hmw` 至少 1 条 |
-| 原型 | `ideate.matrix` 至少 1 条被选中的点子（`selected: true`） |
+| 原型 | `ideate.matrix` 至少 1 条 `selected: true` 的点子，且至少使用过一种发散工具（头脑风暴 / Crazy 8s / SCAMPER 任意非空） |
 | 测试 | `prototype.box` 非空（盒子原则已填）+ `prototype.plan` 非空 |
-| 反思 | `test.ab` 或 `tables.testplan` 有内容（至少做过一轮测试） |
+| 反思 | `tables.testplan` 有内容（至少完成一份测试计划） |
 
 前置条件不满足时，**告知用户还缺什么，建议先补齐，而不是强行跳过**。用户明确说"我知道，先继续"时才允许跳过。
 
@@ -66,9 +66,9 @@ description: 用设计思维（共情 → 定义视角 → 构思 → 原型 →
 | 共情 · 桌面研究 | — | 研究问题拆解（`research-query.html`）、来源管理板（`source-board.html`） | `references/desk-research.md` |
 | 定义视角 | JTBD 语句、PoV 句子、3–5 条 HMW | 价值主张画布（此阶段只填顾客侧）、洞察聚类、360 度视角、九宫格、雏菊图、关键假设清单 | `references/define.md` |
 | 定义 · 桌面研究 | 研究报告（做了桌面研究时） | 综合矩阵（`synthesis.html`）、研究空白（`gap-analysis.html`）、研究报告（`research-report.html`） | `references/desk-research.md` |
-| 构思 | 点子池 + 丘吉尔矩阵决策清单 | 头脑风暴墙、Crazy 8s、SCAMPER、问题反转、跨行业对标、点子沟通表 | `references/ideate.md` |
-| 原型 | 盒子原则 + 原型规划（类型/保真度/要学什么）+ 原型本身 | 故事板（描述方案使用场景）、架子原则、原型工作坊、服务蓝图、MVP 画布、HTML 可点击原型 | `references/prototype.md` |
-| 测试 | 测试计划、试验表 | 反馈收集表、A/B 测试 | `references/test.md` |
+| 构思 | 至少一种发散工具（头脑风暴墙 / Crazy 8s / SCAMPER 任选其一）+ 丘吉尔矩阵（含 ≥1 个 selected 点子） | 问题反转、跨行业对标、点子沟通表 | `references/ideate.md` |
+| 原型 | 盒子原则 + 原型规划（类型/保真度/要学什么）+ 原型本身 | 架子原则、原型工作坊、服务蓝图、MVP 画布、HTML 可点击原型 | `references/prototype.md` |
+| 测试 | 测试计划 | 试验表、反馈收集表、A/B 测试 | `references/test.md` |
 | 反思 | 回溯板（含负责人与时间的行动项） | — | `references/reflect.md` |
 
 `overview.html`（项目总览）始终生成：展示微观/宏观循环、各阶段进度、41 个工具速查卡片（可打开已生成页面，或复制“生成指令”给你），并汇总所有 `toVerify`。

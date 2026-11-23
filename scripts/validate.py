@@ -90,12 +90,16 @@ def check(d):
             if not _nonempty("define.hmw"):
                 warn("meta.phase 已是 ideate 或更后阶段，但 define.hmw 为空；进入构思阶段前需至少 1 条 HMW 问题")
 
-        # 进入 prototype 阶段：需要丘吉尔矩阵中至少 1 条被选中的点子
+        # 进入 prototype 阶段：丘吉尔矩阵有 selected 点子 + 至少用过一种发散工具
         if pi >= 3:
             mx_raw = (d.get("ideate") or {}).get("matrix") or {}
             matrix_items = mx_raw.get("items", []) if isinstance(mx_raw, dict) else mx_raw
             if not any(isinstance(x, dict) and x.get("selected") for x in matrix_items):
                 warn("meta.phase 已是 prototype 或更后阶段，但 ideate.matrix 中没有 selected:true 的点子；进入原型阶段前需在丘吉尔矩阵中选定至少 1 个方向")
+            has_diverge = (_nonempty("boards.brainstorm") or _nonempty("boards.crazy8")
+                           or _nonempty("ideate.scamper"))
+            if not has_diverge:
+                warn("meta.phase 已是 prototype 或更后阶段，但没有使用任何发散工具（头脑风暴 / Crazy 8s / SCAMPER 均为空）；进入原型阶段前至少用一种发散工具产生点子")
 
         # 进入 test 阶段：需要盒子原则 + 原型规划
         if pi >= 4:
@@ -104,12 +108,10 @@ def check(d):
             if not _nonempty("prototype.plan"):
                 warn("meta.phase 已是 test 或更后阶段，但 prototype.plan 为空；进入测试阶段前需完成原型规划")
 
-        # 进入 reflect 阶段：需要至少做过一轮测试（testplan 或 ab）
+        # 进入 reflect 阶段：至少完成一份测试计划
         if pi >= 5:
-            has_testplan = _nonempty("tables.testplan")
-            has_ab = _nonempty("test.ab")
-            if not has_testplan and not has_ab:
-                warn("meta.phase 已是 reflect，但 tables.testplan 和 test.ab 均为空；进入反思阶段前需至少完成一轮测试")
+            if not _nonempty("tables.testplan"):
+                warn("meta.phase 已是 reflect，但 tables.testplan 为空；进入反思阶段前需至少完成一份测试计划")
 
     def ids(path, arr):
         if not isinstance(arr, list):
