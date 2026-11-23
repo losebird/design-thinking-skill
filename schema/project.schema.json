@@ -450,6 +450,13 @@
               "name"
             ]
           }
+        },
+        "toVerify": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "2–4 条验证动作（观察谁、问什么）"
         }
       }
     },
@@ -1104,6 +1111,14 @@
                   },
                   "votes": {
                     "type": "integer"
+                  },
+                  "owner": {
+                    "type": "string",
+                    "description": "回溯板行动项负责人"
+                  },
+                  "deadline": {
+                    "type": "string",
+                    "description": "完成时间（YYYY-MM-DD 或描述性文字）"
                   }
                 },
                 "required": [
@@ -1490,7 +1505,17 @@
           "type": "object"
         },
         "analysis": {
-          "type": "object"
+          "type": "object",
+          "properties": {
+            "fw": {
+              "enum": [
+                "affinity",
+                "metrics",
+                "insights"
+              ],
+              "description": "分析框架：affinity 亲和图 / metrics 量化 / insights 洞察提炼"
+            }
+          }
         },
         "progress": {
           "type": "object"

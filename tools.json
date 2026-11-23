@@ -43,7 +43,8 @@
         "personaSteps"
       ],
       "check": [
-        "personas"      ],
+        "personas"
+      ],
       "core": 1,
       "desc": "10 步法 + 画像画布，描述典型用户",
       "when": "有了初步观察/访谈之后",
@@ -76,7 +77,8 @@
       "check": [
         "journey.stages"
       ],
-      "core": 2,      "desc": "分阶段的行为、触点、情绪曲线与机会点",
+      "core": 2,
+      "desc": "分阶段的行为、触点、情绪曲线与机会点",
       "when": "理解完整体验与断点",
       "method": "empathize.md §6"
     },
@@ -91,7 +93,8 @@
       "check": [
         "hook"
       ],
-      "core": 2,      "desc": "触发-行动-奖赏-投入，含伦理检查",
+      "core": 2,
+      "desc": "触发-行动-奖赏-投入，含伦理检查",
       "when": "研究习惯与持续使用",
       "method": "empathize.md §7"
     },
@@ -120,7 +123,8 @@
         "tables.interview"
       ],
       "check": [
-        "tables.interview.rows"      ],
+        "tables.interview.rows"
+      ],
       "core": 2,
       "desc": "开放式问题 + 追问“为什么” + 例外",
       "when": "真人访谈前准备",
@@ -135,7 +139,8 @@
         "tables.survey"
       ],
       "check": [
-        "tables.survey.rows"      ],
+        "tables.survey.rows"
+      ],
       "core": 2,
       "desc": "按五维度设计问卷，验证访谈发现有多普遍",
       "when": "访谈之后、需要量化验证时",
@@ -150,7 +155,8 @@
         "radials.stakeholders"
       ],
       "check": [
-        "radials.stakeholders.items"      ],
+        "radials.stakeholders.items"
+      ],
       "core": 2,
       "desc": "谁使用、谁付钱、谁决定、谁受影响（补充工具）",
       "when": "项目开始、涉及多方时",
@@ -165,7 +171,8 @@
         "tables.extremes"
       ],
       "check": [
-        "tables.extremes.rows"      ],
+        "tables.extremes.rows"
+      ],
       "core": 2,
       "desc": "从极端与领先用户身上发现隐性需求",
       "when": "想突破主流用户的常规答案",
@@ -184,7 +191,8 @@
       ],
       "core": 2,
       "desc": "用分镜讲清用户在具体情境中的经历",
-      "when": "原型阶段具象化方案使用场景（to-be），向用户展示和收集反馈",      "method": "empathize.md §6"
+      "when": "原型阶段具象化方案使用场景（to-be），向用户展示和收集反馈",
+      "method": "prototype.md §1b"
     },
     {
       "phase": "empathize",
@@ -195,7 +203,8 @@
         "tables.competitors"
       ],
       "check": [
-        "tables.competitors.rows"      ],
+        "tables.competitors.rows"
+      ],
       "core": 2,
       "desc": "对比现有方案的优缺点与空白",
       "when": "了解用户当前的替代方案",
@@ -260,7 +269,8 @@
       "check": [
         "valueCanvas"
       ],
-      "core": 2,      "desc": "顾客任务/痛点/收益 ↔ 产品/止痛剂/增益",
+      "core": 2,
+      "desc": "顾客任务/痛点/收益 ↔ 产品/止痛剂/增益",
       "when": "检验方案是否对准真实需求",
       "method": "define.md §2"
     },
@@ -289,7 +299,8 @@
         "radials.view360"
       ],
       "check": [
-        "radials.view360.items"      ],
+        "radials.view360.items"
+      ],
       "core": 2,
       "desc": "从多个利益相关方视角审视问题",
       "when": "问题涉及多方角色",
@@ -320,7 +331,8 @@
         "radials.daisy"
       ],
       "check": [
-        "radials.daisy.items"      ],
+        "radials.daisy.items"
+      ],
       "core": 2,
       "desc": "围绕核心问题展开要素花瓣",
       "when": "梳理问题的组成部分",
@@ -335,7 +347,8 @@
         "tables.assumptions"
       ],
       "check": [
-        "tables.assumptions.rows"      ],
+        "tables.assumptions.rows"
+      ],
       "core": 2,
       "desc": "列出风险最高的假设及验证方式",
       "when": "任何阶段，尤其是测试前",
@@ -389,7 +402,8 @@
         "deskResearch.report.background",
         "deskResearch.report.findings"
       ],
-      "core": 2,      "desc": "背景 → 发现 → 含义 → 行动建议，一键复制分享",
+      "core": 2,
+      "desc": "背景 → 发现 → 含义 → 行动建议，一键复制分享",
       "when": "向团队同步桌面研究结论时",
       "method": "desk-research.md §2.5"
     },
@@ -415,11 +429,13 @@
       "file": "scamper.html",
       "tpl": "scamper",
       "path": [
-        "ideate.scamper"      ],
+        "ideate.scamper"
+      ],
       "check": [
         "ideate.scamper"
       ],
-      "core": 2,      "desc": "七个角度改造现有方案",
+      "core": 2,
+      "desc": "七个角度改造现有方案",
       "when": "有可改造的现有产品/流程",
       "method": "ideate.md §4"
     },
@@ -464,7 +480,8 @@
         "tables.reversal"
       ],
       "check": [
-        "tables.reversal.rows"      ],
+        "tables.reversal.rows"
+      ],
       "core": 2,
       "desc": "先想“如何让它更糟”，再反转",
       "when": "思路卡住时",
@@ -479,7 +496,8 @@
         "tables.analogy"
       ],
       "check": [
-        "tables.analogy.rows"      ],
+        "tables.analogy.rows"
+      ],
       "core": 2,
       "desc": "借鉴其他行业如何解决类似问题",
       "when": "想要突破行业惯性",
@@ -494,7 +512,8 @@
         "tables.ideas"
       ],
       "check": [
-        "tables.ideas.rows"      ],
+        "tables.ideas.rows"
+      ],
       "core": 2,
       "desc": "把点子讲清楚：名称、用户、价值、风险",
       "when": "向团队/用户展示点子",
@@ -559,7 +578,8 @@
       "check": [
         "boards.mvp.cards"
       ],
-      "core": 2,      "desc": "用最小实验验证最关键假设（补充工具）",
+      "core": 2,
+      "desc": "用最小实验验证最关键假设（补充工具）",
       "when": "准备上线验证前",
       "method": "prototype.md §4"
     },
@@ -572,7 +592,8 @@
         "tables.blueprint"
       ],
       "check": [
-        "tables.blueprint.rows"      ],
+        "tables.blueprint.rows"
+      ],
       "core": 2,
       "desc": "前台/后台/支持流程逐步拆解",
       "when": "服务类方案原型",
@@ -589,9 +610,10 @@
       "check": [
         "researchPlan.hypotheses"
       ],
-      "core": 2,      "desc": "假设清单、招募方案、访谈提纲、分析框架与进度追踪",
-      "when": "每轮测试前整理假设与访谈脚本",
-      "method": "test.md §1"
+      "core": 2,
+      "desc": "假设清单、招募方案、访谈提纲、分析框架与进度追踪",
+      "when": "共情阶段访谈/问卷前制定假设与脚本；测试阶段可复用同一工具制定测试脚本",
+      "method": "empathize.md §12"
     },
     {
       "phase": "test",
@@ -604,7 +626,8 @@
       "check": [
         "test.ab.a"
       ],
-      "core": 2,      "desc": "两版本对比，浏览器内计算显著性",
+      "core": 2,
+      "desc": "两版本对比，浏览器内计算显著性",
       "when": "有可量化指标、样本足够时",
       "method": "test.md §4"
     },
@@ -617,7 +640,8 @@
         "tables.testplan"
       ],
       "check": [
-        "tables.testplan.rows"      ],
+        "tables.testplan.rows"
+      ],
       "core": 2,
       "desc": "目标、场景、问题地图、角色分工",
       "when": "每轮测试前",
@@ -648,7 +672,8 @@
         "tables.experiments"
       ],
       "check": [
-        "tables.experiments.rows"      ],
+        "tables.experiments.rows"
+      ],
       "core": 2,
       "desc": "假设→试验→指标→成功标准→学习→结论",
       "when": "把每次测试记录成可复盘的试验",

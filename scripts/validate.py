@@ -63,12 +63,13 @@ def check(d):
 
         def _has(o):
             """递归检查值是否有实质内容，与 render.py has() / 页面 DT.has 保持一致。
-            空字符串 / 空数组 / 只有 id 的对象 / 全部子值为空的对象 / None / False / 0 视为无内容。
+            空字符串 / 空数组 / 只有 id 的对象 / 全部子值为空的对象 / None / False 视为无内容。
+            注意：数值 0 在 enum 字段（如 fidelity=0 表示低保真）中是合法值，不视为空。
             """
             if o is None or o is False: return False
             if isinstance(o, list): return len(o) > 0
             if isinstance(o, dict): return any(k != "id" and _has(v) for k, v in o.items())
-            if isinstance(o, (int, float)): return o != 0
+            if isinstance(o, (int, float)): return True  # 0 是合法数值（fidelity=0=低保真）
             return str(o).strip() not in ("", "false", "False")
 
         def _nonempty(path):
