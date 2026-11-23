@@ -63,22 +63,28 @@ def check(d):
 
         def _has(o):
             """递归检查值是否有实质内容，与 render.py has() / 页面 DT.has 保持一致。
-            空字符串 / 空数组 / 只有 id 的对象 / 全部子值为空的对象 / None / False 视为无内容。
-            注意：数值 0 在 enum 字段（如 fidelity=0 表示低保真）中是合法值，不视为空。
+            空字符串 / 空数组 / 只有 id 的对象 / 全部子值为空的对象 / None / False / 0 视为无内容。
+            （数值 0 视为无内容，使 {"n":0} 等未填写字段不被误判为已完成。
+              fidelity=0 低保真的特殊处理在 _nonempty("prototype.plan") 中单独处理。）
             """
             if o is None or o is False: return False
             if isinstance(o, list): return len(o) > 0
             if isinstance(o, dict): return any(k != "id" and _has(v) for k, v in o.items())
-            if isinstance(o, (int, float)): return True  # 0 是合法数值（fidelity=0=低保真）
+            if isinstance(o, (int, float)): return o != 0
             return str(o).strip() not in ("", "false", "False")
 
         def _nonempty(path):
-            """检查 path（点分）对应的值是否有实质内容（深度检查）。"""
+            """检查 path（点分）对应的值是否有实质内容（深度递归检查）。
+            特殊规则：prototype.plan 只要 fidelity 字段存在（含0=低保真）即视为有内容。
+            """
             o = d
             for k in path.split("."):
                 if not isinstance(o, dict):
                     return False
                 o = o.get(k)
+            # prototype.plan 特判：fidelity=0 表示低保真，是合法填写状态
+            if path == "prototype.plan" and isinstance(o, dict) and "fidelity" in o:
+                return True
             return _has(o)
 
         # 进入 define 阶段：需要至少 1 个画像 + 移情图有内容
@@ -165,6 +171,14 @@ def check(d):
                 err(f"storyboard.frames[{i}].emotion 应为 -2 到 2 的数字")
             if f.get("hook") not in (None, "", "trigger", "action", "reward", "investment"):
                 err(f"storyboard.frames[{i}].hook 只能是 trigger/action/reward/investment 或空")
+        # 情绪弧：第 1 格通常是负面触发，全程正面缺乏可信度
+        if fr and len(fr) >= 2:
+            first_e = fr[0].get("emotion", 0)
+            if isinstance(first_e, (int, float)) and first_e > 0:
+                warn("故事板第 1 格情绪为正（>0），通常第一格应描述触发情境/痛点（负面或中性）")
+            all_e = [x.get("emotion", 0) for x in fr if isinstance(x.get("emotion"), (int, float))]
+            if all_e and not any(e < 0 for e in all_e):
+                warn("故事板情绪全程非负：应包含至少 1 格负面情绪（痛点触发 / 意外事件 / 失败场景），增加可信度")
         if not sb.get("toVerify"):
             warn("storyboard.toVerify 为空：故事里哪些情节是推测的？")
 
@@ -189,6 +203,12 @@ def check(d):
         for x in (vc.get("pains") or []) + (vc.get("jobs") or []) + (vc.get("gains") or []):
             if sol(x.get("text", "")):
                 warn(f"valueCanvas 顾客侧含方案词（顾客档案应描述需求而非产品）：{x.get('text')}")
+        # Jobs 多样性：至少功能型 + 情感型
+        job_types = {x.get("type") for x in (vc.get("jobs") or []) if isinstance(x, dict)}
+        if vc.get("jobs") and "functional" not in job_types:
+            warn("valueCanvas.jobs 缺少功能型任务（functional）：顾客档案应至少包含功能型 + 情感型 jobs")
+        if vc.get("jobs") and "emotional" not in job_types:
+            warn("valueCanvas.jobs 缺少情感型任务（emotional）：顾客档案应至少包含功能型 + 情感型 jobs")
         for x in vc.get("jobs") or []:
             if x.get("type") not in ("functional", "emotional", "social"):
                 err(f"valueCanvas.jobs（{x.get('text', '')}）type 应为 functional/emotional/social")
@@ -237,12 +257,22 @@ def check(d):
     if jn:
         if jn.get("personaId") and jn["personaId"] not in pids:
             err(f"journey.personaId 不存在：{jn['personaId']}")
-        ids("journey.stages", jn.get("stages") or [])
-        for s in jn.get("stages") or []:
+        stages = jn.get("stages") or []
+        ids("journey.stages", stages)
+        for s in stages:
             e = s.get("emotion", 0)
             if not isinstance(e, (int, float)) or not -2 <= e <= 2:
                 err(f"journey 阶段「{s.get('name')}」emotion 应为 -2..2 的数字")
-        if not any(s.get("opportunities") for s in jn.get("stages") or []):
+        if stages and len(stages) < 3:
+            warn(f"journey 只有 {len(stages)} 个阶段，建议至少 3 个覆盖“发现→首次使用→结果”全链路")
+        emotions = [s.get("emotion", 0) for s in stages if isinstance(s.get("emotion"), (int, float))]
+        if emotions and not any(e < 0 for e in emotions):
+            warn("journey 情绪全程非负（无痛点低谷）：用户旅程应包含至少 1 个负面情绪阶段，对应真实痛点")
+        low_no_opp = [s.get("name", f"阶段{i}") for i, s in enumerate(stages)
+                      if isinstance(s.get("emotion"), (int, float)) and s["emotion"] < 0 and not s.get("opportunities")]
+        if low_no_opp:
+            warn(f"journey 有负面情绪但无机会点的阶段：{', '.join(low_no_opp)}；低谷情绪应对应一个具体机会")
+        if not any(s.get("opportunities") for s in stages):
             warn("journey 没有任何机会点 opportunities")
         if not jn.get("toVerify"):
             warn("journey.toVerify 为空：旅程图哪些阶段的情绪 / 行为是推测的？")
@@ -255,6 +285,21 @@ def check(d):
             warn("hook.ethics 未填写：必须回答“是否改善用户生活”“自己是否会长期使用”")
         elif et.get("improves") == "no" and et.get("selfUse") == "no":
             warn("hook 伦理检查落在“操纵者”象限：请重新设计或明确告知用户风险")
+        trig = hk.get("trigger") or {}
+        if isinstance(trig, dict):  # 旧格式 trigger 为字符串时跳过
+            if not trig.get("external"):
+                warn("hook.trigger.external 为空：需填写外部触发（渠道 / 场景 / 通知）")
+            if not trig.get("internal"):
+                warn("hook.trigger.internal 为空：需填写内部触发（情绪 / 心理状态）")
+        elif trig and not isinstance(trig, dict):
+            warn(f"hook.trigger 应为对象（含 external/internal 字段），当前为字符串（旧格式），请迁移")
+        rw = hk.get("reward") or {}
+        if isinstance(rw, dict):
+            filled_rewards = [k for k in ("tribe", "hunt", "self") if rw.get(k)]
+            if len(filled_rewards) < 2:
+                warn(f"hook.reward 只填了 {len(filled_rewards)} 类奖励（tribe/hunt/self），建议至少覆盖其中 2 类")
+        elif rw and not isinstance(rw, dict):
+            warn("hook.reward 应为对象（含 tribe/hunt/self 字段），当前为字符串（旧格式），请迁移")
 
     # 定义
     df = d.get("define")
@@ -277,9 +322,13 @@ def check(d):
     if sc:
         for k in "SCAMPER":
             ids(f"ideate.scamper.{k}", sc.get(k) or [])
+        empty_letters = [k for k in "SCAMPER" if not (sc.get(k) or [])]
+        if empty_letters:
+            warn(f"ideate.scamper 有 {len(empty_letters)} 个字母没有任何想法：{'  '.join(empty_letters)}；SCAMPER 七个角度应各至少 1 条")
+
     mx = ide.get("matrix")
     if mx and isinstance(mx, list):
-        warn("ideate.matrix 应为对象（含 mode 和 items），当前是数组（旧格式），请按新结构迁移")
+        warn("构思.matrix 应为对象（含 mode 和 items），当前是数组（旧格式），请按新结构迁移")
         mx = None
     if mx:
         if mx.get("mode") not in (None, "value", "urgency"):
@@ -292,6 +341,22 @@ def check(d):
                     err(f"矩阵项「{it.get('text')}」的 {k} 应为 1–5 的数字")
             if not it.get("note"):
                 warn(f"矩阵项「{it.get('text')}」缺少 note（评分依据 / 关键假设）")
+            if isinstance(it.get("x"), (int, float)) and isinstance(it.get("y"), (int, float)):
+                if 2.5 <= it["x"] <= 3.5 or 2.5 <= it["y"] <= 3.5:
+                    warn(f"矩阵项「{it.get('text')}」评分在边界区（2.5–3.5），建议补充 note 说明为何不确定")
+        items = mx.get("items") or []
+        if len(items) >= 4:
+            q_counts = [0, 0, 0, 0]
+            for it in items:
+                x, y = it.get("x", 3), it.get("y", 3)
+                if isinstance(x, (int, float)) and isinstance(y, (int, float)):
+                    q = (0 if y > 3 else 2) + (0 if x > 3 else 1)
+                    q_counts[q] += 1
+            empty_q = sum(1 for c in q_counts if c == 0)
+            if empty_q >= 2:
+                warn(f"ideate.matrix 有 {empty_q} 个象限没有任何点子，建议四象限均有分布（否则可能存在评分偏差）")
+        if not any(it.get("selected") for it in (mx.get("items") or [])):
+            warn("ideate.matrix 没有任何 selected:true 的点子；进入原型阶段前需在矩阵中选定至少 1 个方向")
 
     # 原型
     pr = d.get("prototype")
@@ -318,8 +383,12 @@ def check(d):
                 err(f"test.ab.{k} 转化数 {c} 大于样本量 {n}")
         if not ab.get("hypothesis"):
             warn("test.ab.hypothesis 为空")
+        if not ab.get("variable"):
+            warn("test.ab.variable 为空：A/B 测试应明确只改变一个变量")
+        if ab.get("conclusion") and ab["conclusion"] not in ("keep", "iterate", "drop", "more-data"):
+            err(f"test.ab.conclusion 只能是 keep/iterate/drop/more-data，当前为 {ab['conclusion']!r}")
         if gb == "ai" and (ab.get("a") or {}).get("n") and "示例" not in json.dumps(ab, ensure_ascii=False):
-            warn("A/B 数据在 generatedBy=ai 下出现：如果是示例数字，请在 name 或 desc 中注明“示例数据”")
+            warn("A/B 数据在 generatedBy=ai 下出现：如果是示例数字，请在 name 或 desc 中注明\"示例数据\"")
 
     # 桌面研究（二手研究）
     dr = d.get("deskResearch")
@@ -355,6 +424,13 @@ def check(d):
             if ck not in keys:
                 err(f"boards.{key}.cards 中的列 {ck!r} 不在列定义中（可用：{', '.join(sorted(keys))}）")
             ids(f"boards.{key}.cards.{ck}", arr)
+        # 回溯板：四个象限应各有内容
+        if key == "retro":
+            retro_cards = b.get("cards") or {}
+            for col_key, col_name in [("well", "做得好"), ("improve", "可改进"),
+                                      ("puzzle", "问题/困惑"), ("action", "行动项")]:
+                if not retro_cards.get(col_key):
+                    warn(f"boards.retro 的「{col_name}」列为空；回溯板四个象限应各至少 1 条")
         # 回溯板：行动项需要有负责人与完成时间
         if key == "retro":
             for i, card in enumerate((b.get("cards") or {}).get("action") or []):
@@ -515,9 +591,16 @@ def check_research_plan(rp, err, warn):
     mode = rec.get("mode")
     if mode is not None and mode not in MODE_SET:
         err(f"researchPlan.recruit.mode 只能是 remote/inperson/diary/usability，当前为 {mode!r}")
-    for c in items("researchPlan.recruit.criteria", rec.get("criteria") or []):
+    criteria = items("researchPlan.recruit.criteria", rec.get("criteria") or [])
+    for c in criteria:
         if c.get("type") and c.get("type") not in CRIT_TYPE_SET:
             err(f"researchPlan.recruit.criteria（{c.get('id')}）type 只能是 include/prefer/exclude")
+    if criteria:
+        crit_types = {c.get("type") for c in criteria}
+        if "include" not in crit_types:
+            warn("researchPlan.recruit.criteria 缺少 include 条件：招募标准应明确要招什么样的用户")
+        if "exclude" not in crit_types:
+            warn("researchPlan.recruit.criteria 缺少 exclude 条件：招募标准应明确排除哪类用户")
 
     # ③ 访谈脚本
     script = rp.get("script") or {}
