@@ -61,18 +61,24 @@ def check(d):
     else:
         pi = PHASE_ORDER.index(phase)
 
+        def _has(o):
+            """递归检查值是否有实质内容，与 render.py has() / 页面 DT.has 保持一致。
+            空字符串 / 空数组 / 只有 id 的对象 / 全部子值为空的对象 / None / False / 0 视为无内容。
+            """
+            if o is None or o is False: return False
+            if isinstance(o, list): return len(o) > 0
+            if isinstance(o, dict): return any(k != "id" and _has(v) for k, v in o.items())
+            if isinstance(o, (int, float)): return o != 0
+            return str(o).strip() not in ("", "false", "False")
+
         def _nonempty(path):
-            """检查 path（点分）对应的值是否非空（非 None / 非空列表 / 非空对象 / 非空字符串）。"""
+            """检查 path（点分）对应的值是否有实质内容（深度检查）。"""
             o = d
             for k in path.split("."):
                 if not isinstance(o, dict):
                     return False
                 o = o.get(k)
-            if o is None:
-                return False
-            if isinstance(o, (list, dict)):
-                return bool(o)
-            return str(o).strip() not in ("", "false", "False")
+            return _has(o)
 
         # 进入 define 阶段：需要至少 1 个画像 + 移情图有内容
         if pi >= 1:
@@ -228,6 +234,8 @@ def check(d):
     # 旅程
     jn = d.get("journey")
     if jn:
+        if jn.get("personaId") and jn["personaId"] not in pids:
+            err(f"journey.personaId 不存在：{jn['personaId']}")
         ids("journey.stages", jn.get("stages") or [])
         for s in jn.get("stages") or []:
             e = s.get("emotion", 0)
@@ -235,6 +243,8 @@ def check(d):
                 err(f"journey 阶段「{s.get('name')}」emotion 应为 -2..2 的数字")
         if not any(s.get("opportunities") for s in jn.get("stages") or []):
             warn("journey 没有任何机会点 opportunities")
+        if not jn.get("toVerify"):
+            warn("journey.toVerify 为空：旅程图哪些阶段的情绪 / 行为是推测的？")
 
     # Hook
     hk = d.get("hook")
@@ -344,6 +354,14 @@ def check(d):
             if ck not in keys:
                 err(f"boards.{key}.cards 中的列 {ck!r} 不在列定义中（可用：{', '.join(sorted(keys))}）")
             ids(f"boards.{key}.cards.{ck}", arr)
+        # 回溯板：行动项需要有负责人与完成时间
+        if key == "retro":
+            for i, card in enumerate((b.get("cards") or {}).get("action") or []):
+                if not isinstance(card, dict): continue
+                if not card.get("owner"):
+                    warn(f"boards.retro 行动项（{card.get('text','')[:20] or card.get('id','')}）缺少 owner（负责人），行动项应明确谁来跟进")
+                if not card.get("deadline"):
+                    warn(f"boards.retro 行动项（{card.get('text','')[:20] or card.get('id','')}）缺少 deadline（完成时间），行动项应有明确截止日期")
     for key, t in (d.get("tables") or {}).items():
         cols = t.get("columns") or (pre["tables"].get(key) or {}).get("columns")
         if not cols:
@@ -510,6 +528,16 @@ def check_research_plan(rp, err, warn):
                 warn(f"researchPlan.script.{sec}（{q.get('id')}）是封闭式提问（close），定性访谈应优先用开放式问题")
     if not (script.get("main") or []):
         warn("researchPlan.script.main 为空：核心问题尚未填写")
+    if len(script.get("main") or []) < 3:
+        warn(f"researchPlan.script.main 只有 {len(script.get('main') or [])} 条，建议至少 3 条核心问题")
+
+    # ④ 分析框架
+    analysis = rp.get("analysis") or {}
+    FW_SET = {"affinity", "metrics", "insights"}
+    if analysis.get("fw") and analysis["fw"] not in FW_SET:
+        err(f"researchPlan.analysis.fw 只能是 affinity/metrics/insights，当前为 {analysis['fw']!r}")
+    if not analysis.get("fw"):
+        warn("researchPlan.analysis.fw 为空：研究计划应明确分析框架（affinity 亲和图 / metrics 量化指标 / insights 洞察提炼）")
 
 
 def main(a):

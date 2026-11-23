@@ -68,7 +68,7 @@ description: 用设计思维（共情 → 定义视角 → 构思 → 原型 →
 | 定义 · 桌面研究 | 研究报告（做了桌面研究时） | 综合矩阵（`synthesis.html`）、研究空白（`gap-analysis.html`）、研究报告（`research-report.html`） | `references/desk-research.md` |
 | 构思 | 至少一种发散工具（头脑风暴墙 / Crazy 8s / SCAMPER 任选其一）+ 丘吉尔矩阵（含 ≥1 个 selected 点子） | 问题反转、跨行业对标、点子沟通表 | `references/ideate.md` |
 | 原型 | 盒子原则 + 原型规划（类型/保真度/要学什么）+ 原型本身 | 故事板（描述方案使用场景）、架子原则、原型工作坊、服务蓝图、MVP 画布、HTML 可点击原型 | `references/prototype.md` |
-| 测试 | 测试计划 | 试验表、反馈收集表、A/B 测试 | `references/test.md` |
+| 测试 | 测试计划 | 试验表、反馈收集表、A/B 测试、用户研究计划（制定测试脚本时可复用） | `references/test.md` |
 | 反思 | 回溯板（含负责人与时间的行动项） | — | `references/reflect.md` |
 
 `overview.html`（项目总览）始终生成：展示微观/宏观循环、各阶段进度、41 个工具速查卡片（可打开已生成页面，或复制“生成指令”给你），并汇总所有 `toVerify`。
