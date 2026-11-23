@@ -31,7 +31,7 @@
 | 定义 | 研究空白 | gap-analysis / gap-analysis.html | `deskResearch.gaps` | desk-research.md §2.4 |
 | 定义 | 研究报告 | research-report / research-report.html | `deskResearch.report` | desk-research.md §2.5 |
 | 构思 | 丘吉尔矩阵 | matrix / matrix.html | `ideate.matrix` | ideate.md §9 |
-| 构思 | SCAMPER 奔驰法 | scamper / scamper.html | `ideate.scamper`、`ideate.matrix` | ideate.md §4 |
+| 构思 | SCAMPER 奔驰法 | scamper / scamper.html | `ideate.scamper` | ideate.md §4 |
 | 构思 | Crazy 8s | board / board-crazy8.html | `boards.crazy8` | ideate.md §3 |
 | 构思 | 头脑风暴墙 | board / board-brainstorm.html | `boards.brainstorm` | ideate.md §3 |
 | 构思 | 问题反转 | table / table-reversal.html | `tables.reversal` | ideate.md §5 |
