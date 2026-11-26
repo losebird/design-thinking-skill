@@ -166,4 +166,4 @@ description: 用设计思维（共情 → 定义视角 → 构思 → 原型 →
 
 ## 来源
 
-方法内容基于蠹儒《设计思维》《AI 辅助设计思维》讲义，以及 Lewrick 等著《The Design Thinking Playbook》（Wiley, 2018）。
+方法内容基于《设计思维》《AI 辅助设计思维》讲义，以及 Lewrick 等著《The Design Thinking Playbook》（Wiley, 2018）。
